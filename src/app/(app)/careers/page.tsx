@@ -19,13 +19,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import careerData from '@/lib/careers.json';
 import type { Career, Ikigai } from '@/lib/types';
 import { Bot, Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type MatchResult = {
   explanation: string;
@@ -45,6 +46,11 @@ export default function CareersPage() {
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const isProfileComplete =
     ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests;
@@ -95,7 +101,17 @@ export default function CareersPage() {
         description="Discover careers that align with your unique Ikigai profile."
       />
 
-      {!isProfileComplete && (
+      {!hasMounted ? (
+         <Card className="mb-6">
+            <CardHeader>
+                <Skeleton className="h-6 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-full" />
+            </CardHeader>
+            <CardFooter>
+                 <Skeleton className="h-10 w-40" />
+            </CardFooter>
+        </Card>
+      ) : !isProfileComplete && (
         <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <CardHeader>
                 <CardTitle className="text-yellow-900 dark:text-yellow-300">Complete Your Profile</CardTitle>
@@ -127,7 +143,7 @@ export default function CareersPage() {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button onClick={() => handleCheckFit(career)} disabled={!isProfileComplete}>
+              <Button onClick={() => handleCheckFit(career)} disabled={!hasMounted || !isProfileComplete}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Check Fit
               </Button>
