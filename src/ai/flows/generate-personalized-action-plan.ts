@@ -37,7 +37,7 @@ export async function generatePersonalizedActionPlan(
 
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedActionPlanPrompt',
-  model: 'googleai/gemini-pro',
+  model: 'googleai/gemini-1.0-pro',
   input: {schema: GeneratePersonalizedActionPlanInputSchema},
   output: {schema: GeneratePersonalizedActionPlanOutputSchema},
   prompt: `You are a career coach who specializes in creating personalized action plans.
