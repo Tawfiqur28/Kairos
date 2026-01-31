@@ -23,24 +23,24 @@ export function IkigaiDiagram({ className }: { className?: string }) {
           Your passions & interests
         </text>
 
-        <text x="405" y="225" textAnchor="middle" className="font-bold text-lg">
+        <text x="390" y="225" textAnchor="middle" className="font-bold text-lg">
           What You're Good At
         </text>
-        <text x="405" y="245" textAnchor="middle" className="text-sm opacity-80">
+        <text x="390" y="245" textAnchor="middle" className="text-sm opacity-80">
           Your talents & skills
         </text>
 
-        <text x="250" y="385" textAnchor="middle" className="font-bold text-lg">
+        <text x="250" y="375" textAnchor="middle" className="font-bold text-lg">
           What You Can Be Paid For
         </text>
-        <text x="250" y="405" textAnchor="middle" className="text-sm opacity-80">
+        <text x="250" y="390" textAnchor="middle" className="text-sm opacity-80">
           Valuable & marketable
         </text>
 
-        <text x="95" y="225" textAnchor="middle" className="font-bold text-lg">
+        <text x="110" y="225" textAnchor="middle" className="font-bold text-lg">
           What The World Needs
         </text>
-        <text x="95" y="245" textAnchor="middle" className="text-sm opacity-80">
+        <text x="110" y="245" textAnchor="middle" className="text-sm opacity-80">
           Problems you can solve
         </text>
         </g>
