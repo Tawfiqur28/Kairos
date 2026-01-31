@@ -1,4 +1,3 @@
-// src/ai/flows/generate-personalized-action-plan.ts
 'use server';
 /**
  * @fileOverview Generates a 3-year personalized action plan for career goals.
@@ -38,7 +37,7 @@ export async function generatePersonalizedActionPlan(
 
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedActionPlanPrompt',
-  model: 'gemini-pro',
+  model: 'googleai/gemini-pro',
   input: {schema: GeneratePersonalizedActionPlanInputSchema},
   output: {schema: GeneratePersonalizedActionPlanOutputSchema},
   prompt: `You are a career coach who specializes in creating personalized action plans.
