@@ -25,9 +25,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import careerData from '@/lib/careers.json';
 import type { Career, Ikigai } from '@/lib/types';
-import { Bot, Loader2, Sparkles } from 'lucide-react';
+import { Bot, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized-action-plan';
 
 type MatchResult = {
   explanation: string;
@@ -36,6 +38,94 @@ type MatchResult = {
   valueAlignment: number;
   fitScore: number;
 };
+
+// Component to generate and display the action plan
+function ActionPlan({
+  career,
+  userProfileString,
+  onBack,
+}: {
+  career: Career;
+  userProfileString: string;
+  onBack: () => void;
+}) {
+  const [actionPlan, setActionPlan] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleGeneratePlan = async () => {
+    setIsLoading(true);
+    setActionPlan(null);
+    try {
+      const result = await generatePersonalizedActionPlan({
+        careerGoal: career.title,
+        userDetails: userProfileString,
+      });
+
+      if (result.actionPlan.startsWith('ERROR:')) {
+        throw new Error(result.actionPlan);
+      }
+
+      setActionPlan(result.actionPlan);
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: 'AI Error',
+        description:
+          error.message || 'Could not generate an action plan at this time.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    handleGeneratePlan();
+  }, [career]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-2xl">
+            Your Action Plan: {career.title}
+          </CardTitle>
+          <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Careers
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:font-headline">
+        {isLoading && (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-4">AI is crafting your personalized plan...</p>
+          </div>
+        )}
+        {actionPlan && (
+          <div
+            className="p-4 bg-muted/50 rounded-lg"
+            dangerouslySetInnerHTML={{ __html: actionPlan }}
+          />
+        )}
+        {!actionPlan && !isLoading && (
+          <div className="text-center p-8">
+            <p className="mb-4">
+              Click the button to re-generate your personalized action plan.
+            </p>
+            <Button onClick={handleGeneratePlan} disabled={isLoading}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Re-generate Plan
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export default function CareersPage() {
   const allCareers: Career[] = careerData.careers;
@@ -53,6 +143,8 @@ export default function CareersPage() {
   const { toast } = useToast();
 
   const [hasMounted, setHasMounted] = useState(false);
+  const [view, setView] = useState<'careers' | 'plan'>('careers');
+  const [careerForPlan, setCareerForPlan] = useState<Career | null>(null);
 
   const isProfileComplete = useMemo(() => 
     ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests,
@@ -82,7 +174,7 @@ export default function CareersPage() {
     } else {
       setSortedCareers(allCareers);
     }
-  }, [isProfileComplete, userProfileString, allCareers]);
+  }, [isProfileComplete, userProfileString]);
 
 
   const handleCheckFit = async (career: Career) => {
@@ -116,11 +208,11 @@ export default function CareersPage() {
         marketDemandScore * 0.1;
 
       setMatchResult({ ...result, fitScore: Math.round(fitScore) });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: 'AI Error',
-        description: 'Could not generate a career match at this time.',
+        description: error.message || 'Could not generate a career match at this time.',
         variant: 'destructive',
       });
       // Close the dialog on error
@@ -128,6 +220,12 @@ export default function CareersPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGeneratePlanClick = (career: Career) => {
+    setSelectedCareer(null); // Close the dialog
+    setCareerForPlan(career);
+    setView('plan');
   };
 
   return (
@@ -147,7 +245,7 @@ export default function CareersPage() {
                  <Skeleton className="h-10 w-40" />
             </CardFooter>
         </Card>
-      ) : !isProfileComplete && (
+      ) : !isProfileComplete && view === 'careers' && (
         <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <CardHeader>
                 <CardTitle className="text-yellow-900 dark:text-yellow-300">Complete Your Profile</CardTitle>
@@ -163,30 +261,59 @@ export default function CareersPage() {
         </Card>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {sortedCareers.map((career) => (
-          <Card key={career.id}>
-            <CardHeader>
-              <CardTitle>{career.title}</CardTitle>
-              <CardDescription>{career.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <h4 className="text-sm font-semibold mb-2">Key Skills:</h4>
-              <ul className="list-disc list-inside text-sm text-muted-foreground">
-                {career.requiredSkills.map((skill) => (
-                  <li key={skill}>{skill}</li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={() => handleCheckFit(career)} disabled={!hasMounted || !isProfileComplete}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Check Fit
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      <AnimatePresence mode="wait">
+        {view === 'careers' && hasMounted ? (
+          <motion.div
+            key="careers-view"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {sortedCareers.map((career) => (
+                <Card key={career.id}>
+                  <CardHeader>
+                    <CardTitle>{career.title}</CardTitle>
+                    <CardDescription>{career.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <h4 className="text-sm font-semibold mb-2">Key Skills:</h4>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {career.requiredSkills.map((skill) => (
+                        <li key={skill}>{skill}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleCheckFit(career)} disabled={!hasMounted || !isProfileComplete}>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Check Fit
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
+        ) : view === 'plan' && careerForPlan && (
+          <motion.div
+            key="plan-view"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ActionPlan
+              career={careerForPlan}
+              userProfileString={userProfileString}
+              onBack={() => {
+                setView('careers');
+                setCareerForPlan(null);
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Dialog open={!!selectedCareer} onOpenChange={(isOpen) => !isOpen && setSelectedCareer(null)}>
         <DialogContent className="sm:max-w-[425px]">
@@ -219,8 +346,8 @@ export default function CareersPage() {
                   </p>
                 </div>
                 {matchResult.fitScore > 60 && (
-                     <Button asChild className="w-full">
-                        <Link href={`/plan?career=${selectedCareer?.id}`}>Generate Your Action Plan</Link>
+                     <Button onClick={() => handleGeneratePlanClick(selectedCareer!)} className="w-full">
+                        Generate Your Action Plan
                     </Button>
                 )}
               </div>
