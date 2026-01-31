@@ -376,47 +376,80 @@ const getScienceRequirements = (career: string): string => {
   return 'technical or analytical skills';
 };
 
-// ==================== OTHER AI FUNCTIONS ====================
+// ==================== SPICY ACTION PLAN ====================
 export const generatePersonalizedActionPlan = async (
   careerGoal: string,
   userDetails: string,
-): Promise<string> => {
-  const prompt = `Based on the user's details and career goal, generate a structured and actionable 1-year action plan.
+): Promise<{
+  missionName: string;
+  threeYearPlan: string;
+  monthlyUpdates: string[];
+  spicyTips: string[];
+}> => {
+  const prompt = `You are a Career Gamification Master. Create a spicy, unique 3-year action plan.
 
-USER DETAILS: "${userDetails}"
-CAREER GOAL: "${careerGoal}"
+**CONTEXT:**
+Career: "${careerGoal}"
+User's Profile (Skills, Interests, etc.): "${userDetails}"
 
-**INSTRUCTIONS:**
-- The plan must be formatted using HTML markdown.
-- Use headings (<h3>) for each time frame.
-- Use unordered lists (<ul> and <li>) for action items.
-- The plan should be broken down into these sections:
-  1.  **Immediate Steps (First 30 Days):** Quick-win actions.
-  2.  **3-Month Roadmap:** Foundational learning and projects.
-  3.  **6-Month Goals:** Intermediate milestones like internships or certifications.
-  4.  **1-Year Vision:** Long-term goals like job applications and portfolio building.
-- Provide specific, realistic, and encouraging advice. For example, suggest specific online courses (Coursera, Udemy), project ideas, or networking strategies.
+**CREATIVE CONSTRAINTS:**
+1.  **Mission Name:** Invent a cool mission name (max 5 words).
+2.  **Metaphors:** Use metaphors from appropriate domains:
+    *   Tech careers (e.g., Software Engineer): magic, samurai, space exploration.
+    *   Creative careers (e.g., Music Producer): alchemy, poetry, composition.
+    *   Science careers (e.g., Researcher): expedition, discovery, wizardry.
+3.  **Phases:** Include 3 phases (Beginner→Apprentice→Master) with catchy, domain-appropriate names.
+4.  **Phase Content:** Each phase MUST have:
+    *   2-3 "Power-Ups" (specific skills).
+    *   1 "Boss Fight" (a challenging project).
+    *   1 "Secret Unlock" (a networking or non-obvious opportunity).
+5.  **Insider Tips:** Add 2-3 "spicyTips" (surprising but true industry advice).
+6.  **Intel:** Include 3 "monthlyUpdates" (emerging tech, market trends, etc.).
 
-EXAMPLE RESPONSE FORMAT:
-<h3>Immediate Steps (First 30 Days)</h3>
-<ul>
-  <li>...</li>
-</ul>
-<h3>3-Month Roadmap</h3>
-<ul>
-  <li>...</li>
-</ul>
-...
-`;
+**FORMAT REQUIREMENTS:**
+*   'threeYearPlan' MUST be a single HTML string. Use emojis 🎮⚡🚀, <h3> for phase titles, and <ul>/<li> for lists.
+*   The entire output MUST be a single, valid JSON object with NO other text, comments, or markdown.
+
+**JSON-ONLY OUTPUT STRUCTURE:**
+{
+  "missionName": "Your epic mission name here",
+  "threeYearPlan": "<h3>🎮 Phase 1: The Neophyte</h3><ul><li>⚡ **Power-Up:** Skill 1</li><li>...</li></ul><h3>- BOSS FIGHT -</h3><p>Project description.</p><h3>- SECRET UNLOCK -</h3><p>Opportunity description.</p>...",
+  "monthlyUpdates": ["Update 1", "Update 2", "Update 3"],
+  "spicyTips": ["Tip 1", "Tip 2"]
+}
+
+**START GENERATING for career: ${careerGoal}:**`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
-  
+
+  const fallback = {
+    missionName: `Mission: Conquer ${careerGoal}`,
+    threeYearPlan: `<h3>🎮 Phase 1: Basic Training</h3><ul><li>⚡ **Power-Up:** Learn the fundamentals of ${careerGoal}.</li></ul><h3>- BOSS FIGHT -</h3><p>Complete a 'Hello, World!' equivalent project for this field.</p><h3>- SECRET UNLOCK -</h3><p>Find and follow one influential person in this industry on LinkedIn or X.</p><p><em>(AI plan generation failed. This is a default starter plan.)</em></p>`,
+    monthlyUpdates: ["Market trends are currently unavailable.", "New tools and techniques are always emerging in every field."],
+    spicyTips: ["The best way to learn is by doing real projects.", "Don't be afraid to fail; it's part of the learning process."]
+  };
+
   if (response.startsWith('ERROR:')) {
-    return `<h3>Action Plan for ${careerGoal}</h3><p>Could not generate a detailed plan due to an API error. Here is a general suggestion:</p><ul><li>Start by researching the core skills required for a ${careerGoal}.</li><li>Look for introductory online courses on platforms like Coursera or edX.</li><li>Connect with professionals in the field on LinkedIn.</li></ul>`;
+    console.error("ModelScope API Error in Action Plan:", response);
+    return fallback;
   }
 
-  return response;
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.missionName && parsed.threeYearPlan) {
+        return parsed;
+      }
+    }
+    console.warn('Action Plan generation did not return valid JSON:', response);
+    return fallback;
+  } catch (e) {
+    console.error('Failed to parse Spicy Action Plan JSON:', e);
+    return fallback;
+  }
 };
+
 
 export const processJournalEntriesForCareerSuggestions = async (
   journalEntries: string,

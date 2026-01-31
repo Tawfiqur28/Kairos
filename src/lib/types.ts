@@ -27,6 +27,8 @@ export interface JournalEntry {
 }
 
 export interface ActionPlan {
-  careerGoal: string;
-  plan: string;
+  missionName: string;
+  threeYearPlan: string;
+  monthlyUpdates: string[];
+  spicyTips: string[];
 }
