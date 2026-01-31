@@ -13,7 +13,7 @@ export const callModelScopeAI = async (
   
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
     console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
-    throw new Error('ModelScope API key not configured. Check your .env file.');
+    return 'ERROR: ModelScope API key not configured. Please add your `MODELSCOPE_API_KEY` to the .env file in the root of your project.';
   }
 
   try {
@@ -67,7 +67,10 @@ export const callModelScopeAI = async (
     
   } catch (error) {
     console.error('❌ Failed to call ModelScope API:', error);
-    throw error;
+    if (error instanceof Error) {
+        return `ERROR: Failed to call ModelScope API: ${error.message}`;
+    }
+    return 'ERROR: An unknown error occurred while contacting the ModelScope API.';
   }
 };
 
@@ -81,6 +84,10 @@ User Profile: "${userProfile}"
 Please respond with a JSON array of strings, choosing from these possible themes: "Tech", "Arts", "Science", "Business", "Healthcare", "Education".
 For example: ["Tech", "Business"]`;
   const response = await callModelScopeAI(prompt, 'qwen-max');
+  if (response.startsWith('ERROR:')) {
+    console.error(response);
+    return [];
+  }
   try {
     const jsonMatch = response.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
@@ -117,6 +124,14 @@ Also provide a personalized explanation for the match.
 Format as JSON: {"explanation": "...", "skillMatch": 80, "interestMatch": 90, "valueAlignment": 70}`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
+  if (response.startsWith('ERROR:')) {
+    return {
+        explanation: response,
+        skillMatch: 0,
+        interestMatch: 0,
+        valueAlignment: 0,
+    }
+  }
   
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
@@ -129,7 +144,7 @@ Format as JSON: {"explanation": "...", "skillMatch": 80, "interestMatch": 90, "v
   
   // Fallback response
   return {
-    explanation: response.substring(0, 500) + '...',
+    explanation: "The AI response was not in the expected JSON format. Here is the raw response:\n\n" + response,
     skillMatch: 70,
     interestMatch: 70,
     valueAlignment: 70,
@@ -176,6 +191,12 @@ Based on the user's journal entries and feelings, suggest some career paths that
 Format as JSON: {"careerSuggestions": "...", "analysis": "..."}`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
+  if (response.startsWith('ERROR:')) {
+    return {
+        careerSuggestions: 'Could not generate suggestions.',
+        analysis: response
+    }
+  }
 
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
@@ -189,6 +210,6 @@ Format as JSON: {"careerSuggestions": "...", "analysis": "..."}`;
   // Fallback response
   return {
     careerSuggestions: "Could not generate suggestions. The AI response was not in the expected format.",
-    analysis: response.substring(0, 500) + '...',
+    analysis: response,
   };
 };
