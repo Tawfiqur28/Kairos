@@ -24,10 +24,10 @@ export function IkigaiDiagram({ className }: { className?: string }) {
         </text>
 
         <text x="390" y="225" textAnchor="middle" className="font-bold text-lg">
-          What You're Good At
+          What The World Needs
         </text>
         <text x="390" y="245" textAnchor="middle" className="text-sm opacity-80">
-          Your talents & skills
+          Problems you can solve
         </text>
 
         <text x="225" y="385" textAnchor="middle" className="font-bold text-lg">
@@ -38,10 +38,10 @@ export function IkigaiDiagram({ className }: { className?: string }) {
         </text>
 
         <text x="60" y="225" textAnchor="middle" className="font-bold text-lg">
-          What The World Needs
+          What You're Good At
         </text>
         <text x="60" y="245" textAnchor="middle" className="text-sm opacity-80">
-          Problems you can solve
+          Your talents & skills
         </text>
         </g>
         <g>
