@@ -2,7 +2,12 @@ import { AppLogo } from '@/components/app-logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 
 export default function AppLayout({
@@ -38,6 +43,7 @@ export default function AppLayout({
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 mb-4">
+                  <SheetTitle className="sr-only">Menu</SheetTitle>
                   <AppLogo />
                 </div>
                 <MainNav />
