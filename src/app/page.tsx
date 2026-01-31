@@ -18,8 +18,8 @@ export default function Home() {
         <div className="flex h-20 items-center justify-between py-6">
           <AppLogo />
           <Button asChild>
-            <Link href="/dashboard">
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            <Link href="/learn-more">
+              Learn More <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>

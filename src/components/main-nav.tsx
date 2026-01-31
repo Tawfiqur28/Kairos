@@ -3,6 +3,7 @@
 import {
   BookText,
   Briefcase,
+  Info,
   LayoutDashboard,
   ListChecks,
   Target,
@@ -18,6 +19,7 @@ const navItems = [
   { href: '/journal', icon: BookText, label: 'Journal' },
   { href: '/careers', icon: Briefcase, label: 'Careers' },
   { href: '/plan', icon: ListChecks, label: 'Action Plan' },
+  { href: '/learn-more', icon: Info, label: 'Learn More' },
 ];
 
 export function MainNav() {
