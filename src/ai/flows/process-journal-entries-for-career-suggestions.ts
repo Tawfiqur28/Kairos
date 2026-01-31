@@ -31,7 +31,7 @@ export async function processJournalEntriesForCareerSuggestions(
 
 const prompt = ai.definePrompt({
   name: 'processJournalEntriesForCareerSuggestionsPrompt',
-  model: 'gemini-1.5-flash-latest',
+  model: 'gemini-pro',
   input: {schema: JournalEntryInputSchema},
   output: {schema: CareerSuggestionsOutputSchema},
   prompt: `You are a career counselor. Analyze the following journal entries and feelings of the user to provide career suggestions.
