@@ -32,6 +32,7 @@ export default function RootLayout({
           fontBody.variable,
           fontCode.variable
         )}
+        suppressHydrationWarning={true}
       >
         {children}
         <Toaster />
