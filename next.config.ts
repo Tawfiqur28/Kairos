@@ -30,6 +30,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // These modules are server-side only, we don't want to bundle them for the client
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        async_hooks: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
