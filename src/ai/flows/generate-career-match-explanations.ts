@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'generateCareerMatchExplanationsPrompt',
   input: {schema: GenerateCareerMatchExplanationsInputSchema},
   output: {schema: GenerateCareerMatchExplanationsOutputSchema},
-  prompt: `You are a career advisor. You will receive a user profile and career details. Your task is to provide a personalized explanation of why the career is a good match for the user, and provide a numerical score indicating the degree of fit (0-100).\n\nUser Profile: {{{userProfile}}}\n\nCareer: {{{career}}}\nCareer Details: {{{careerDetails}}}\n\nExplanation:`,
+  prompt: `You are a career advisor. You will receive a user profile and career details. Your task is to provide a personalized explanation of why the career is a good match for the user, and provide a numerical score indicating the degree of fit (0-100). Set the fitScore output field appropriately based on your analysis.\n\nUser Profile: {{{userProfile}}}\n\nCareer: {{{career}}}\nCareer Details: {{{careerDetails}}}`,
 });
 
 const generateCareerMatchExplanationsFlow = ai.defineFlow(
