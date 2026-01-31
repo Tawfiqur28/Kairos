@@ -8,6 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 
 const GeneratePersonalizedActionPlanInputSchema = z.object({
@@ -37,7 +38,7 @@ export async function generatePersonalizedActionPlan(
 
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedActionPlanPrompt',
-  model: 'googleai/gemini-1.0-pro',
+  model: googleAI.model('gemini-pro'),
   input: {schema: GeneratePersonalizedActionPlanInputSchema},
   output: {schema: GeneratePersonalizedActionPlanOutputSchema},
   prompt: `You are a career coach who specializes in creating personalized action plans.

@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 
 const JournalEntryInputSchema = z.object({
@@ -31,7 +32,7 @@ export async function processJournalEntriesForCareerSuggestions(
 
 const prompt = ai.definePrompt({
   name: 'processJournalEntriesForCareerSuggestionsPrompt',
-  model: 'googleai/gemini-1.0-pro',
+  model: googleAI.model('gemini-pro'),
   input: {schema: JournalEntryInputSchema},
   output: {schema: CareerSuggestionsOutputSchema},
   prompt: `You are a career counselor. Analyze the following journal entries and feelings of the user to provide career suggestions.
