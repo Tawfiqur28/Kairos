@@ -345,10 +345,15 @@ export default function CareersPage() {
                     {matchResult.explanation}
                   </p>
                 </div>
-                {matchResult.fitScore > 60 && (
-                     <Button onClick={() => handleGeneratePlanClick(selectedCareer!)} className="w-full">
+                {matchResult.fitScore > 60 ? (
+                    <Button onClick={() => handleGeneratePlanClick(selectedCareer!)} className="w-full">
                         Generate Your Action Plan
                     </Button>
+                ) : (
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="font-semibold">Keep Exploring!</p>
+                    <p className="text-sm text-muted-foreground">This career might not be the strongest match right now. Check out other options!</p>
+                  </div>
                 )}
               </div>
             )}
