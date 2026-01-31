@@ -38,6 +38,7 @@ export async function generatePersonalizedActionPlan(
 
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedActionPlanPrompt',
+  model: 'gemini-1.5-flash-latest',
   input: {schema: GeneratePersonalizedActionPlanInputSchema},
   output: {schema: GeneratePersonalizedActionPlanOutputSchema},
   prompt: `You are a career coach who specializes in creating personalized action plans.
