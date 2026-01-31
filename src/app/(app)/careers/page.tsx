@@ -1,6 +1,7 @@
 'use client';
 
 import { generateCareerMatchExplanations } from '@/ai/flows/generate-career-match-explanations';
+import { extractCareerThemes } from '@/ai/flows/extract-career-themes';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,15 +27,18 @@ import careerData from '@/lib/careers.json';
 import type { Career, Ikigai } from '@/lib/types';
 import { Bot, Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 type MatchResult = {
   explanation: string;
+  skillMatch: number;
+  interestMatch: number;
+  valueAlignment: number;
   fitScore: number;
 };
 
 export default function CareersPage() {
-  const careers: Career[] = careerData.careers;
+  const allCareers: Career[] = careerData.careers;
   const [ikigai] = useLocalStorage<Ikigai>('ikigai-profile', {
     passions: '',
     skills: '',
@@ -42,18 +46,44 @@ export default function CareersPage() {
     interests: '',
   });
 
+  const [sortedCareers, setSortedCareers] = useState<Career[]>(allCareers);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const [hasMounted, setHasMounted] = useState(false);
+
+  const isProfileComplete = useMemo(() => 
+    ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests,
+    [ikigai]
+  );
+  
+  const userProfileString = useMemo(() => 
+    `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}.`,
+    [ikigai]
+  );
+
   useEffect(() => {
     setHasMounted(true);
-  }, []);
+    if (isProfileComplete) {
+      extractCareerThemes(userProfileString).then(themes => {
+        if (themes.length > 0) {
+          const reorderedCareers = [...allCareers].sort((a, b) => {
+            const aInTheme = themes.includes(a.cluster);
+            const bInTheme = themes.includes(b.cluster);
+            if (aInTheme && !bInTheme) return -1;
+            if (!aInTheme && bInTheme) return 1;
+            return 0;
+          });
+          setSortedCareers(reorderedCareers);
+        }
+      });
+    } else {
+      setSortedCareers(allCareers);
+    }
+  }, [isProfileComplete, userProfileString, allCareers]);
 
-  const isProfileComplete =
-    ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests;
 
   const handleCheckFit = async (career: Career) => {
     if (!isProfileComplete) {
@@ -70,7 +100,6 @@ export default function CareersPage() {
     setMatchResult(null);
 
     try {
-      const userProfileString = `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}.`;
       const careerDetailsString = `${career.description} Required skills: ${career.requiredSkills.join(', ')}.`;
 
       const result = await generateCareerMatchExplanations({
@@ -79,7 +108,14 @@ export default function CareersPage() {
         careerDetails: careerDetailsString,
       });
 
-      setMatchResult(result);
+      const marketDemandScore = career.marketDemand * 10;
+      const fitScore =
+        result.skillMatch * 0.4 +
+        result.interestMatch * 0.3 +
+        result.valueAlignment * 0.2 +
+        marketDemandScore * 0.1;
+
+      setMatchResult({ ...result, fitScore: Math.round(fitScore) });
     } catch (error) {
       console.error(error);
       toast({
@@ -116,7 +152,7 @@ export default function CareersPage() {
             <CardHeader>
                 <CardTitle className="text-yellow-900 dark:text-yellow-300">Complete Your Profile</CardTitle>
                 <CardDescription className="text-yellow-800 dark:text-yellow-400">
-                    Your Ikigai Canvas is empty. Please fill it out to enable AI career matching.
+                    Your Ikigai Canvas is empty. Please fill it out to enable AI career matching and sorting.
                 </CardDescription>
             </CardHeader>
             <CardFooter>
@@ -128,7 +164,7 @@ export default function CareersPage() {
       )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {careers.map((career) => (
+        {sortedCareers.map((career) => (
           <Card key={career.id}>
             <CardHeader>
               <CardTitle>{career.title}</CardTitle>
@@ -182,7 +218,7 @@ export default function CareersPage() {
                     {matchResult.explanation}
                   </p>
                 </div>
-                {matchResult.fitScore > 70 && (
+                {matchResult.fitScore > 60 && (
                      <Button asChild className="w-full">
                         <Link href={`/plan?career=${selectedCareer?.id}`}>Generate Your Action Plan</Link>
                     </Button>

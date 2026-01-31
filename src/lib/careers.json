@@ -4,31 +4,81 @@
       "id": "software-engineer",
       "title": "Software Engineer",
       "description": "Designs, develops, and maintains software applications. Involves coding, debugging, and collaborating with teams to build and improve software products.",
-      "requiredSkills": ["Programming (Python, Java, C++)", "Data Structures & Algorithms", "Problem Solving", "Version Control (Git)"]
+      "requiredSkills": ["Programming (Python, Java, C++)", "Data Structures & Algorithms", "Problem Solving", "Version Control (Git)"],
+      "marketDemand": 9,
+      "cluster": "Tech"
     },
     {
       "id": "ux-designer",
       "title": "UX Designer",
       "description": "Focuses on creating user-friendly and intuitive digital products. Involves user research, wireframing, prototyping, and usability testing to enhance user satisfaction.",
-      "requiredSkills": ["User Research", "Wireframing", "Prototyping Tools (Figma, Sketch)", "Visual Design"]
+      "requiredSkills": ["User Research", "Wireframing", "Prototyping Tools (Figma, Sketch)", "Visual Design"],
+      "marketDemand": 8,
+      "cluster": "Tech"
     },
     {
       "id": "data-scientist",
       "title": "Data Scientist",
       "description": "Analyzes large, complex data sets to identify trends and make predictions. Uses statistical methods, machine learning, and data visualization to provide actionable insights.",
-      "requiredSkills": ["Statistics", "Machine Learning", "Python/R", "Data Visualization"]
+      "requiredSkills": ["Statistics", "Machine Learning", "Python/R", "Data Visualization"],
+      "marketDemand": 10,
+      "cluster": "Tech"
     },
     {
       "id": "cyber-security-analyst",
       "title": "Cyber Security Analyst",
       "description": "Protects an organization's computer networks and systems from cyber threats. Involves monitoring for security breaches, investigating violations, and implementing security measures.",
-      "requiredSkills": ["Network Security", "Intrusion Detection", "Cryptography", "Risk Analysis"]
+      "requiredSkills": ["Network Security", "Intrusion Detection", "Cryptography", "Risk Analysis"],
+      "marketDemand": 9,
+      "cluster": "Tech"
     },
     {
       "id": "cloud-architect",
       "title": "Cloud Architect",
       "description": "Oversees a company’s cloud computing strategy. This includes cloud adoption plans, cloud application design, and cloud management and monitoring.",
-      "requiredSkills": ["Cloud Computing (AWS, Azure, GCP)", "Networking", "Security", "DevOps"]
+      "requiredSkills": ["Cloud Computing (AWS, Azure, GCP)", "Networking", "Security", "DevOps"],
+      "marketDemand": 10,
+      "cluster": "Tech"
+    },
+    {
+      "id": "music-producer",
+      "title": "Music Producer",
+      "description": "Oversees the creation of a song or album. They guide the artist, manage the recording process, and shape the final sound of the music.",
+      "requiredSkills": ["DAW (Ableton, Logic)", "Music Theory", "Sound Engineering", "Project Management"],
+      "marketDemand": 6,
+      "cluster": "Arts"
+    },
+    {
+      "id": "research-scientist",
+      "title": "Research Scientist",
+      "description": "Conducts scientific experiments and analysis in a lab or academic setting to advance knowledge in a particular field like biology, chemistry, or physics.",
+      "requiredSkills": ["Scientific Method", "Data Analysis", "Laboratory Techniques", "Academic Writing"],
+      "marketDemand": 7,
+      "cluster": "Science"
+    },
+    {
+      "id": "marketing-manager",
+      "title": "Marketing Manager",
+      "description": "Develops and executes marketing strategies to promote a product or service. They manage campaigns, analyze market trends, and oversee a marketing team.",
+      "requiredSkills": ["Digital Marketing", "SEO/SEM", "Content Strategy", "Data Analysis"],
+      "marketDemand": 8,
+      "cluster": "Business"
+    },
+    {
+      "id": "registered-nurse",
+      "title": "Registered Nurse",
+      "description": "Provides and coordinates patient care, educates patients and the public about various health conditions, and provides advice and emotional support.",
+      "requiredSkills": ["Patient Care", "Medical Knowledge", "Empathy", "Critical Thinking"],
+      "marketDemand": 9,
+      "cluster": "Healthcare"
+    },
+    {
+      "id": "high-school-teacher",
+      "title": "High School Teacher",
+      "description": "Educates students in a specific subject area. Involves creating lesson plans, grading assignments, and mentoring students to prepare them for college and beyond.",
+      "requiredSkills": ["Subject Matter Expertise", "Communication", "Patience", "Curriculum Development"],
+      "marketDemand": 7,
+      "cluster": "Education"
     }
   ]
 }

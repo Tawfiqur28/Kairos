@@ -15,6 +15,8 @@ export interface Career {
   title: string;
   description: string;
   requiredSkills: string[];
+  marketDemand: number;
+  cluster: string;
 }
 
 export interface JournalEntry {

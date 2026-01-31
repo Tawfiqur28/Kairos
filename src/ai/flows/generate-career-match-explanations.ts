@@ -16,7 +16,9 @@ export type GenerateCareerMatchExplanationsInput = z.infer<typeof GenerateCareer
 
 const GenerateCareerMatchExplanationsOutputSchema = z.object({
   explanation: z.string().describe('A personalized explanation of why the career is a good match for the user.'),
-  fitScore: z.number().describe('A numerical score indicating the degree of fit between the user profile and the career (0-100).'),
+  skillMatch: z.number().describe('A numerical score for skill match (0-100).'),
+  interestMatch: z.number().describe('A numerical score for interest match (0-100).'),
+  valueAlignment: z.number().describe('A numerical score for value alignment (0-100).'),
 });
 
 export type GenerateCareerMatchExplanationsOutput = z.infer<typeof GenerateCareerMatchExplanationsOutputSchema>;
@@ -38,7 +40,9 @@ export async function generateCareerMatchExplanations(
     // Fallback response if AI fails
     return {
       explanation: `Based on your profile showing interest in ${input.career}, this career aligns with several of your skills and interests. Consider exploring related courses or internships to learn more.`,
-      fitScore: 70
+      skillMatch: 70,
+      interestMatch: 70,
+      valueAlignment: 70
     };
   }
 }

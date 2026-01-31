@@ -49,14 +49,7 @@ function PlanGenerator() {
         userDetails: userDetails,
       });
 
-      // Specific instruction handling from user request
-      if (career.id === 'software-engineer' || career.id === "cloud-architect" || career.id === "cyber-security-analyst") {
-        const specificPlan = `Given your interest in ${career.title} as an undergraduate student, here is a more specific plan:\n\n**Year 1: Foundational Skills**\n- **Major Declaration:** Declare your major in Computer Science. If not possible, a related field like Information Technology or Software Engineering is also a great choice.\n- **Core Courses:** Excel in your introductory courses: Intro to Programming (Python/Java), Data Structures, and Discrete Mathematics.\n- **Personal Projects:** Start a small project on GitHub. A simple command-line tool, a personal website, or a basic mobile app are great starting points.\n- **Networking:** Join your university's coding club or ACM chapter. Attend at least two tech meetups or university career fairs.\n\n**Year 2: Specialization & Experience**\n- **Advanced Courses:** Take courses related to your area of interest. For **Software Engineering**, focus on Software Design Patterns and Operating Systems. For **Cloud Computing**, take courses on Networks and Databases. For **Cyber Security**, look for introductions to cryptography and network security.\n- **First Internship:** Secure a summer internship. It doesn't have to be at a top company; a local startup or even a university IT department role provides valuable experience.\n- **Certifications:** Begin studying for an entry-level certification. For Cloud, consider AWS Certified Cloud Practitioner. For Cyber Security, CompTIA Security+.\n- **Hackathons:** Participate in at least one hackathon to build something cool and practice teamwork under pressure.\n\n**Year 3: Mastery & Launch**\n- **Master's Preparation:** Research Master's programs. For a **Software Engineering** path, a Master's in Software Engineering or CS is ideal. For **Cloud**, look for Cloud Computing specializations. For **Cyber Security**, a focused Master's in Cybersecurity is best. Start preparing for the GRE if required.\n- **Advanced Internship/Project:** Secure a more advanced internship or contribute to a significant open-source project. This will be a major highlight on your resume and grad school applications.\n- **Portfolio Refinement:** Polish your portfolio website, ensuring your top 2-3 projects are well-documented with clear descriptions and code samples.\n- **Full-time/Grad School Applications:** Begin applying for full-time jobs and Master's programs in the fall semester. Leverage your university's career services for resume reviews and mock interviews.\n\n${result.actionPlan}`;
-        setActionPlan(specificPlan);
-      } else {
-        setActionPlan(result.actionPlan);
-      }
-
+      setActionPlan(result.actionPlan);
     } catch (error) {
       console.error(error);
       toast({
@@ -92,7 +85,7 @@ function PlanGenerator() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Your 3-Year Action Plan: {career.title}</CardTitle>
+        <CardTitle className="text-2xl">Your Action Plan: {career.title}</CardTitle>
       </CardHeader>
       <CardContent className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:font-headline">
         {isLoading && (

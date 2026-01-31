@@ -72,25 +72,49 @@ export const callModelScopeAI = async (
 };
 
 /**
+ * Extracts career themes from a user's Ikigai profile.
+ */
+export const extractCareerThemes = async (userProfile: string): Promise<string[]> => {
+  const prompt = `Based on the following user profile, identify the main career themes.
+User Profile: "${userProfile}"
+
+Please respond with a JSON array of strings, choosing from these possible themes: "Tech", "Arts", "Science", "Business", "Healthcare", "Education".
+For example: ["Tech", "Business"]`;
+  const response = await callModelScopeAI(prompt, 'qwen-max');
+  try {
+    const jsonMatch = response.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  } catch (e) {
+    console.warn('Could not parse JSON array from AI response for themes', response);
+  }
+  return [];
+};
+
+
+/**
  * Career matching function using ModelScope
  */
 export const generateCareerMatchExplanations = async (
   userProfile: string, 
   career: string, 
   careerDetails: string
-): Promise<{ explanation: string, fitScore: number }> => {
+): Promise<{ explanation: string, skillMatch: number, interestMatch: number, valueAlignment: number }> => {
   const prompt = `As a career advisor, analyze this match:
   
 USER PROFILE: ${userProfile}
-
 CAREER: ${career}
 CAREER DETAILS: ${careerDetails}
 
-Provide:
-1. A personalized explanation of why this career is a good match
-2. A numerical fit score (0-100)
+Provide scores (0-100) for the following, based on the user profile:
+1. skillMatch: How well the user's skills align with the career's required skills.
+2. interestMatch: How well the user's passions and interests align with the career's day-to-day activities.
+3. valueAlignment: How well the career aligns with the user's values and what they believe the world needs.
 
-Format as JSON: {"explanation": "...", "fitScore": 85}`;
+Also provide a personalized explanation for the match.
+
+Format as JSON: {"explanation": "...", "skillMatch": 80, "interestMatch": 90, "valueAlignment": 70}`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
   
@@ -106,7 +130,9 @@ Format as JSON: {"explanation": "...", "fitScore": 85}`;
   // Fallback response
   return {
     explanation: response.substring(0, 500) + '...',
-    fitScore: 75
+    skillMatch: 70,
+    interestMatch: 70,
+    valueAlignment: 70,
   };
 };
 
@@ -117,16 +143,17 @@ export const generatePersonalizedActionPlan = async (
   careerGoal: string,
   userDetails: string
 ): Promise<string> => {
-  const prompt = `Create a detailed 3-year step-by-step plan for a user to pursue a career in ${careerGoal}.
-  
-User Details: ${userDetails}
-  
-Make it VERY specific with:
-- Year 1: Specific courses, activities, skills to learn
-- Year 2: Projects, internships, certifications
-- Year 3: College applications, portfolio building, job preparation
+  const prompt = `Create a detailed, personalized action plan for a user to pursue a career in ${careerGoal}.
 
-Be practical and actionable. Respond only with the plan.`;
+User Details: ${userDetails}
+
+Structure the plan into four phases with specific, actionable steps for each:
+- Immediate Steps (Next 30 Days):
+- 3-Month Roadmap:
+- 6-Month Goals:
+- 1-Year Vision:
+
+Be practical and encouraging. Respond only with the plan text, using markdown for formatting.`;
 
   return await callModelScopeAI(prompt, 'qwen-max');
 };
