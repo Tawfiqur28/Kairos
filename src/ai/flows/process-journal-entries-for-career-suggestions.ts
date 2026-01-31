@@ -7,10 +7,8 @@
  * - JournalEntryInput - The input type for the processJournalEntriesForCareerSuggestions function.
  * - CareerSuggestionsOutput - The return type for the processJournalEntriesForCareerSuggestions function.
  */
-
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/google-genai';
-import {z} from 'genkit';
+import { z } from 'zod';
+import { processJournalEntriesForCareerSuggestions as processJournalEntriesFromModel } from '@/ai/genkit';
 
 const JournalEntryInputSchema = z.object({
   journalEntries: z.string().describe('A collection of journal entries from the user.'),
@@ -27,32 +25,6 @@ export type CareerSuggestionsOutput = z.infer<typeof CareerSuggestionsOutputSche
 export async function processJournalEntriesForCareerSuggestions(
   input: JournalEntryInput
 ): Promise<CareerSuggestionsOutput> {
-  return processJournalEntriesForCareerSuggestionsFlow(input);
+    const result = await processJournalEntriesFromModel(input.journalEntries, input.feelings);
+    return CareerSuggestionsOutputSchema.parse(result);
 }
-
-const prompt = ai.definePrompt({
-  name: 'processJournalEntriesForCareerSuggestionsPrompt',
-  model: googleAI.model('gemini-pro'),
-  input: {schema: JournalEntryInputSchema},
-  output: {schema: CareerSuggestionsOutputSchema},
-  prompt: `You are a career counselor. Analyze the following journal entries and feelings of the user to provide career suggestions.
-
-Journal Entries: {{{journalEntries}}}
-
-Feelings: {{{feelings}}}
-
-Based on the user\'s journal entries and feelings, suggest some career paths that the user might find fulfilling and provide an analysis of why these careers might be a good fit for the user, and set the careerSuggestions output field appropriately.
-`,
-});
-
-const processJournalEntriesForCareerSuggestionsFlow = ai.defineFlow(
-  {
-    name: 'processJournalEntriesForCareerSuggestionsFlow',
-    inputSchema: JournalEntryInputSchema,
-    outputSchema: CareerSuggestionsOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);

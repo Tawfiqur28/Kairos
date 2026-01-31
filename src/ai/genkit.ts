@@ -1,23 +1,5 @@
-// import { config } from 'dotenv';
-// config();
-
-// import {genkit} from 'genkit';
-// import {googleAI} from '@genkit-ai/google-genai';
-
-// export const ai = genkit({
-//   plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY})],
-// });
-
-// src/ai/genkit.ts - REPLACE ENTIRE FILE
-
 import { config } from 'dotenv';
 config();
-
-// ====== DELETE ALL GOOGLE AI CODE ======
-// Remove this entire line:
-// import { googleAI } from '@genkit-ai/google-ai';
-
-// ====== ADD MODELSCORE INTEGRATION ======
 
 /**
  * Direct ModelScope API caller
@@ -29,8 +11,8 @@ export const callModelScopeAI = async (
 ): Promise<string> => {
   const API_KEY = process.env.MODELSCOPE_API_KEY;
   
-  if (!API_KEY) {
-    console.error('❌ MODELSCOPE_API_KEY is missing in .env file');
+  if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+    console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
     throw new Error('ModelScope API key not configured. Check your .env file.');
   }
 
@@ -65,7 +47,7 @@ export const callModelScopeAI = async (
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ ModelScope API error:', response.status, errorText);
-      throw new Error(`ModelScope API error: ${response.status}`);
+      throw new Error(`ModelScope API error: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
@@ -73,8 +55,13 @@ export const callModelScopeAI = async (
     // Extract response based on ModelScope format
     const result = data.output?.text || 
                    data.output?.choices?.[0]?.message?.content || 
-                   'No response generated';
+                   '';
     
+    if (!result) {
+        console.warn('ModelScope response was empty or in an unexpected format', data);
+        return 'No response generated from AI.';
+    }
+
     console.log('✅ ModelScope API call successful');
     return result;
     
@@ -84,18 +71,6 @@ export const callModelScopeAI = async (
   }
 };
 
-// ====== FOR BACKWARD COMPATIBILITY ======
-// If other files expect an 'ai' object, create a simple wrapper
-
-export const ai = {
-  generate: async (params: { prompt: string, model?: string }) => {
-    const result = await callModelScopeAI(params.prompt, params.model || 'qwen-max');
-    return { text: result };
-  }
-};
-
-// ====== SPECIALIZED FUNCTIONS FOR YOUR APP ======
-
 /**
  * Career matching function using ModelScope
  */
@@ -103,7 +78,7 @@ export const generateCareerMatchExplanations = async (
   userProfile: string, 
   career: string, 
   careerDetails: string
-) => {
+): Promise<{ explanation: string, fitScore: number }> => {
   const prompt = `As a career advisor, analyze this match:
   
 USER PROFILE: ${userProfile}
@@ -120,13 +95,12 @@ Format as JSON: {"explanation": "...", "fitScore": 85}`;
   const response = await callModelScopeAI(prompt, 'qwen-max');
   
   try {
-    // Try to parse JSON from response
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
   } catch (e) {
-    console.warn('Could not parse JSON from AI response, using fallback');
+    console.warn('Could not parse JSON from AI response, using fallback', response);
   }
   
   // Fallback response
@@ -140,17 +114,54 @@ Format as JSON: {"explanation": "...", "fitScore": 85}`;
  * Plan generation function using ModelScope
  */
 export const generatePersonalizedActionPlan = async (
-  career: string,
-  userLevel: string = 'high school junior'
-) => {
-  const prompt = `Create a detailed 3-year step-by-step plan for a ${userLevel} to pursue a career in ${career}.
+  careerGoal: string,
+  userDetails: string
+): Promise<string> => {
+  const prompt = `Create a detailed 3-year step-by-step plan for a user to pursue a career in ${careerGoal}.
+  
+User Details: ${userDetails}
   
 Make it VERY specific with:
 - Year 1: Specific courses, activities, skills to learn
 - Year 2: Projects, internships, certifications
 - Year 3: College applications, portfolio building, job preparation
 
-Be practical and actionable.`;
+Be practical and actionable. Respond only with the plan.`;
 
   return await callModelScopeAI(prompt, 'qwen-max');
+};
+
+/**
+ * Journal processing function using ModelScope
+ */
+export const processJournalEntriesForCareerSuggestions = async (
+  journalEntries: string,
+  feelings: string
+): Promise<{ careerSuggestions: string, analysis: string }> => {
+  const prompt = `You are a career counselor. Analyze the following journal entries and feelings of the user to provide career suggestions.
+
+Journal Entries: ${journalEntries}
+
+Feelings: ${feelings}
+
+Based on the user's journal entries and feelings, suggest some career paths that the user might find fulfilling and provide an analysis of why these careers might be a good fit for the user.
+
+Format as JSON: {"careerSuggestions": "...", "analysis": "..."}`;
+
+  const response = await callModelScopeAI(prompt, 'qwen-max');
+
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  } catch (e) {
+    console.warn('Could not parse JSON from AI response, using fallback', response);
+  }
+
+  // Fallback response
+  return {
+    careerSuggestions: "Could not generate suggestions. The AI response was not in the expected format.",
+    analysis: response.substring(0, 500) + '...',
+  };
 };

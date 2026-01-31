@@ -7,9 +7,8 @@
  * - GeneratePersonalizedActionPlanOutput - The return type for the generatePersonalizedActionPlan function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/google-genai';
-import {z} from 'genkit';
+import { z } from 'zod';
+import { generatePersonalizedActionPlan as generatePersonalizedActionPlanFromModel } from '@/ai/genkit';
 
 const GeneratePersonalizedActionPlanInputSchema = z.object({
   careerGoal: z.string().describe('The user\u0027s desired career goal.'),
@@ -33,32 +32,6 @@ export type GeneratePersonalizedActionPlanOutput = z.infer<
 export async function generatePersonalizedActionPlan(
   input: GeneratePersonalizedActionPlanInput
 ): Promise<GeneratePersonalizedActionPlanOutput> {
-  return generatePersonalizedActionPlanFlow(input);
+  const planText = await generatePersonalizedActionPlanFromModel(input.careerGoal, input.userDetails);
+  return { actionPlan: planText };
 }
-
-const prompt = ai.definePrompt({
-  name: 'generatePersonalizedActionPlanPrompt',
-  model: googleAI.model('gemini-pro'),
-  input: {schema: GeneratePersonalizedActionPlanInputSchema},
-  output: {schema: GeneratePersonalizedActionPlanOutputSchema},
-  prompt: `You are a career coach who specializes in creating personalized action plans.
-
-  Based on the user's career goal and details, create a detailed 3-year action plan with specific, actionable steps.
-
-  Present the plan as a timeline or checklist.
-
-  Career Goal: {{{careerGoal}}}
-  User Details: {{{userDetails}}}`,
-});
-
-const generatePersonalizedActionPlanFlow = ai.defineFlow(
-  {
-    name: 'generatePersonalizedActionPlanFlow',
-    inputSchema: GeneratePersonalizedActionPlanInputSchema,
-    outputSchema: GeneratePersonalizedActionPlanOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);

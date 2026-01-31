@@ -1,12 +1,11 @@
-
+'use server';
 /**
  * @fileOverview Generates personalized explanations for why a career is a good match for the user.
  */
 
-import { z } from 'genkit';
-import { generateCareerMatchExplanations as callModelScopeAI } from '@/ai/genkit';
+import { z } from 'zod';
+import { generateCareerMatchExplanations as generateCareerMatchExplanationsFromModel } from '@/ai/genkit';
 
-// Input schema
 const GenerateCareerMatchExplanationsInputSchema = z.object({
   userProfile: z.string().describe('A detailed description of the user profile, including their passions, skills, values, and interests.'),
   career: z.string().describe('The name of the career being evaluated for a match.'),
@@ -15,7 +14,6 @@ const GenerateCareerMatchExplanationsInputSchema = z.object({
 
 export type GenerateCareerMatchExplanationsInput = z.infer<typeof GenerateCareerMatchExplanationsInputSchema>;
 
-// Output schema  
 const GenerateCareerMatchExplanationsOutputSchema = z.object({
   explanation: z.string().describe('A personalized explanation of why the career is a good match for the user.'),
   fitScore: z.number().describe('A numerical score indicating the degree of fit between the user profile and the career (0-100).'),
@@ -23,21 +21,17 @@ const GenerateCareerMatchExplanationsOutputSchema = z.object({
 
 export type GenerateCareerMatchExplanationsOutput = z.infer<typeof GenerateCareerMatchExplanationsOutputSchema>;
 
-/**
- * Main flow function that calls ModelScope AI
- */
-export async function generateCareerMatchExplanationsFlow(
+export async function generateCareerMatchExplanations(
   input: GenerateCareerMatchExplanationsInput
 ): Promise<GenerateCareerMatchExplanationsOutput> {
   try {
-    // Call the ModelScope AI function
-    const result = await callModelScopeAI(
+    const result = await generateCareerMatchExplanationsFromModel(
       input.userProfile,
-      input.career, 
+      input.career,
       input.careerDetails
     );
-    
-    return result;
+    // Validate with Zod before returning
+    return GenerateCareerMatchExplanationsOutputSchema.parse(result);
   } catch (error) {
     console.error('Error generating career match explanations:', error);
     
@@ -47,13 +41,4 @@ export async function generateCareerMatchExplanationsFlow(
       fitScore: 70
     };
   }
-}
-
-/**
- * Alias for backward compatibility
- */
-export async function generateCareerMatchExplanations(
-  input: GenerateCareerMatchExplanationsInput
-): Promise<GenerateCareerMatchExplanationsOutput> {
-  return generateCareerMatchExplanationsFlow(input);
 }
