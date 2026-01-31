@@ -1,14 +1,10 @@
 import { AppLogo } from '@/components/app-logo';
-import { Icons } from '@/components/icons';
+import { IkigaiDiagram } from '@/components/ikigai-diagram';
 import { Button } from '@/components/ui/button';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ArrowRight, Bot, PenSquare, Sparkles, Target } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Home() {
-  const ikigaiImage = PlaceHolderImages.find((img) => img.id === 'ikigai');
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="container z-40 bg-background">
@@ -57,16 +53,7 @@ export default function Home() {
             </div>
           </div>
           <div className="hidden items-center justify-center md:flex">
-            {ikigaiImage && (
-              <Image
-                src={ikigaiImage.imageUrl}
-                alt={ikigaiImage.description}
-                width={500}
-                height={500}
-                className="object-contain"
-                data-ai-hint={ikigaiImage.imageHint}
-              />
-            )}
+            <IkigaiDiagram className="w-full h-auto" />
           </div>
         </section>
 
