@@ -17,8 +17,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry } from '@/lib/types';
-import { Bot, Loader2, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { Bot, Loader2, Sparkles, Mic } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 
 type CareerSuggestions = {
   careerSuggestions: string;
@@ -32,6 +32,48 @@ export default function JournalPage() {
   const [suggestions, setSuggestions] = useState<CareerSuggestions | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+
+  useEffect(() => {
+    setVoiceSupported('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+  }, []);
+
+  const handleVoiceInput = useCallback(() => {
+    if (!voiceSupported) {
+      toast({
+        title: 'Voice not supported',
+        description: "Your browser doesn't support voice recognition.",
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (isListening) return;
+
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+        setIsListening(true);
+        toast({ title: 'Listening...', description: 'Start speaking your journal entry.' });
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = (event: any) => {
+        toast({ title: 'Voice recognition error', description: event.error, variant: 'destructive' });
+    };
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setCurrentContent(prevContent => prevContent ? `${prevContent} ${transcript}`.trim() : transcript);
+      toast({ title: "Text added!" });
+    };
+
+    recognition.start();
+  }, [voiceSupported, isListening, toast]);
 
   const handleSaveEntry = () => {
     if (!currentContent.trim() || !currentFeeling.trim()) {
@@ -115,7 +157,21 @@ export default function JournalPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="content">What's on your mind?</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="content">What's on your mind?</Label>
+                  {voiceSupported && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleVoiceInput}
+                      disabled={isListening}
+                      className={isListening ? 'text-primary animate-pulse' : 'text-muted-foreground'}
+                    >
+                      <Mic className="h-4 w-4" />
+                      <span className="sr-only">{isListening ? 'Listening...' : 'Start voice input'}</span>
+                    </Button>
+                  )}
+                </div>
                 <Textarea
                   id="content"
                   placeholder="Describe your day, your tasks, what you enjoyed, and what you didn't."
