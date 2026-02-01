@@ -1,8 +1,17 @@
-
 'use server';
 
 import { config } from 'dotenv';
 config();
+
+// Lazily import dashscope to improve initial load time.
+let dashscopeGeneration: any;
+async function getDashscopeGeneration() {
+  if (!dashscopeGeneration) {
+    const dashscope = await import('dashscope');
+    dashscopeGeneration = dashscope.Generation;
+  }
+  return dashscopeGeneration;
+}
 
 // ==================== API CALLER ====================
 async function callModelScopeAI(prompt: string, model: string): Promise<string> {
@@ -10,22 +19,18 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
 
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
     console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
-    // Return a more structured error response instead of throwing
     return 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
   }
 
   try {
-    // ERROR 1: 'Generation' not imported from dashscope
-    // FIX: Import it correctly
-    const dashscope = await import('dashscope');
-    
-    const result = await dashscope.Generation.call({
+    const Generation = await getDashscopeGeneration();
+    const result = await Generation.call({
       model: model,
       prompt: prompt,
       apiKey: API_KEY,
     });
 
-    if (result.statusCode === 200 && result.output && result.output.text) { // ERROR 2: 'status_code' → 'statusCode'
+    if (result.statusCode === 200 && result.output && result.output.text) {
       const text = result.output.text;
       // Clean up markdown code blocks if present
       if (text.startsWith('```json')) {
@@ -37,7 +42,7 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
       return text;
     } else {
       console.error('ModelScope API Error:', result);
-      return `ERROR: API call failed with status ${result.statusCode}. Message: ${result.message}`; // ERROR 3: 'status_code' → 'statusCode'
+      return `ERROR: API call failed with status ${result.statusCode}. Message: ${result.message}`;
     }
   } catch (error) {
     console.error('Error calling ModelScope API:', error);
@@ -47,7 +52,6 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
 }
 
 // ==================== ENHANCED CAREER DATABASE ====================
-// ERROR 4: Type definition for CAREER_DATABASE
 type CareerEntry = {
   name: string;
   requiredThemes: string[];
@@ -59,7 +63,6 @@ type CareerDatabase = {
 };
 
 const CAREER_DATABASE: CareerDatabase = {
-  // TECH careers
   Tech: [
     { name: 'Software Engineer', requiredThemes: ['Tech'], incompatibleThemes: ['Music', 'Arts'] },
     { name: 'Cloud Architect', requiredThemes: ['Tech'], incompatibleThemes: ['Music', 'Arts'] },
@@ -68,8 +71,6 @@ const CAREER_DATABASE: CareerDatabase = {
     { name: 'AI Researcher', requiredThemes: ['Tech', 'Science'], incompatibleThemes: ['Music'] },
     { name: 'Quantum Computing Engineer', requiredThemes: ['Tech', 'Physics'], incompatibleThemes: ['Music', 'Arts'] }
   ],
-  
-  // PHYSICS careers
   Physics: [
     { name: 'Physicist', requiredThemes: ['Physics', 'Science'], incompatibleThemes: ['Music', 'Business'] },
     { name: 'Astrophysicist', requiredThemes: ['Physics', 'Science'], incompatibleThemes: ['Music', 'Business'] },
@@ -78,8 +79,6 @@ const CAREER_DATABASE: CareerDatabase = {
     { name: 'Research Scientist (Physics)', requiredThemes: ['Physics', 'Science'], incompatibleThemes: ['Music', 'Business'] },
     { name: 'Physics Teacher/Professor', requiredThemes: ['Physics', 'Education'], incompatibleThemes: [] }
   ],
-  
-  // CHEMISTRY careers
   Chemistry: [
     { name: 'Chemist', requiredThemes: ['Chemistry', 'Science'], incompatibleThemes: ['Music', 'Arts'] },
     { name: 'Chemical Engineer', requiredThemes: ['Chemistry', 'Tech'], incompatibleThemes: ['Music', 'Arts'] },
@@ -89,8 +88,6 @@ const CAREER_DATABASE: CareerDatabase = {
     { name: 'Environmental Chemist', requiredThemes: ['Chemistry', 'Science'], incompatibleThemes: ['Music', 'Arts'] },
     { name: 'Chemistry Teacher/Professor', requiredThemes: ['Chemistry', 'Education'], incompatibleThemes: [] }
   ],
-  
-  // BIOLOGY careers
   Science: [
     { name: 'Biologist', requiredThemes: ['Science'], incompatibleThemes: ['Music', 'Arts'] },
     { name: 'Geneticist', requiredThemes: ['Science'], incompatibleThemes: ['Music', 'Arts'] },
@@ -98,8 +95,6 @@ const CAREER_DATABASE: CareerDatabase = {
     { name: 'Biomedical Researcher', requiredThemes: ['Science', 'Healthcare'], incompatibleThemes: ['Music', 'Arts'] },
     { name: 'Environmental Scientist', requiredThemes: ['Science'], incompatibleThemes: ['Music', 'Arts'] }
   ],
-  
-  // MUSIC careers
   Music: [
     { name: 'Music Producer', requiredThemes: ['Music'], incompatibleThemes: ['Tech', 'Science', 'Physics', 'Chemistry'] },
     { name: 'Sound Engineer', requiredThemes: ['Music', 'Tech'], incompatibleThemes: ['Science', 'Physics', 'Chemistry'] },
@@ -107,8 +102,6 @@ const CAREER_DATABASE: CareerDatabase = {
     { name: 'Composer', requiredThemes: ['Music', 'Arts'], incompatibleThemes: ['Tech', 'Science', 'Physics', 'Chemistry'] },
     { name: 'Audio Programmer', requiredThemes: ['Music', 'Tech'], incompatibleThemes: ['Science', 'Physics', 'Chemistry'] }
   ],
-  
-  // Other categories...
   Business: [
     { name: 'Marketing Manager', requiredThemes: ['Business'], incompatibleThemes: [] },
     { name: 'Financial Analyst', requiredThemes: ['Business'], incompatibleThemes: [] }
@@ -121,15 +114,13 @@ const CAREER_DATABASE: CareerDatabase = {
 
 // ==================== FAST THEME EXTRACTION (NO AI) ====================
 export const extractCareerThemes = async (userProfile: string): Promise<string[]> => {
-  // Use the fast, local keyword detection instead of a slow AI call.
-  // This makes the career page sort instantly.
+  // Use fast, local keyword detection instead of a slow AI call.
   return Promise.resolve(detectScienceThemesFromKeywords(userProfile));
 };
 
-// Enhanced keyword detection for sciences
 const detectScienceThemesFromKeywords = (profile: string): string[] => {
   const lowerProfile = profile.toLowerCase();
-  const themes: string[] = []; // ERROR 5: Added type annotation
+  const themes: string[] = [];
   
   const keywordMap: Record<string, string[]> = {
     Tech: ['code', 'programming', 'computer', 'software', 'developer', 'engineer', 'python', 'java', 'javascript', 'tech', 'ai', 'machine learning', 'data', 'algorithm'],
@@ -141,7 +132,6 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
     Arts: ['art', 'design', 'creative', 'drawing', 'painting', 'visual', 'graphic', 'ui/ux']
   };
   
-  // Count keyword occurrences
   const themeCounts: Record<string, number> = {};
   
   Object.entries(keywordMap).forEach(([theme, keywords]) => {
@@ -151,18 +141,14 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
     }
   });
   
-  // Only include themes with significant presence
   Object.entries(themeCounts).forEach(([theme, count]) => {
     if (count >= 2) { // Require at least 2 keyword matches
       themes.push(theme);
     }
   });
   
-  // If strong physics/chemistry keywords, remove conflicting themes
   if (themes.includes('Physics') || themes.includes('Chemistry')) {
-    const filtered = themes.filter(theme => 
-      !['Music', 'Arts'].includes(theme)
-    );
+    const filtered = themes.filter(theme => !['Music', 'Arts'].includes(theme));
     return filtered.length > 0 ? filtered : themes;
   }
   
@@ -170,27 +156,26 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
 };
 
 // ==================== ENHANCED CAREER MATCHING FOR SCIENCES ====================
+type CareerMatchResult = {
+  explanation: string;
+  skillMatch: number;
+  interestMatch: number;
+  valueAlignment: number;
+  overallScore: number;
+  themeMismatch: boolean;
+  confidence: 'high' | 'medium' | 'low';
+};
+
 export const generateCareerMatchExplanations = async (
   userProfile: string, 
   career: string, 
   careerDetails: string
-): Promise<{ 
-  explanation: string, 
-  skillMatch: number, 
-  interestMatch: number, 
-  valueAlignment: number,
-  overallScore: number,
-  themeMismatch: boolean,
-  confidence: 'high' | 'medium' | 'low'
-}> => {
-  // Extract user themes
+): Promise<CareerMatchResult> => {
   const userThemes = await extractCareerThemes(userProfile);
   console.log('Science career matching - User themes:', userThemes, 'Career:', career);
   
-  // Check for theme compatibility
   const themeMismatch = checkScienceThemeMismatch(userThemes, career);
   
-  // If strong mismatch (e.g., Physics user with Music career), return very low score
   if (themeMismatch === 'strong') {
     return {
       explanation: `❌ **Major Theme Mismatch**: Your profile shows strong ${userThemes.join('/')} interests, but "${career}" is typically pursued by those with different passions. We recommend exploring ${userThemes.join(' or ')}-focused careers instead.`,
@@ -203,7 +188,6 @@ export const generateCareerMatchExplanations = async (
     };
   }
   
-  // If moderate mismatch, score lower
   if (themeMismatch === 'moderate') {
     const baseScore = 45;
     return {
@@ -217,9 +201,7 @@ export const generateCareerMatchExplanations = async (
     };
   }
   
-  // SPECIAL SCIENCE PROMPTS FOR BETTER ANALYSIS
   let specializedPrompt = '';
-  
   if (career.includes('Physicist') || career.includes('Physics')) {
     specializedPrompt = `**PHYSICS SPECIALIZATION**: Focus on mathematical aptitude, problem-solving skills, and interest in fundamental principles.`;
   } else if (career.includes('Chemist') || career.includes('Chemical')) {
@@ -261,7 +243,6 @@ Respond with JSON: {
   const response = await callModelScopeAI(prompt, 'qwen-max');
   
   if (response.startsWith('ERROR:')) {
-    // Science-aware fallback scoring
     const baseScore = calculateScienceBaseScore(userThemes, career);
     return {
       explanation: `Based on your ${userThemes.join(', ')} background, ${career} has approximately ${baseScore}% alignment. Physics/Chemistry careers typically require strong academic foundation in those subjects.`,
@@ -270,7 +251,7 @@ Respond with JSON: {
       valueAlignment: baseScore,
       overallScore: baseScore,
       themeMismatch: false,
-      confidence: 'medium' as const // ERROR 6: Added 'as const' for literal type
+      confidence: 'medium'
     };
   }
   
@@ -288,14 +269,13 @@ Respond with JSON: {
       }
       
       parsed.themeMismatch = false;
-      parsed.confidence = 'high' as const; // Added 'as const'
+      parsed.confidence = 'high';
       return parsed;
     }
   } catch (e) {
     console.warn('Science career match JSON parse failed:', e);
   }
   
-  // Science-based fallback
   const baseScore = calculateScienceBaseScore(userThemes, career);
   return {
     explanation: `Science career analysis: ${career} requires ${getScienceRequirements(career)}. Your ${userThemes.join(', ')} background provides ${baseScore}% foundation.`,
@@ -304,17 +284,15 @@ Respond with JSON: {
     valueAlignment: baseScore,
     overallScore: baseScore,
     themeMismatch: false,
-    confidence: 'low' as const // Added 'as const'
+    confidence: 'low'
   };
 };
 
 // Helper: Check science theme mismatches
 const checkScienceThemeMismatch = (userThemes: string[], career: string): 'strong' | 'moderate' | 'none' => {
-  // Find career in database
   for (const [theme, careers] of Object.entries(CAREER_DATABASE)) {
     const found = careers.find(c => c.name === career);
     if (found) {
-      // Strong mismatch: Physics/Chemistry user with Music/Arts career
       const hasPhysicsChemistry = userThemes.some(t => ['Physics', 'Chemistry'].includes(t));
       const isMusicArts = found.requiredThemes.some(t => ['Music', 'Arts'].includes(t));
       
@@ -322,7 +300,6 @@ const checkScienceThemeMismatch = (userThemes: string[], career: string): 'stron
         return 'strong';
       }
       
-      // Moderate mismatch: Some incompatible themes
       const hasIncompatible = found.incompatibleThemes.some(incomp => 
         userThemes.includes(incomp)
       );
@@ -337,12 +314,10 @@ const checkScienceThemeMismatch = (userThemes: string[], career: string): 'stron
 const calculateScienceBaseScore = (userThemes: string[], career: string): number => {
   let baseScore = 50;
   
-  // Bonus for theme alignment
   if (career.includes('Physics') && userThemes.includes('Physics')) baseScore += 25;
   if (career.includes('Chemistry') && userThemes.includes('Chemistry')) baseScore += 25;
   if (career.includes('Engineer') && userThemes.includes('Tech')) baseScore += 20;
   
-  // Penalty for mismatches
   if (career.includes('Physics') && userThemes.includes('Music')) baseScore -= 30;
   if (career.includes('Chemistry') && userThemes.includes('Arts')) baseScore -= 30;
   
@@ -485,5 +460,3 @@ export const processJournalEntriesForCareerSuggestions = async (
       };
   }
 };
-
-    

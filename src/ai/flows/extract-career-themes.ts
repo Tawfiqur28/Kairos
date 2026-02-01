@@ -16,12 +16,8 @@ export type ExtractCareerThemesOutput = z.infer<typeof ExtractCareerThemesOutput
 export async function extractCareerThemes(
   input: ExtractCareerThemesInput
 ): Promise<ExtractCareerThemesOutput> {
-  try {
-    const result = await extractCareerThemesFromModel(input);
-    return ExtractCareerThemesOutputSchema.parse(result);
-  } catch (error) {
-    console.error('Error extracting career themes:', error);
-    // Return empty array on failure
-    return [];
-  }
+  const result = await extractCareerThemesFromModel(input);
+  // The underlying model is a fast, local function that doesn't throw,
+  // so the previous try/catch was unnecessary.
+  return ExtractCareerThemesOutputSchema.parse(result);
 }
