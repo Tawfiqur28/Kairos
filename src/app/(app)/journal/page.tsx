@@ -17,13 +17,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry } from '@/lib/types';
-import { Bot, Loader2, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { Bot, Loader2, Mic, MicOff, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 type CareerSuggestions = {
   careerSuggestions: string;
   analysis: string;
 };
+
+declare global {
+    interface Window {
+      SpeechRecognition: any;
+      webkitSpeechRecognition: any;
+    }
+}
 
 export default function JournalPage() {
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>('journal-entries', []);
@@ -32,6 +39,65 @@ export default function JournalPage() {
   const [suggestions, setSuggestions] = useState<CareerSuggestions | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      setIsSpeechRecognitionSupported(true);
+    }
+  }, []);
+
+  const handleToggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    if (!isSpeechRecognitionSupported) {
+      toast({
+        title: "Browser Not Supported",
+        description: "Your browser doesn't support voice recognition.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsListening(true);
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = true;
+    recognitionRef.current.interimResults = true; 
+
+    recognitionRef.current.onresult = (event: any) => {
+      let finalTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + '. ';
+        }
+      }
+      setCurrentContent(prev => prev ? `${prev} ${finalTranscript}` : finalTranscript);
+    };
+    
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      toast({
+        title: "Voice Recognition Error",
+        description: event.error === 'not-allowed' ? "Please grant microphone permissions." : "An error occurred during voice recognition.",
+        variant: "destructive"
+      });
+      setIsListening(false);
+    }
+
+    recognitionRef.current.start();
+  };
 
   const handleSaveEntry = () => {
     if (!currentContent.trim() || !currentFeeling.trim()) {
@@ -115,7 +181,20 @@ export default function JournalPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="content">What's on your mind?</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="content">What's on your mind?</Label>
+                  {isSpeechRecognitionSupported && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleToggleListening}
+                      className={isListening ? 'text-destructive animate-pulse' : 'text-muted-foreground'}
+                    >
+                      {isListening ? <MicOff /> : <Mic />}
+                      <span className="sr-only">{isListening ? 'Stop listening' : 'Start listening'}</span>
+                    </Button>
+                  )}
+                </div>
                 <Textarea
                   id="content"
                   placeholder="Describe your day, your tasks, what you enjoyed, and what you didn't."
