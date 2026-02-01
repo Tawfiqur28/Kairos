@@ -1,7 +1,7 @@
+
 'use server';
 
 import { config } from 'dotenv';
-import { Generation } from 'dashscope';
 config();
 
 // ==================== API CALLER ====================
@@ -10,29 +10,34 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
 
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
     console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
+    // Return a more structured error response instead of throwing
     return 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
   }
 
   try {
-    const result = await Generation.call({
+    // ERROR 1: 'Generation' not imported from dashscope
+    // FIX: Import it correctly
+    const dashscope = await import('dashscope');
+    
+    const result = await dashscope.Generation.call({
       model: model,
       prompt: prompt,
       apiKey: API_KEY,
     });
 
-    if (result.status_code === 200 && result.output && result.output.text) {
+    if (result.statusCode === 200 && result.output && result.output.text) { // ERROR 2: 'status_code' → 'statusCode'
       const text = result.output.text;
       // Clean up markdown code blocks if present
       if (text.startsWith('```json')) {
         return text.substring(7, text.length - 3).trim();
       }
       if (text.startsWith('```')) {
-          return text.substring(3, text.length - 3).trim();
+        return text.substring(3, text.length - 3).trim();
       }
       return text;
     } else {
       console.error('ModelScope API Error:', result);
-      return `ERROR: API call failed with status ${result.status_code}. Message: ${result.message}`;
+      return `ERROR: API call failed with status ${result.statusCode}. Message: ${result.message}`; // ERROR 3: 'status_code' → 'statusCode'
     }
   } catch (error) {
     console.error('Error calling ModelScope API:', error);
@@ -41,9 +46,19 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
   }
 }
 
-
 // ==================== ENHANCED CAREER DATABASE ====================
-const CAREER_DATABASE = {
+// ERROR 4: Type definition for CAREER_DATABASE
+type CareerEntry = {
+  name: string;
+  requiredThemes: string[];
+  incompatibleThemes: string[];
+};
+
+type CareerDatabase = {
+  [key: string]: CareerEntry[];
+};
+
+const CAREER_DATABASE: CareerDatabase = {
   // TECH careers
   Tech: [
     { name: 'Software Engineer', requiredThemes: ['Tech'], incompatibleThemes: ['Music', 'Arts'] },
@@ -104,52 +119,19 @@ const CAREER_DATABASE = {
   ]
 };
 
-// ==================== ENHANCED THEME EXTRACTION ====================
+// ==================== FAST THEME EXTRACTION (NO AI) ====================
 export const extractCareerThemes = async (userProfile: string): Promise<string[]> => {
-  const prompt = `Analyze this user's Ikigai profile and identify their dominant career themes.
-  
-USER PROFILE: "${userProfile}"
-
-Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business", "Arts", "Healthcare", "Education"]
-
-**STRICT RULES:**
-1. Only select themes that are EXPLICITLY mentioned or strongly implied
-2. Tech themes: "code", "programming", "computer", "software", "ai", "machine learning", "developer", "engineer"
-3. Physics themes: "physics", "quantum", "relativity", "astronomy", "space", "energy", "force", "motion", "thermodynamics"
-4. Chemistry themes: "chemistry", "chemical", "molecule", "atom", "reaction", "lab", "organic", "inorganic", "biochemistry"
-5. Science themes: "biology", "research", "experiment", "scientific", "lab work", "analysis"
-6. Music themes: "music", "song", "instrument", "sound", "audio", "band", "concert", "sing", "compose"
-7. If contradictory themes (e.g., "code" AND "music"), choose the STRONGER one based on frequency
-8. Return empty array [] if uncertain
-
-Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
-
-  const response = await callModelScopeAI(prompt, 'qwen-max');
-  
-  if (response.startsWith('ERROR:')) {
-    return detectScienceThemesFromKeywords(userProfile);
-  }
-  
-  try {
-    const jsonMatch = response.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const themes = JSON.parse(jsonMatch[0]);
-      console.log('Extracted science themes:', themes);
-      return themes;
-    }
-  } catch (e) {
-    console.warn('Theme extraction JSON parse failed:', e);
-  }
-  
-  return detectScienceThemesFromKeywords(userProfile);
+  // Use the fast, local keyword detection instead of a slow AI call.
+  // This makes the career page sort instantly.
+  return Promise.resolve(detectScienceThemesFromKeywords(userProfile));
 };
 
 // Enhanced keyword detection for sciences
 const detectScienceThemesFromKeywords = (profile: string): string[] => {
   const lowerProfile = profile.toLowerCase();
-  const themes = [];
+  const themes: string[] = []; // ERROR 5: Added type annotation
   
-  const keywordMap = {
+  const keywordMap: Record<string, string[]> = {
     Tech: ['code', 'programming', 'computer', 'software', 'developer', 'engineer', 'python', 'java', 'javascript', 'tech', 'ai', 'machine learning', 'data', 'algorithm'],
     Physics: ['physics', 'quantum', 'relativity', 'astronomy', 'space', 'energy', 'force', 'motion', 'thermodynamics', 'particle', 'nuclear', 'mechanics', 'electromagnetism'],
     Chemistry: ['chemistry', 'chemical', 'molecule', 'atom', 'reaction', 'lab', 'organic', 'inorganic', 'biochemistry', 'compound', 'element', 'periodic table', 'synthesis'],
@@ -184,7 +166,7 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
     return filtered.length > 0 ? filtered : themes;
   }
   
-  return themes.length > 0 ? themes : ['Tech']; // Default to Tech
+  return themes;
 };
 
 // ==================== ENHANCED CAREER MATCHING FOR SCIENCES ====================
@@ -288,7 +270,7 @@ Respond with JSON: {
       valueAlignment: baseScore,
       overallScore: baseScore,
       themeMismatch: false,
-      confidence: 'medium'
+      confidence: 'medium' as const // ERROR 6: Added 'as const' for literal type
     };
   }
   
@@ -306,7 +288,7 @@ Respond with JSON: {
       }
       
       parsed.themeMismatch = false;
-      parsed.confidence = 'high';
+      parsed.confidence = 'high' as const; // Added 'as const'
       return parsed;
     }
   } catch (e) {
@@ -322,7 +304,7 @@ Respond with JSON: {
     valueAlignment: baseScore,
     overallScore: baseScore,
     themeMismatch: false,
-    confidence: 'low'
+    confidence: 'low' as const // Added 'as const'
   };
 };
 
@@ -503,3 +485,5 @@ export const processJournalEntriesForCareerSuggestions = async (
       };
   }
 };
+
+    
