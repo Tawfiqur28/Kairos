@@ -17,15 +17,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry, Ikigai } from '@/lib/types';
-import { Bot, Loader2, Mic, MicOff, Send } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-
-type ChatMessage = {
-  role: 'user' | 'assistant';
-  content: string;
-};
 
 declare global {
     interface Window {
@@ -54,20 +48,8 @@ export default function JournalPage() {
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
 
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  
   const [hasMounted, setHasMounted] = useState(false);
   const [journalPlaceholder, setJournalPlaceholder] = useState('');
-
-  const chatSuggestions = [
-    "How do I prepare for a software engineering interview?",
-    "Explain the concept of relativity like I'm a high school student.",
-    "What is Next.js 15?",
-    "Give me some study tips for my final exams.",
-  ];
 
   useEffect(() => {
     setHasMounted(true);
@@ -125,13 +107,6 @@ export default function JournalPage() {
     setJournalPlaceholder(getPlaceholder());
   }, [ikigai.educationLevel, t, hasMounted]);
 
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatHistory]);
-
-
   const handleToggleListening = () => {
     if (!isSpeechRecognitionSupported) {
       toast({
@@ -174,229 +149,60 @@ export default function JournalPage() {
     });
   };
 
-  const handleSendMessage = async (e?: React.FormEvent, suggestion?: string) => {
-    e?.preventDefault();
-    const messageContent = suggestion || chatInput;
-    if (!messageContent.trim() || isChatLoading) return;
-
-    const userMessage: ChatMessage = { role: 'user', content: messageContent };
-    const messagesForApi = [...chatHistory, userMessage];
-    
-    setChatHistory(prev => [...prev, userMessage, { role: 'assistant', content: '' }]);
-    setChatInput('');
-    setIsChatLoading(true);
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: messagesForApi,
-          ikigai: ikigai,
-        }),
-      });
-
-      if (!response.ok || !response.body) {
-        let errorDetails = response.statusText;
-        try {
-          const errorJson = await response.json();
-          errorDetails = errorJson.error || JSON.stringify(errorJson);
-        } catch (e) {
-          // Ignore if response is not JSON
-        }
-        throw new Error(`API error (${response.status}): ${errorDetails}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedResponse = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        accumulatedResponse += decoder.decode(value, { stream: true });
-        
-        if (accumulatedResponse.startsWith('ERROR:')) {
-            toast({
-              title: t('toasts.aiErrorTitle'),
-              description: accumulatedResponse,
-              variant: 'destructive',
-            });
-            setChatHistory(prev => {
-              const updatedHistory = [...prev];
-              const lastMessage = updatedHistory[updatedHistory.length - 1];
-              if (lastMessage.role === 'assistant') {
-                lastMessage.content = "Sorry, I encountered an error. Please try again.";
-              }
-              return updatedHistory;
-            });
-            break; // Stop processing the stream on error
-        }
-
-        setChatHistory(prev => {
-          const updatedHistory = [...prev];
-          const lastMessage = updatedHistory[updatedHistory.length - 1];
-          if (lastMessage.role === 'assistant') {
-            lastMessage.content = accumulatedResponse;
-          }
-          return updatedHistory;
-        });
-      }
-    } catch (error) {
-      console.error('Full error details:', error);
-      const errorMessage = error instanceof Error ? error.message : t('toasts.aiErrorJournal');
-      toast({
-        title: t('toasts.aiErrorTitle'),
-        description: errorMessage,
-        variant: 'destructive',
-      });
-      setChatHistory(prev => {
-          const updatedHistory = [...prev];
-          const lastMessage = updatedHistory[updatedHistory.length - 1];
-          if (lastMessage.role === 'assistant' && lastMessage.content === '') {
-            lastMessage.content = "Sorry, I'm having trouble connecting right now. Please try again later.";
-          }
-          return updatedHistory;
-      });
-    } finally {
-      setIsChatLoading(false);
-    }
-  };
-
-
   return (
     <>
       <PageHeader
         title={t('journal.title')}
         description={t('journal.description')}
       />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('journal.newEntryTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
-                <Input
-                  id="feeling"
-                  placeholder={t('journal.feelingPlaceholder')}
-                  value={currentFeeling}
-                  onChange={(e) => setCurrentFeeling(e.target.value)}
-                />
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('journal.newEntryTitle')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
+              <Input
+                id="feeling"
+                placeholder={t('journal.feelingPlaceholder')}
+                value={currentFeeling}
+                onChange={(e) => setCurrentFeeling(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="content">{t('journal.thoughtsLabel')}</Label>
+                {isSpeechRecognitionSupported && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleToggleListening}
+                    className={isListening ? 'text-destructive animate-pulse' : 'text-muted-foreground'}
+                  >
+                    {isListening ? <MicOff /> : <Mic />}
+                    <span className="sr-only">{isListening ? 'Stop listening' : 'Start listening'}</span>
+                  </Button>
+                )}
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="content">{t('journal.thoughtsLabel')}</Label>
-                  {isSpeechRecognitionSupported && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleToggleListening}
-                      className={isListening ? 'text-destructive animate-pulse' : 'text-muted-foreground'}
-                    >
-                      {isListening ? <MicOff /> : <Mic />}
-                      <span className="sr-only">{isListening ? 'Stop listening' : 'Start listening'}</span>
-                    </Button>
-                  )}
-                </div>
-                <Textarea
-                  id="content"
-                  placeholder={journalPlaceholder}
-                  className="min-h-32"
-                  value={currentContent}
-                  onChange={(e) => setCurrentContent(e.target.value)}
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveEntry}>{t('journal.saveButton')}</Button>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>KAIROS Assistant</CardTitle>
-              <CardDescription>
-                Your personal AI guide for academic and career questions.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[500px] flex flex-col">
-                <ScrollArea className="flex-1 p-4 border rounded-md bg-muted/20" ref={chatContainerRef}>
-                  {chatHistory.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                      <Bot size={48} className="mb-4" />
-                      <p>Ask me anything about your studies, college applications, or career path!</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {chatHistory.map((msg, index) => (
-                        <div key={index} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-                          {msg.role === 'assistant' && <Avatar className="h-8 w-8"><AvatarFallback><Bot size={16}/></AvatarFallback></Avatar>}
-                          <div className={`p-3 rounded-lg max-w-[80%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>
-                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                          </div>
-                        </div>
-                      ))}
-                      {isChatLoading && chatHistory[chatHistory.length - 1]?.content === '' && (
-                        <div className="flex gap-2">
-                          <Avatar className="h-8 w-8"><AvatarFallback><Bot size={16}/></AvatarFallback></Avatar>
-                          <div className="p-3 rounded-lg bg-background flex items-center">
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </ScrollArea>
-                <form onSubmit={handleSendMessage} className="mt-4 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <Textarea
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Message KAIROS Assistant..."
-                      disabled={isChatLoading}
-                      rows={1}
-                      className="resize-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <Button type="submit" disabled={isChatLoading || !chatInput.trim()}>
-                      <Send className="h-4 w-4" />
-                      <span className="sr-only">Send</span>
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {chatHistory.length === 0 && chatSuggestions.map((suggestion) => (
-                      <Button
-                        key={suggestion}
-                        size="sm"
-                        variant="outline"
-                        className="text-xs"
-                        onClick={(e) => handleSendMessage(e, suggestion)}
-                        disabled={isChatLoading}
-                      >
-                        {suggestion}
-                      </Button>
-                    ))}
-                  </div>
-                </form>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Textarea
+                id="content"
+                placeholder={journalPlaceholder}
+                className="min-h-32"
+                value={currentContent}
+                onChange={(e) => setCurrentContent(e.target.value)}
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleSaveEntry}>{t('journal.saveButton')}</Button>
+          </CardFooter>
+        </Card>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <h3 className="text-xl font-bold font-headline">{t('journal.pastEntriesTitle')}</h3>
           {entries.length > 0 ? (
-            <ScrollArea className="space-y-4 max-h-[700px] overflow-y-auto pr-4">
+            <ScrollArea className="h-[600px] pr-4">
               {entries.map((entry) => (
                 <Card key={entry.id} className="mb-4">
                   <CardHeader>
@@ -404,14 +210,14 @@ export default function JournalPage() {
                     <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">{entry.content}</p>
+                    <p className="text-sm text-muted-foreground break-words">{entry.content}</p>
                   </CardContent>
                 </Card>
               ))}
             </ScrollArea>
           ) : (
-            <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
-                <p>{t('journal.noEntries')}</p>
+            <div className="flex h-full items-center justify-center rounded-lg border-2 border-dashed p-8 text-center text-muted-foreground">
+              <p>{t('journal.noEntries')}</p>
             </div>
           )}
         </div>

@@ -6,11 +6,8 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Dialog,
@@ -27,10 +24,11 @@ import careerData from '@/lib/careers.json';
 import type { Career, Ikigai, ActionPlan } from '@/lib/types';
 import { Bot, Loader2, Sparkles, GanttChartSquare, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized-action-plan';
 import { useLanguage } from '@/context/language-context';
 import { useRouter } from 'next/navigation';
+import CareerCard from '@/components/career-card';
 
 type MatchResult = {
   explanation: string;
@@ -111,7 +109,7 @@ export default function CareersPage() {
     }
   }, [isProfileComplete, userProfileString]);
 
-  const handleCheckFit = async (career: Career) => {
+  const handleCheckFit = useCallback(async (career: Career) => {
     if (!isProfileComplete) {
       toast({
         title: t('toasts.profileIncompleteTitle'),
@@ -135,13 +133,11 @@ export default function CareersPage() {
         careerCluster: career.cluster
       });
 
-      // Display dynamic score - NOT always 50%
       setMatchResult({ 
         ...result, 
         fitScore: result.overallScore 
       });
 
-      // Log for debugging
       console.log(`Career: ${career.title}, Score: ${result.overallScore}%, Theme Mismatch: ${result.themeMismatch}`);
 
     } catch (error: any) {
@@ -151,8 +147,7 @@ export default function CareersPage() {
         description: error.message || t('toasts.aiErrorCareerMatch'),
         variant: 'destructive',
       });
-      // Show fallback result instead of closing dialog
-      const fallbackScore = Math.floor(Math.random() * 40) + 30; // Random 30-70% instead of 50%
+      const fallbackScore = Math.floor(Math.random() * 40) + 30;
       setMatchResult({
         explanation: `Based on your profile in ${userThemes.join(', ') || 'various areas'}, ${career.title} shows ${fallbackScore}% alignment. This is an initial assessment - consider exploring this field further.`,
         skillMatch: fallbackScore,
@@ -165,9 +160,9 @@ export default function CareersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isProfileComplete, userProfileString, t, toast, userThemes, setMatchResult, setSelectedCareer, setIsLoading]);
 
-  const handleGeneratePlan = async (career: Career) => {
+  const handleGeneratePlan = useCallback(async (career: Career) => {
     if (!career) return;
     
     setSelectedCareer(null); // Close dialog
@@ -187,7 +182,6 @@ export default function CareersPage() {
         throw new Error('Failed to generate a valid action plan.');
       }
       
-      // Store the plan and navigate
       setActionPlan(result);
       
       toast({
@@ -206,9 +200,8 @@ export default function CareersPage() {
         variant: 'destructive',
       });
     }
-  };
+  }, [userProfileString, router, setActionPlan, t, toast]);
 
-  // Get confidence color
   const getConfidenceColor = (confidence: 'high' | 'medium' | 'low') => {
     switch (confidence) {
       case 'high': return 'text-green-600 dark:text-green-400';
@@ -269,45 +262,14 @@ export default function CareersPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {sortedCareers.map((career) => {
             const matchesTheme = userThemes.includes(career.cluster);
-            
             return (
-              <Card key={career.id} className={matchesTheme ? 'border-primary/30 bg-primary/5' : ''}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <CardTitle>{career.title}</CardTitle>
-                    {matchesTheme && (
-                      <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-full">
-                        Matches Your Profile
-                      </span>
-                    )}
-                  </div>
-                  <CardDescription>{career.description}</CardDescription>
-                  <div className="text-xs text-muted-foreground">
-                    Cluster: {career.cluster}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <h4 className="text-sm font-semibold mb-2">{t('careers.keySkills')}</h4>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground">
-                    {career.requiredSkills.slice(0, 3).map((skill) => (
-                      <li key={skill}>{skill}</li>
-                    ))}
-                    {career.requiredSkills.length > 3 && (
-                      <li className="text-primary">+{career.requiredSkills.length - 3} more</li>
-                    )}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    onClick={() => handleCheckFit(career)} 
-                    disabled={!hasMounted || !isProfileComplete}
-                    className="w-full"
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {t('careers.checkFit')}
-                  </Button>
-                </CardFooter>
-              </Card>
+              <CareerCard
+                key={career.id}
+                career={career}
+                matchesTheme={matchesTheme}
+                onCheckFit={handleCheckFit}
+                isProfileComplete={!!isProfileComplete}
+              />
             );
           })}
         </div>

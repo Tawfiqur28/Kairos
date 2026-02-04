@@ -1,13 +1,20 @@
 'use client';
 
 import { AppLogo } from '@/components/app-logo';
-import { IkigaiDiagram } from '@/components/ikigai-diagram';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Bot, PenSquare, Sparkles, Target } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/language-context';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const IkigaiDiagram = dynamic(() => import('@/components/ikigai-diagram').then(mod => mod.IkigaiDiagram), {
+  ssr: false,
+  loading: () => <Skeleton className="w-full h-auto aspect-square rounded-full" />
+});
+
 
 export default function Home() {
   const { t } = useLanguage();
