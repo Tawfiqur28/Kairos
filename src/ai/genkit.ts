@@ -1,6 +1,7 @@
 'use server';
 
 import { config } from 'dotenv';
+import careerData from '@/lib/careers.json';
 config();
 
 // Lazily import dashscope to improve initial load time.
@@ -155,7 +156,7 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
   return themes;
 };
 
-// ==================== ENHANCED CAREER MATCHING FOR SCIENCES ====================
+// ==================== ENHANCED CAREER MATCHING ====================
 type CareerMatchResult = {
   explanation: string;
   skillMatch: number;
@@ -171,46 +172,67 @@ export const generateCareerMatchExplanations = async (
   career: string, 
   careerDetails: string
 ): Promise<CareerMatchResult> => {
-  const userThemes = await extractCareerThemes(userProfile);
-  console.log('Science career matching - User themes:', userThemes, 'Career:', career);
-  
-  const themeMismatch = checkScienceThemeMismatch(userThemes, career);
-  
-  if (themeMismatch === 'strong') {
-    return {
-      explanation: `❌ **Major Theme Mismatch**: Your profile shows strong ${userThemes.join('/')} interests, but "${career}" is typically pursued by those with different passions. We recommend exploring ${userThemes.join(' or ')}-focused careers instead.`,
-      skillMatch: 15,
-      interestMatch: 10,
-      valueAlignment: 25,
-      overallScore: 18,
-      themeMismatch: true,
-      confidence: 'high'
-    };
-  }
-  
-  if (themeMismatch === 'moderate') {
-    const baseScore = 45;
-    return {
-      explanation: `⚠️ **Partial Theme Alignment**: Your ${userThemes.join('/')} interests have some overlap with ${career}, but there may be better matches. Consider if you're truly passionate about this field.`,
-      skillMatch: baseScore,
-      interestMatch: baseScore - 10,
-      valueAlignment: baseScore,
-      overallScore: baseScore - 5,
-      themeMismatch: true,
-      confidence: 'medium'
-    };
-  }
-  
-  let specializedPrompt = '';
-  if (career.includes('Physicist') || career.includes('Physics')) {
-    specializedPrompt = `**PHYSICS SPECIALIZATION**: Focus on mathematical aptitude, problem-solving skills, and interest in fundamental principles.`;
-  } else if (career.includes('Chemist') || career.includes('Chemical')) {
-    specializedPrompt = `**CHEMISTRY SPECIALIZATION**: Focus on lab skills, attention to detail, safety awareness, and interest in molecular interactions.`;
-  } else if (career.includes('Engineer')) {
-    specializedPrompt = `**ENGINEERING SPECIALIZATION**: Focus on practical application, design skills, and problem-solving.`;
-  }
-  
-  const prompt = `Analyze career fit for SCIENCE/TECH oriented user:
+  const careerInfo = careerData.careers.find(c => c.title === career);
+  const careerCluster = careerInfo?.cluster;
+  const scienceClusters = ['Tech', 'Science', 'Physics', 'Chemistry'];
+  const isScienceCareer = careerCluster ? scienceClusters.includes(careerCluster) : false;
+
+  const getFallback = (baseScore = 50, isScience = false) => {
+      const explanation = isScience 
+          ? `Based on your background, ${career} has approximately ${baseScore}% alignment. This is a fallback score.`
+          : `An AI analysis for "${career}" could not be completed. This is a fallback score.`;
+      return {
+          explanation,
+          skillMatch: baseScore,
+          interestMatch: baseScore,
+          valueAlignment: baseScore,
+          overallScore: baseScore,
+          themeMismatch: false,
+          confidence: 'low' as 'low' | 'medium' | 'high'
+      };
+  };
+
+  if (isScienceCareer) {
+    const userThemes = await extractCareerThemes(userProfile);
+    console.log('Science career matching - User themes:', userThemes, 'Career:', career);
+    
+    const themeMismatch = checkScienceThemeMismatch(userThemes, career);
+    
+    if (themeMismatch === 'strong') {
+      return {
+        explanation: `❌ **Major Theme Mismatch**: Your profile shows strong ${userThemes.join('/')} interests, but "${career}" is typically pursued by those with different passions. We recommend exploring ${userThemes.join(' or ')}-focused careers instead.`,
+        skillMatch: 15,
+        interestMatch: 10,
+        valueAlignment: 25,
+        overallScore: 18,
+        themeMismatch: true,
+        confidence: 'high'
+      };
+    }
+    
+    if (themeMismatch === 'moderate') {
+      const baseScore = 45;
+      return {
+        explanation: `⚠️ **Partial Theme Alignment**: Your ${userThemes.join('/')} interests have some overlap with ${career}, but there may be better matches. Consider if you're truly passionate about this field.`,
+        skillMatch: baseScore,
+        interestMatch: baseScore - 10,
+        valueAlignment: baseScore,
+        overallScore: baseScore - 5,
+        themeMismatch: true,
+        confidence: 'medium'
+      };
+    }
+    
+    let specializedPrompt = '';
+    if (career.includes('Physicist') || career.includes('Physics')) {
+      specializedPrompt = `**PHYSICS SPECIALIZATION**: Focus on mathematical aptitude, problem-solving skills, and interest in fundamental principles.`;
+    } else if (career.includes('Chemist') || career.includes('Chemical')) {
+      specializedPrompt = `**CHEMISTRY SPECIALIZATION**: Focus on lab skills, attention to detail, safety awareness, and interest in molecular interactions.`;
+    } else if (career.includes('Engineer')) {
+      specializedPrompt = `**ENGINEERING SPECIALIZATION**: Focus on practical application, design skills, and problem-solving.`;
+    }
+    
+    const prompt = `Analyze career fit for SCIENCE/TECH oriented user:
   
 USER PROFILE (Themes: [${userThemes.join(', ')}]): ${userProfile}
 
@@ -236,63 +258,108 @@ ${specializedPrompt}
 - Engineering careers require practical problem-solving
 - If user mentions "code" but career is lab-based, adjust scores accordingly
 
-Calculate: overallScore = (skillMatch × 0.5) + (interestMatch × 0.3) + (valueAlignment × 0.2)
+Calculate: overallScore = (skillMatch * 0.5) + (interestMatch * 0.3) + (valueAlignment * 0.2)
 
 Respond with JSON: {
   "explanation": "Detailed analysis considering scientific background...",
   "skillMatch": 85,
   "interestMatch": 90,
   "valueAlignment": 70,
-  "overallScore": 83
+  "overallScore": 83,
+  "themeMismatch": false,
+  "confidence": "high"
 }`;
 
-  const response = await callModelScopeAI(prompt, 'qwen-max');
-  
-  if (response.startsWith('ERROR:')) {
-    const baseScore = calculateScienceBaseScore(userThemes, career);
-    return {
-      explanation: `Based on your ${userThemes.join(', ')} background, ${career} has approximately ${baseScore}% alignment. Physics/Chemistry careers typically require strong academic foundation in those subjects.`,
-      skillMatch: baseScore,
-      interestMatch: baseScore,
-      valueAlignment: baseScore,
-      overallScore: baseScore,
-      themeMismatch: false,
-      confidence: 'medium'
-    };
-  }
-  
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      
-      if (!parsed.overallScore) {
-        parsed.overallScore = Math.round(
-          (parsed.skillMatch || 60) * 0.5 + 
-          (parsed.interestMatch || 60) * 0.3 + 
-          (parsed.valueAlignment || 60) * 0.2
-        );
-      }
-      
-      parsed.themeMismatch = false;
-      parsed.confidence = 'high';
-      return parsed;
+    const response = await callModelScopeAI(prompt, 'qwen-max');
+    
+    if (response.startsWith('ERROR:')) {
+        const baseScore = calculateScienceBaseScore(userThemes, career);
+        return getFallback(baseScore, true);
     }
-  } catch (e) {
-    console.warn('Science career match JSON parse failed:', e);
+    
+    try {
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (!parsed.overallScore) {
+                parsed.overallScore = Math.round(
+                    (parsed.skillMatch || 60) * 0.5 + 
+                    (parsed.interestMatch || 60) * 0.3 + 
+                    (parsed.valueAlignment || 60) * 0.2
+                );
+            }
+            return { ...parsed, confidence: parsed.confidence || 'high' };
+        }
+    } catch (e) {
+        console.warn('Science career match JSON parse failed:', e);
+    }
+
+    const baseScore = calculateScienceBaseScore(userThemes, career);
+    return getFallback(baseScore, true);
+
+  } else {
+    // Generic path for non-science careers
+    console.log('Generic career matching - Career:', career);
+
+    const prompt = `Analyze the career fit for a user.
+
+USER PROFILE: ${userProfile}
+
+CAREER: ${career}
+CAREER DETAILS: ${careerDetails}
+
+**IMPORTANT:** The user profile contains their "Current Education Level". You MUST tailor the "explanation" to their academic stage. Provide actionable, stage-specific advice.
+- High School: Recommend foundational skills, courses, and exploration activities.
+- Undergraduate: Recommend specific coursework, project ideas, and internship strategies.
+- Master's: Recommend areas of specialization, research topics, and networking opportunities.
+- PhD: Recommend strategies for dissertation, publication, and positioning for high-level roles.
+
+**SCORING CRITERIA:**
+1. skillMatch (0-100): Match between user's skills and interests and career requirements.
+2. interestMatch (0-100): Alignment between user's passions and this career's daily activities.
+3. valueAlignment (0-100): How well this career aligns with the user's stated values.
+
+Calculate: overallScore = (skillMatch * 0.4) + (interestMatch * 0.4) + (valueAlignment * 0.2)
+
+Respond with a single valid JSON object with NO other text, comments, or markdown.
+
+JSON OUTPUT STRUCTURE: {
+  "explanation": "Detailed, personalized analysis tailored to the user's education level...",
+  "skillMatch": 80,
+  "interestMatch": 85,
+  "valueAlignment": 75,
+  "overallScore": 81,
+  "themeMismatch": false,
+  "confidence": "high"
+}`;
+
+    const response = await callModelScopeAI(prompt, 'qwen-max');
+
+    if (response.startsWith('ERROR:')) {
+        return getFallback(50, false);
+    }
+    
+    try {
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (!parsed.overallScore) {
+                parsed.overallScore = Math.round(
+                    (parsed.skillMatch || 60) * 0.4 + 
+                    (parsed.interestMatch || 60) * 0.4 + 
+                    (parsed.valueAlignment || 60) * 0.2
+                );
+            }
+            return { ...parsed, confidence: parsed.confidence || 'high' };
+        }
+    } catch (e) {
+        console.warn('Generic career match JSON parse failed:', e);
+    }
+    
+    return getFallback(50, false);
   }
-  
-  const baseScore = calculateScienceBaseScore(userThemes, career);
-  return {
-    explanation: `Science career analysis: ${career} requires ${getScienceRequirements(career)}. Your ${userThemes.join(', ')} background provides ${baseScore}% foundation.`,
-    skillMatch: baseScore,
-    interestMatch: baseScore,
-    valueAlignment: baseScore,
-    overallScore: baseScore,
-    themeMismatch: false,
-    confidence: 'low'
-  };
 };
+
 
 // Helper: Check science theme mismatches
 const checkScienceThemeMismatch = (userThemes: string[], career: string): 'strong' | 'moderate' | 'none' => {
