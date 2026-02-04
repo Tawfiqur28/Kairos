@@ -71,6 +71,8 @@ export default function JournalPage() {
 
   useEffect(() => {
     setHasMounted(true);
+    // Set placeholder initially and then update when ikigai profile is loaded
+    setJournalPlaceholder(t('journal.thoughtsPlaceholder'));
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       setIsSpeechRecognitionSupported(true);
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -195,7 +197,14 @@ export default function JournalPage() {
       });
 
       if (!response.ok || !response.body) {
-        throw new Error(`API error: ${response.statusText}`);
+        let errorDetails = response.statusText;
+        try {
+          const errorJson = await response.json();
+          errorDetails = errorJson.error || JSON.stringify(errorJson);
+        } catch (e) {
+          // Ignore if response is not JSON
+        }
+        throw new Error(`API error (${response.status}): ${errorDetails}`);
       }
 
       const reader = response.body.getReader();
@@ -235,7 +244,7 @@ export default function JournalPage() {
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error('Full error details:', error);
       const errorMessage = error instanceof Error ? error.message : t('toasts.aiErrorJournal');
       toast({
         title: t('toasts.aiErrorTitle'),

@@ -1,8 +1,7 @@
-import type { EducationLevel } from '@/lib/types';
-import { z } from 'zod';
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 
-// Helper function to provide context based on education level
+// Helper to provide context based on education level
 const getEducationLevelChatContext = (educationLevel?: string): string => {
   const contexts = {
     highSchool: `HIGH SCHOOL focus: Foundational concepts, exam prep, college applications, study skills, time management.`,
@@ -43,6 +42,25 @@ const ChatRequestSchema = z.object({
   }).optional(),
 });
 
+
+// Lazily import dashscope to improve initial load time.
+let dashscopeGeneration: any;
+async function getDashscopeGeneration() {
+  if (!dashscopeGeneration) {
+    try {
+      // Use destructuring for a more robust import of the Generation class
+      const { Generation } = await import('dashscope');
+      dashscopeGeneration = Generation;
+    } catch (e) {
+      console.error('Failed to import or find Generation in dashscope', e);
+      return null; // Return null if import fails
+    }
+  }
+  return dashscopeGeneration;
+}
+
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -79,27 +97,56 @@ ${searchResultsContext}
       ...messages
     ];
 
-    // Get the base URL for the current request
-    const url = new URL(request.url);
-    const baseUrl = `${url.protocol}//${url.host}`;
-    
-    // Call the new ModelScope API route
-    const response = await fetch(`${baseUrl}/api/chat/modelscope`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ messages: modelMessages, model: 'qwen-max' }),
-    });
+    const API_KEY = process.env.MODELSCOPE_API_KEY;
 
-    if (!response.ok) {
-        const errorBody = await response.json();
-        throw new Error(errorBody.error || 'Failed to get response from model API');
+    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+      return new Response(
+        'ERROR: ModelScope API key not configured. Please add it to your .env file.',
+        { status: 500 }
+      );
     }
     
-    // Stream the response back to the client
-    return new Response(response.body, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    const Generation = await getDashscopeGeneration();
+    if (!Generation) {
+      return new Response('ERROR: Dashscope module could not be loaded.', { status: 500 });
+    }
+
+    const result = await Generation.call({
+      model: 'qwen-max',
+      messages: modelMessages,
+      apiKey: API_KEY,
+      stream: true,
+    });
+
+    const encoder = new TextEncoder();
+    
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          let fullContent = '';
+          for await (const chunk of result) {
+            const newContent = chunk.output?.choices?.[0]?.message?.content || '';
+            if (newContent && newContent !== fullContent) {
+              const diff = newContent.substring(fullContent.length);
+              if (diff) {
+                controller.enqueue(encoder.encode(diff));
+              }
+              fullContent = newContent;
+            }
+          }
+          controller.close();
+        } catch (error) {
+          console.error('Stream error:', error);
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+      },
     });
 
   } catch (error) {
