@@ -1,3 +1,4 @@
+
 'use server';
 
 import { config } from 'dotenv';
@@ -115,7 +116,6 @@ const CAREER_DATABASE: CareerDatabase = {
 
 // ==================== FAST THEME EXTRACTION (NO AI) ====================
 export const extractCareerThemes = async (userProfile: string): Promise<string[]> => {
-  // Use fast, local keyword detection instead of a slow AI call.
   return Promise.resolve(detectScienceThemesFromKeywords(userProfile));
 };
 
@@ -133,21 +133,14 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
     Arts: ['art', 'design', 'creative', 'drawing', 'painting', 'visual', 'graphic', 'ui/ux']
   };
   
-  const themeCounts: Record<string, number> = {};
-  
   Object.entries(keywordMap).forEach(([theme, keywords]) => {
     const count = keywords.filter(keyword => lowerProfile.includes(keyword)).length;
-    if (count > 0) {
-      themeCounts[theme] = count;
-    }
-  });
-  
-  Object.entries(themeCounts).forEach(([theme, count]) => {
     if (count >= 2) { // Require at least 2 keyword matches
       themes.push(theme);
     }
   });
   
+  // Filter out incompatible themes for science users
   if (themes.includes('Physics') || themes.includes('Chemistry')) {
     const filtered = themes.filter(theme => !['Music', 'Arts'].includes(theme));
     return filtered.length > 0 ? filtered : themes;
@@ -156,7 +149,7 @@ const detectScienceThemesFromKeywords = (profile: string): string[] => {
   return themes;
 };
 
-// ==================== ENHANCED CAREER MATCHING ====================
+// ==================== IMPROVED CAREER MATCHING WITH DYNAMIC SCORING ====================
 type CareerMatchResult = {
   explanation: string;
   skillMatch: number;
@@ -172,68 +165,77 @@ export const generateCareerMatchExplanations = async (
   career: string, 
   careerDetails: string
 ): Promise<CareerMatchResult> => {
+  // FIRST: Calculate a base score based on keyword matching (before AI call)
+  const userThemes = await extractCareerThemes(userProfile);
+  const baseScore = calculateInitialScore(userThemes, career);
+  
+  // Don't always show 50% - use calculated base score
+  const getFallback = (score: number, isScience = false) => {
+    const baseExplanation = `Based on your background in ${userThemes.join(', ') || 'various fields'}, ${career} has approximately ${score}% alignment.`;
+    const scienceExplanation = `${baseExplanation} This is an initial assessment based on your scientific interests.`;
+    const genericExplanation = `${baseExplanation} Consider exploring this field further to see if it matches your goals.`;
+    
+    return {
+      explanation: isScience ? scienceExplanation : genericExplanation,
+      skillMatch: score,
+      interestMatch: score,
+      valueAlignment: score,
+      overallScore: score,
+      themeMismatch: false,
+      confidence: 'medium'
+    };
+  };
+
+  // Check for career cluster and theme compatibility
   const careerInfo = careerData.careers.find(c => c.title === career);
   const careerCluster = careerInfo?.cluster;
   const scienceClusters = ['Tech', 'Science', 'Physics', 'Chemistry'];
   const isScienceCareer = careerCluster ? scienceClusters.includes(careerCluster) : false;
 
-  const getFallback = (baseScore = 50, isScience = false) => {
-      const explanation = isScience 
-          ? `Based on your background, ${career} has approximately ${baseScore}% alignment. This is a fallback score.`
-          : `An AI analysis for "${career}" could not be completed. This is a fallback score.`;
-      return {
-          explanation,
-          skillMatch: baseScore,
-          interestMatch: baseScore,
-          valueAlignment: baseScore,
-          overallScore: baseScore,
-          themeMismatch: false,
-          confidence: 'low' as 'low' | 'medium' | 'high'
-      };
-  };
-
-  if (isScienceCareer) {
-    const userThemes = await extractCareerThemes(userProfile);
-    console.log('Science career matching - User themes:', userThemes, 'Career:', career);
-    
-    const themeMismatch = checkScienceThemeMismatch(userThemes, career);
-    
-    if (themeMismatch === 'strong') {
-      return {
-        explanation: `❌ **Major Theme Mismatch**: Your profile shows strong ${userThemes.join('/')} interests, but "${career}" is typically pursued by those with different passions. We recommend exploring ${userThemes.join(' or ')}-focused careers instead.`,
-        skillMatch: 15,
-        interestMatch: 10,
-        valueAlignment: 25,
-        overallScore: 18,
-        themeMismatch: true,
-        confidence: 'high'
-      };
-    }
-    
-    if (themeMismatch === 'moderate') {
-      const baseScore = 45;
-      return {
-        explanation: `⚠️ **Partial Theme Alignment**: Your ${userThemes.join('/')} interests have some overlap with ${career}, but there may be better matches. Consider if you're truly passionate about this field.`,
-        skillMatch: baseScore,
-        interestMatch: baseScore - 10,
-        valueAlignment: baseScore,
-        overallScore: baseScore - 5,
-        themeMismatch: true,
-        confidence: 'medium'
-      };
-    }
-    
-    let specializedPrompt = '';
-    if (career.includes('Physicist') || career.includes('Physics')) {
-      specializedPrompt = `**PHYSICS SPECIALIZATION**: Focus on mathematical aptitude, problem-solving skills, and interest in fundamental principles.`;
-    } else if (career.includes('Chemist') || career.includes('Chemical')) {
-      specializedPrompt = `**CHEMISTRY SPECIALIZATION**: Focus on lab skills, attention to detail, safety awareness, and interest in molecular interactions.`;
-    } else if (career.includes('Engineer')) {
-      specializedPrompt = `**ENGINEERING SPECIALIZATION**: Focus on practical application, design skills, and problem-solving.`;
-    }
-    
-    const prompt = `Analyze career fit for SCIENCE/TECH oriented user:
+  // Check for theme mismatches early
+  const themeMismatch = checkScienceThemeMismatch(userThemes, career);
   
+  if (themeMismatch === 'strong') {
+    return {
+      explanation: `❌ **Major Theme Mismatch**: Your profile shows strong ${userThemes.join('/')} interests, but "${career}" requires different skills. Consider exploring ${userThemes.join(' or ')}-focused careers for better alignment.`,
+      skillMatch: 15,
+      interestMatch: 10,
+      valueAlignment: 25,
+      overallScore: 18,
+      themeMismatch: true,
+      confidence: 'high'
+    };
+  }
+  
+  if (themeMismatch === 'moderate') {
+    const adjustedScore = Math.max(30, baseScore - 20);
+    return {
+      explanation: `⚠️ **Partial Theme Alignment**: Your ${userThemes.join('/')} background has some overlap with ${career}, but there may be better matches. Consider developing additional skills for this field.`,
+      skillMatch: adjustedScore,
+      interestMatch: adjustedScore - 10,
+      valueAlignment: adjustedScore,
+      overallScore: adjustedScore - 5,
+      themeMismatch: true,
+      confidence: 'medium'
+    };
+  }
+
+  // Try AI analysis for better personalized scoring
+  try {
+    let prompt = '';
+    
+    if (isScienceCareer) {
+      let specializedPrompt = '';
+      if (career.includes('Physicist') || career.includes('Physics')) {
+        specializedPrompt = `**PHYSICS SPECIALIZATION**: Focus on mathematical aptitude, problem-solving skills, and interest in fundamental principles.`;
+      } else if (career.includes('Chemist') || career.includes('Chemical')) {
+        specializedPrompt = `**CHEMISTRY SPECIALIZATION**: Focus on lab skills, attention to detail, safety awareness, and interest in molecular interactions.`;
+      } else if (career.includes('Engineer')) {
+        specializedPrompt = `**ENGINEERING SPECIALIZATION**: Focus on practical application, design skills, and problem-solving.`;
+      }
+      
+      prompt = `Analyze career fit for SCIENCE/TECH oriented user:
+
 USER PROFILE (Themes: [${userThemes.join(', ')}]): ${userProfile}
 
 CAREER: ${career}
@@ -241,27 +243,19 @@ CAREER DETAILS: ${careerDetails}
 
 ${specializedPrompt}
 
-**IMPORTANT:** The user profile contains their "Current Education Level". You MUST tailor the "explanation" to their academic stage. Provide actionable, stage-specific advice.
-- High School: Recommend foundational skills, courses (like AP), and exploration activities.
-- Undergraduate: Recommend specific coursework, project ideas, and internship strategies.
-- Master's: Recommend areas of specialization, research topics, and networking opportunities.
-- PhD: Recommend strategies for dissertation, publication, and positioning for high-level roles.
+**IMPORTANT:** Consider the user's education level and provide stage-specific advice.
 
-**SCIENCE-SPECIFIC SCORING CRITERIA:**
-1. skillMatch (0-100): Match between user's technical/math/lab skills and career requirements
-2. interestMatch (0-100): Alignment between user's scientific interests and this field's research areas
-3. valueAlignment (0-100): How well this career serves user's desire for discovery, innovation, or impact
+Calculate scores based on:
+1. skillMatch (0-100): Technical/math/lab skills alignment
+2. interestMatch (0-100): Scientific interests alignment  
+3. valueAlignment (0-100): Desire for discovery/innovation/impact
 
-**KEY CONSIDERATIONS:**
-- Physics careers require strong math and abstract thinking
-- Chemistry careers require lab safety awareness and precision
-- Engineering careers require practical problem-solving
-- If user mentions "code" but career is lab-based, adjust scores accordingly
+**BASE SCORE TO CONSIDER:** ${baseScore}% (based on theme matching)
 
 Calculate: overallScore = (skillMatch * 0.5) + (interestMatch * 0.3) + (valueAlignment * 0.2)
 
 Respond with JSON: {
-  "explanation": "Detailed analysis considering scientific background...",
+  "explanation": "Detailed analysis...",
   "skillMatch": 85,
   "interestMatch": 90,
   "valueAlignment": 70,
@@ -269,62 +263,22 @@ Respond with JSON: {
   "themeMismatch": false,
   "confidence": "high"
 }`;
+    } else {
+      prompt = `Analyze the career fit for a user.
 
-    const response = await callModelScopeAI(prompt, 'qwen-max');
-    
-    if (response.startsWith('ERROR:')) {
-        const baseScore = calculateScienceBaseScore(userThemes, career);
-        return getFallback(baseScore, true);
-    }
-    
-    try {
-        const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            if (!parsed.overallScore) {
-                parsed.overallScore = Math.round(
-                    (parsed.skillMatch || 60) * 0.5 + 
-                    (parsed.interestMatch || 60) * 0.3 + 
-                    (parsed.valueAlignment || 60) * 0.2
-                );
-            }
-            return { ...parsed, confidence: parsed.confidence || 'high' };
-        }
-    } catch (e) {
-        console.warn('Science career match JSON parse failed:', e);
-    }
-
-    const baseScore = calculateScienceBaseScore(userThemes, career);
-    return getFallback(baseScore, true);
-
-  } else {
-    // Generic path for non-science careers
-    console.log('Generic career matching - Career:', career);
-
-    const prompt = `Analyze the career fit for a user.
-
-USER PROFILE: ${userProfile}
+USER PROFILE (Themes: [${userThemes.join(', ')}]): ${userProfile}
 
 CAREER: ${career}
 CAREER DETAILS: ${careerDetails}
 
-**IMPORTANT:** The user profile contains their "Current Education Level". You MUST tailor the "explanation" to their academic stage. Provide actionable, stage-specific advice.
-- High School: Recommend foundational skills, courses, and exploration activities.
-- Undergraduate: Recommend specific coursework, project ideas, and internship strategies.
-- Master's: Recommend areas of specialization, research topics, and networking opportunities.
-- PhD: Recommend strategies for dissertation, publication, and positioning for high-level roles.
+**IMPORTANT:** Provide education-level specific advice.
 
-**SCORING CRITERIA:**
-1. skillMatch (0-100): Match between user's skills and interests and career requirements.
-2. interestMatch (0-100): Alignment between user's passions and this career's daily activities.
-3. valueAlignment (0-100): How well this career aligns with the user's stated values.
+**BASE SCORE TO CONSIDER:** ${baseScore}% (based on initial theme matching)
 
 Calculate: overallScore = (skillMatch * 0.4) + (interestMatch * 0.4) + (valueAlignment * 0.2)
 
-Respond with a single valid JSON object with NO other text, comments, or markdown.
-
-JSON OUTPUT STRUCTURE: {
-  "explanation": "Detailed, personalized analysis tailored to the user's education level...",
+Respond with JSON: {
+  "explanation": "Detailed analysis...",
   "skillMatch": 80,
   "interestMatch": 85,
   "valueAlignment": 75,
@@ -332,34 +286,90 @@ JSON OUTPUT STRUCTURE: {
   "themeMismatch": false,
   "confidence": "high"
 }`;
+    }
 
     const response = await callModelScopeAI(prompt, 'qwen-max');
-
+    
     if (response.startsWith('ERROR:')) {
-        return getFallback(50, false);
+      console.warn('AI analysis failed, using calculated base score:', baseScore);
+      return getFallback(baseScore, isScienceCareer);
     }
     
     try {
-        const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            if (!parsed.overallScore) {
-                parsed.overallScore = Math.round(
-                    (parsed.skillMatch || 60) * 0.4 + 
-                    (parsed.interestMatch || 60) * 0.4 + 
-                    (parsed.valueAlignment || 60) * 0.2
-                );
-            }
-            return { ...parsed, confidence: parsed.confidence || 'high' };
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        
+        // Ensure scores are calculated
+        if (!parsed.overallScore) {
+          const weights = isScienceCareer ? [0.5, 0.3, 0.2] : [0.4, 0.4, 0.2];
+          parsed.overallScore = Math.round(
+            (parsed.skillMatch || baseScore) * weights[0] + 
+            (parsed.interestMatch || baseScore) * weights[1] + 
+            (parsed.valueAlignment || baseScore) * weights[2]
+          );
         }
+        
+        // Ensure scores are within reasonable range
+        parsed.overallScore = Math.max(10, Math.min(100, parsed.overallScore));
+        parsed.skillMatch = Math.max(10, Math.min(100, parsed.skillMatch || baseScore));
+        parsed.interestMatch = Math.max(10, Math.min(100, parsed.interestMatch || baseScore));
+        parsed.valueAlignment = Math.max(10, Math.min(100, parsed.valueAlignment || baseScore));
+        
+        return { 
+          ...parsed, 
+          confidence: parsed.confidence || (parsed.overallScore > 70 ? 'high' : parsed.overallScore > 50 ? 'medium' : 'low')
+        };
+      }
     } catch (e) {
-        console.warn('Generic career match JSON parse failed:', e);
+      console.warn('JSON parse failed:', e);
     }
-    
-    return getFallback(50, false);
+  } catch (error) {
+    console.error('Error in career matching:', error);
   }
+  
+  // Fallback with calculated score, not fixed 50%
+  return getFallback(baseScore, isScienceCareer);
 };
 
+// Helper: Calculate initial score based on theme matching
+const calculateInitialScore = (userThemes: string[], career: string): number => {
+  let score = 50; // Start at 50, not fixed 50
+  
+  // Find career in database
+  for (const [theme, careers] of Object.entries(CAREER_DATABASE)) {
+    const foundCareer = careers.find(c => c.name === career);
+    if (foundCareer) {
+      // Bonus for matching required themes
+      foundCareer.requiredThemes.forEach(reqTheme => {
+        if (userThemes.includes(reqTheme)) {
+          score += 20; // +20% for each matching required theme
+        }
+      });
+      
+      // Penalty for incompatible themes
+      foundCareer.incompatibleThemes.forEach(incompTheme => {
+        if (userThemes.includes(incompTheme)) {
+          score -= 25; // -25% for each incompatible theme
+        }
+      });
+      
+      break;
+    }
+  }
+  
+  // Additional keyword-based scoring
+  const careerLower = career.toLowerCase();
+  
+  if (careerLower.includes('physics') && userThemes.includes('Physics')) score += 15;
+  if (careerLower.includes('chem') && userThemes.includes('Chemistry')) score += 15;
+  if (careerLower.includes('engineer') && userThemes.includes('Tech')) score += 10;
+  if (careerLower.includes('data') && userThemes.includes('Tech')) score += 10;
+  if (careerLower.includes('research') && userThemes.includes('Science')) score += 10;
+  
+  // Keep score within bounds
+  return Math.max(10, Math.min(95, score));
+};
 
 // Helper: Check science theme mismatches
 const checkScienceThemeMismatch = (userThemes: string[], career: string): 'strong' | 'moderate' | 'none' => {
@@ -383,29 +393,6 @@ const checkScienceThemeMismatch = (userThemes: string[], career: string): 'stron
   return 'none';
 };
 
-// Helper: Calculate base score for science careers
-const calculateScienceBaseScore = (userThemes: string[], career: string): number => {
-  let baseScore = 50;
-  
-  if (career.includes('Physics') && userThemes.includes('Physics')) baseScore += 25;
-  if (career.includes('Chemistry') && userThemes.includes('Chemistry')) baseScore += 25;
-  if (career.includes('Engineer') && userThemes.includes('Tech')) baseScore += 20;
-  
-  if (career.includes('Physics') && userThemes.includes('Music')) baseScore -= 30;
-  if (career.includes('Chemistry') && userThemes.includes('Arts')) baseScore -= 30;
-  
-  return Math.max(10, Math.min(95, baseScore));
-};
-
-// Helper: Get science requirements for a career
-const getScienceRequirements = (career: string): string => {
-  if (career.includes('Physics')) return 'strong mathematics and analytical thinking';
-  if (career.includes('Chemistry')) return 'lab skills and attention to detail';
-  if (career.includes('Engineer')) return 'problem-solving and technical skills';
-  if (career.includes('Scientist')) return 'research methodology and critical thinking';
-  return 'technical or analytical skills';
-};
-
 // ==================== STRUCTURED ACTION PLAN ====================
 export const generatePersonalizedActionPlan = async (
   careerGoal: string,
@@ -416,49 +403,53 @@ export const generatePersonalizedActionPlan = async (
   timeline: string;
   phases: { title: string; duration: string; tasks: { id: string; text: string; completed: boolean }[] }[];
 }> => {
-  const prompt = `You are a Career Strategist AI. Create a detailed, actionable plan for a user aiming for the career of '${careerGoal}'.
-The user's profile, including their education level, is: "${userDetails}".
+  // Extract education level from user details
+  const educationLevel = extractEducationLevel(userDetails);
+  
+  const prompt = `Create a detailed, actionable 3-year plan for a user aiming to become a '${careerGoal}'.
+  
+User Profile: "${userDetails}"
+Education Level: "${educationLevel}"
 
-The plan should be broken down into 3 distinct phases, from foundational steps to advanced specialization.
+**IMPORTANT:** Tailor the plan specifically to their education level:
+- High School: Focus on foundational courses, extracurriculars, and college prep
+- Undergraduate: Focus on major courses, internships, and skill-building
+- Graduate/Master's: Focus on specialization, research, and networking
+- Professional: Focus on career transition, certification, and portfolio building
 
-For each phase, provide:
-- A clear, concise title (e.g., 'Phase 1: Foundation Building').
-- An estimated duration (e.g., 'Year 1').
-- A list of 3-4 concrete, actionable tasks. For each task, provide a unique ID and its text.
+Create 3 phases with concrete, actionable tasks.
 
-Respond with ONLY a single, valid JSON object with NO other text, comments, or markdown.
-
-JSON OUTPUT STRUCTURE:
+Respond with ONLY valid JSON:
 {
   "careerTitle": "${careerGoal}",
-  "educationLevel": "The user's education level from their profile",
-  "timeline": "3-Year Journey to ${careerGoal}",
+  "educationLevel": "${educationLevel}",
+  "timeline": "3-Year Plan to ${careerGoal}",
   "phases": [
     {
-      "title": "Phase 1: Foundation Building",
-      "duration": "Year 1",
+      "title": "Phase 1: Foundation",
+      "duration": "Months 1-12",
       "tasks": [
-        { "id": "task-1-1", "text": "First concrete task for this phase", "completed": false },
-        { "id": "task-1-2", "text": "Second concrete task for this phase", "completed": false },
-        { "id": "task-1-3", "text": "Third concrete task for this phase", "completed": false }
+        { "id": "task-1-1", "text": "Concrete task 1", "completed": false },
+        { "id": "task-1-2", "text": "Concrete task 2", "completed": false },
+        { "id": "task-1-3", "text": "Concrete task 3", "completed": false }
       ]
     },
     {
-      "title": "Phase 2: Skill Application",
+      "title": "Phase 2: Skill Development",
       "duration": "Year 2",
       "tasks": [
-        { "id": "task-2-1", "text": "First concrete task for this phase", "completed": false },
-        { "id": "task-2-2", "text": "Second concrete task for this phase", "completed": false },
-        { "id": "task-2-3", "text": "Third concrete task for this phase", "completed": false }
+        { "id": "task-2-1", "text": "Concrete task 1", "completed": false },
+        { "id": "task-2-2", "text": "Concrete task 2", "completed": false },
+        { "id": "task-2-3", "text": "Concrete task 3", "completed": false }
       ]
     },
     {
-      "title": "Phase 3: Specialization & Networking",
+      "title": "Phase 3: Specialization & Entry",
       "duration": "Year 3",
       "tasks": [
-        { "id": "task-3-1", "text": "First concrete task for this phase", "completed": false },
-        { "id": "task-3-2", "text": "Second concrete task for this phase", "completed": false },
-        { "id": "task-3-3", "text": "Third concrete task for this phase", "completed": false }
+        { "id": "task-3-1", "text": "Concrete task 1", "completed": false },
+        { "id": "task-3-2", "text": "Concrete task 2", "completed": false },
+        { "id": "task-3-3", "text": "Concrete task 3", "completed": false }
       ]
     }
   ]
@@ -466,31 +457,44 @@ JSON OUTPUT STRUCTURE:
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
 
+  // Fallback plan
   const fallback = {
     careerTitle: careerGoal,
-    educationLevel: 'N/A',
-    timeline: `3-Year Journey to ${careerGoal}`,
+    educationLevel: educationLevel,
+    timeline: `3-Year Plan to ${careerGoal}`,
     phases: [
       {
-        title: 'Phase 1: Getting Started',
-        duration: 'Year 1',
-        tasks: [{ id: 'fb-1', text: `Research the basics of the ${careerGoal} field.`, completed: false }],
+        title: 'Phase 1: Foundation Building',
+        duration: 'Months 1-12',
+        tasks: [
+          { id: 'fb-1-1', text: `Research ${careerGoal} career requirements and salary expectations`, completed: false },
+          { id: 'fb-1-2', text: `Complete an introductory online course in the field`, completed: false },
+          { id: 'fb-1-3', text: `Connect with 2-3 professionals in the industry on LinkedIn`, completed: false }
+        ]
       },
       {
-        title: 'Phase 2: Building Skills',
+        title: 'Phase 2: Skill Development',
         duration: 'Year 2',
-        tasks: [{ id: 'fb-2', text: 'Take an introductory online course.', completed: false }],
+        tasks: [
+          { id: 'fb-2-1', text: `Build a portfolio project demonstrating relevant skills`, completed: false },
+          { id: 'fb-2-2', text: `Complete an intermediate certification or course`, completed: false },
+          { id: 'fb-2-3', text: `Attend at least one industry conference or webinar`, completed: false }
+        ]
       },
       {
-        title: 'Phase 3: Gaining Experience',
+        title: 'Phase 3: Career Entry',
         duration: 'Year 3',
-        tasks: [{ id: 'fb-3', text: 'Work on a personal project.', completed: false }],
-      },
-    ],
+        tasks: [
+          { id: 'fb-3-1', text: `Apply for internships or entry-level positions`, completed: false },
+          { id: 'fb-3-2', text: `Prepare and practice for technical interviews`, completed: false },
+          { id: 'fb-3-3', text: `Finalize your professional portfolio and LinkedIn profile`, completed: false }
+        ]
+      }
+    ]
   };
 
   if (response.startsWith('ERROR:')) {
-    console.error("ModelScope API Error in Action Plan:", response);
+    console.error("API Error:", response);
     return fallback;
   }
 
@@ -498,68 +502,104 @@ JSON OUTPUT STRUCTURE:
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
-      if (parsed.phases && parsed.phases.length === 3) {
+      if (parsed.phases && parsed.phases.length >= 3) {
         return parsed;
       }
     }
-    console.warn('Action Plan generation did not return valid JSON:', response);
     return fallback;
   } catch (e) {
-    console.error('Failed to parse Action Plan JSON:', e);
+    console.error('JSON parse failed:', e);
     return fallback;
   }
 };
 
+// Helper: Extract education level from user profile
+const extractEducationLevel = (userDetails: string): string => {
+  const details = userDetails.toLowerCase();
+  if (details.includes('high school') || details.includes('highschool')) return 'High School';
+  if (details.includes('undergraduate') || details.includes('bachelor') || details.includes('college')) return 'Undergraduate';
+  if (details.includes('master') || details.includes('graduate')) return 'Master\'s';
+  if (details.includes('phd') || details.includes('doctorate')) return 'PhD';
+  if (details.includes('professional') || details.includes('working')) return 'Professional';
+  return 'Not Specified';
+};
 
+// ==================== JOURNAL PROCESSING ====================
 export const processJournalEntriesForCareerSuggestions = async (
   journalEntries: string,
   feelings: string
 ): Promise<{ careerSuggestions: string, analysis: string }> => {
-  const prompt = `Analyze the user's journal entries and feelings to provide career suggestions and a brief analysis.
+  const prompt = `Analyze journal entries and feelings for career suggestions.
 
-  JOURNAL ENTRIES:
-  "${journalEntries}"
-  
-  FEELINGS SUMMARY:
-  "${feelings}"
-  
-  **INSTRUCTIONS:**
-  - Identify recurring themes, interests, and pain points in the journal entries.
-  - Connect these themes to potential career fields or specific jobs.
-  - Provide a brief "analysis" of the user's mindset based on their writing.
-  - List 3-5 "careerSuggestions" that seem like a good fit.
-  - Format the output as a JSON object with two keys: "analysis" and "careerSuggestions".
-  
-  EXAMPLE RESPONSE:
-  {
-    "analysis": "You seem to feel most fulfilled when working on creative projects that have a tangible outcome. You often express frustration with repetitive tasks.",
-    "careerSuggestions": "1. UX/UI Designer\\n2. Content Creator / Youtuber\\n3. Project Manager in a creative agency"
-  }`;
+JOURNAL: "${journalEntries}"
+FEELINGS: "${feelings}"
+
+Identify themes and suggest 3-5 careers.
+
+Respond with JSON: {
+  "analysis": "Brief analysis...",
+  "careerSuggestions": "1. Career 1\\n2. Career 2\\n3. Career 3"
+}`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
 
   if (response.startsWith('ERROR:')) {
-      return {
-          analysis: 'Could not analyze your journal at this time due to an API error.',
-          careerSuggestions: 'Please try again later.'
-      };
+    return {
+      analysis: 'Unable to analyze journal entries at this time.',
+      careerSuggestions: 'Try again later or provide more details.'
+    };
   }
 
   try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
-      }
-      // Fallback if no JSON is found
-      return {
-          analysis: 'Analysis could not be parsed.',
-          careerSuggestions: response
-      };
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    return {
+      analysis: 'Analysis completed.',
+      careerSuggestions: response
+    };
   } catch (e) {
-      console.warn('Journal processing JSON parse failed:', e);
-      return {
-          analysis: 'There was an issue parsing the AI response.',
-          careerSuggestions: 'No suggestions could be generated at this time.'
-      };
+    console.warn('Journal parse failed:', e);
+    return {
+      analysis: 'There was an issue processing your journal.',
+      careerSuggestions: 'No specific suggestions could be generated.'
+    };
   }
+};
+
+// ==================== NEW: GET ALL CAREERS WITH SCORES ====================
+export const getAllCareerScores = async (
+  userProfile: string,
+  limit: number = 10
+): Promise<Array<{career: string, score: number, explanation: string}>> => {
+  // Get all unique careers from your database
+  const allCareers: string[] = [];
+  Object.values(CAREER_DATABASE).forEach(careerList => {
+    careerList.forEach(career => {
+      if (!allCareers.includes(career.name)) {
+        allCareers.push(career.name);
+      }
+    });
+  });
+  
+  // Calculate scores for each career
+  const scoredCareers = await Promise.all(
+    allCareers.slice(0, limit).map(async (career) => {
+      const result = await generateCareerMatchExplanations(
+        userProfile, 
+        career, 
+        `Career in ${career} field`
+      );
+      
+      return {
+        career,
+        score: result.overallScore,
+        explanation: result.explanation
+      };
+    })
+  );
+  
+  // Sort by score (highest first)
+  return scoredCareers.sort((a, b) => b.score - a.score);
 };

@@ -3,18 +3,24 @@
 import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { ActionPlan } from '@/lib/types';
 import { useLanguage } from '@/context/language-context';
-import { Calendar, GraduationCap } from 'lucide-react';
+import { Calendar, GraduationCap, Target, Clock, Award, TrendingUp, AlertCircle, Download, Share2, Printer, RefreshCw, Home, Briefcase } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized-action-plan';
 
 export default function PlanPage() {
   const [plan, setPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
+  const [ikigai, setIkigai] = useLocalStorage('ikigai-profile', {});
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   const handleTaskToggle = (phaseIndex: number, taskId: string) => {
     if (!plan) return;
@@ -24,11 +30,26 @@ export default function PlanPage() {
     if (task) {
       task.completed = !task.completed;
       setPlan(newPlan);
+      
+      // Show toast for task completion
+      if (task.completed) {
+        toast({
+          title: 'Task Completed! 🎉',
+          description: `Great job completing: "${task.text}"`,
+          variant: 'default',
+        });
+      }
     }
   };
 
-  const { overallProgress, phaseProgress, totalTasks, completedTasks } = useMemo(() => {
-    if (!plan) return { overallProgress: 0, phaseProgress: [], totalTasks: 0, completedTasks: 0 };
+  const { overallProgress, phaseProgress, totalTasks, completedTasks, daysRemaining } = useMemo(() => {
+    if (!plan) return { 
+      overallProgress: 0, 
+      phaseProgress: [], 
+      totalTasks: 0, 
+      completedTasks: 0,
+      daysRemaining: 0
+    };
 
     const phaseProgress = plan.phases.map(phase => {
       const total = phase.tasks.length;
@@ -40,8 +61,17 @@ export default function PlanPage() {
     const totalTasks = plan.phases.reduce((acc, phase) => acc + phase.tasks.length, 0);
     const completedTasks = plan.phases.reduce((acc, phase) => acc + phase.tasks.filter(t => t.completed).length, 0);
     const overallProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    
+    // Calculate estimated days remaining (assuming 1 task per week)
+    const estimatedDays = (totalTasks - completedTasks) * 7;
 
-    return { overallProgress, phaseProgress, totalTasks, completedTasks };
+    return { 
+      overallProgress, 
+      phaseProgress, 
+      totalTasks, 
+      completedTasks,
+      daysRemaining: estimatedDays
+    };
   }, [plan]);
 
   const educationLevelMap: Record<string, string> = {
@@ -49,86 +79,379 @@ export default function PlanPage() {
     undergrad: 'Undergraduate Student',
     masters: 'Master\'s Student',
     phd: 'PhD/Doctoral Candidate',
+    professional: 'Working Professional',
+    notSpecified: 'Not Specified'
   };
-  const displayEducationLevel = plan?.educationLevel && educationLevelMap[plan.educationLevel] ? educationLevelMap[plan.educationLevel] : plan?.educationLevel;
+  
+  const displayEducationLevel = plan?.educationLevel && educationLevelMap[plan.educationLevel] 
+    ? educationLevelMap[plan.educationLevel] 
+    : plan?.educationLevel || 'Not Specified';
 
+  const handleRegeneratePlan = async () => {
+    if (!plan || !ikigai) return;
+    
+    setIsRegenerating(true);
+    try {
+      const userDetails = `Passions: ${ikigai.passions || ''}. Skills: ${ikigai.skills || ''}. Values: ${ikigai.values || ''}. Interests: ${ikigai.interests || ''}. Education Level: ${ikigai.educationLevel || ''}.`;
+      
+      const newPlan = await generatePersonalizedActionPlan({
+        careerGoal: plan.careerTitle,
+        userDetails,
+        useAIFallback: true
+      });
+      
+      setPlan(newPlan);
+      toast({
+        title: 'Plan Regenerated!',
+        description: 'Your action plan has been updated with fresh recommendations.',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Failed to regenerate plan:', error);
+      toast({
+        title: 'Regeneration Failed',
+        description: 'Could not regenerate the plan. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  const handleExportPlan = () => {
+    if (!plan) return;
+    
+    const planText = `
+ACTION PLAN: ${plan.careerTitle}
+Education Level: ${displayEducationLevel}
+Timeline: ${plan.timeline}
+Generated: ${plan.generatedAt ? new Date(plan.generatedAt).toLocaleDateString() : new Date().toLocaleDateString()}
+Progress: ${Math.round(overallProgress)}% (${completedTasks}/${totalTasks} tasks)
+
+${plan.phases.map((phase, idx) => `
+PHASE ${idx + 1}: ${phase.title} (${phase.duration})
+${phase.tasks.map(task => `[${task.completed ? '✓' : ' '}] ${task.text}`).join('\n')}
+`).join('\n')}
+
+Generated by KAIROS Career Planner
+    `.trim();
+    
+    const blob = new Blob([planText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `KAIROS-Action-Plan-${plan.careerTitle.replace(/\s+/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: 'Plan Exported!',
+      description: 'Your action plan has been downloaded as a text file.',
+      variant: 'default',
+    });
+  };
+
+  const handlePrintPlan = () => {
+    window.print();
+  };
 
   if (!plan) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center">
-        <PageHeader title="No Action Plan Found" description="Generate a plan from the Careers page to see it here." />
-        <Button asChild className="mt-4">
-            <Link href="/careers">Explore Careers</Link>
-        </Button>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
+        <PageHeader 
+          title="No Action Plan Found" 
+          description="Generate a personalized action plan from the Careers page to see it here." 
+        />
+        <div className="space-y-6 max-w-md">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-500" />
+                No Active Plan
+              </CardTitle>
+              <CardDescription>
+                You need to generate an action plan first to track your progress.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                  <Target className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="font-medium">How to get started:</p>
+                    <ol className="text-sm text-muted-foreground mt-1 ml-5 list-decimal">
+                      <li>Complete your Ikigai profile</li>
+                      <li>Explore careers in the Careers section</li>
+                      <li>Generate a plan for your chosen career</li>
+                      <li>Track your progress here</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-3">
+              <Button asChild className="w-full">
+                <Link href="/careers">
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  Explore Careers & Generate Plan
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/ikigai">
+                  <Target className="mr-2 h-4 w-4" />
+                  Complete Your Profile First
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <PageHeader title={t('plan.title')} description={t('plan.description')} />
+      <PageHeader 
+        title={t('plan.title')} 
+        description={t('plan.description')} 
+      />
       
-      <Card className="mb-6">
+      {/* Progress Overview Card */}
+      <Card className="mb-6 border-primary/20">
         <CardHeader>
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <div>
-                    <CardTitle className="text-3xl">{plan.careerTitle}</CardTitle>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground mt-2">
-                        <div className="flex items-center gap-2">
-                            <GraduationCap className="h-4 w-4" />
-                            <span>{displayEducationLevel}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>{plan.timeline}</span>
-                        </div>
-                    </div>
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-3xl">{plan.careerTitle}</CardTitle>
+                <Badge variant="outline" className="border-primary/30 text-primary">
+                  Active Plan
+                </Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4" />
+                  <span>{displayEducationLevel}</span>
                 </div>
-                <div className="text-right">
-                    <div className="text-sm font-bold text-primary">{Math.round(overallProgress)}% Complete</div>
-                    <p className="text-xs text-muted-foreground">{completedTasks} of {totalTasks} tasks done</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{plan.timeline}</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>~{daysRemaining} days remaining</span>
+                </div>
+              </div>
             </div>
+            <div className="space-y-2 text-right">
+              <div className="text-2xl font-bold text-primary">{Math.round(overallProgress)}% Complete</div>
+              <p className="text-sm text-muted-foreground">
+                {completedTasks} of {totalTasks} tasks completed
+              </p>
+              <Progress value={overallProgress} className="w-full h-2" />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-            <Progress value={overallProgress} className="w-full h-3" />
-        </CardContent>
-      </Card>
-      
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {plan.phases.map((phase, phaseIndex) => (
-          <Card key={phaseIndex}>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>{phase.title}</span>
-                <span className="text-sm font-medium text-muted-foreground">{phase.duration}</span>
-              </CardTitle>
-               <div className="flex items-center gap-2 pt-2">
-                <Progress value={phaseProgress[phaseIndex]} className="h-2" />
-                <span className="text-xs text-muted-foreground font-semibold">{Math.round(phaseProgress[phaseIndex])}%</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Target className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium">Current Phase</span>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {phase.tasks.map((task) => (
-                <div key={task.id} className="flex items-center space-x-3">
-                  <Checkbox
-                    id={`task-${task.id}`}
-                    checked={task.completed}
-                    onCheckedChange={() => handleTaskToggle(phaseIndex, task.id)}
-                  />
-                  <label
-                    htmlFor={`task-${task.id}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 data-[completed=true]:line-through data-[completed=true]:text-muted-foreground"
-                    data-completed={task.completed}
-                  >
-                    {task.text}
-                  </label>
+              <div className="text-lg font-bold">
+                {phaseProgress.findIndex(p => p < 100) + 1 || plan.phases.length}
+              </div>
+            </div>
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Award className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium">Success Rate</span>
+              </div>
+              <div className="text-lg font-bold">
+                {completedTasks > 0 ? `${Math.round((completedTasks / totalTasks) * 100)}%` : '0%'}
+              </div>
+            </div>
+            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-medium">Momentum</span>
+              </div>
+              <div className="text-lg font-bold">
+                {completedTasks === 0 ? 'Start Now' : 'Keep Going!'}
+              </div>
+            </div>
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="h-4 w-4 text-orange-600" />
+                <span className="text-sm font-medium">Estimated</span>
+              </div>
+              <div className="text-lg font-bold">
+                {Math.ceil(daysRemaining / 30)} months
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-wrap gap-2 justify-between border-t pt-4">
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportPlan}>
+              <Download className="mr-2 h-3 w-3" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrintPlan}>
+              <Printer className="mr-2 h-3 w-3" />
+              Print
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/careers">
+                <Share2 className="mr-2 h-3 w-3" />
+                Share
+              </Link>
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/careers">
+                <Home className="mr-2 h-3 w-3" />
+                Back to Careers
+              </Link>
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={handleRegeneratePlan}
+              disabled={isRegenerating}
+            >
+              <RefreshCw className={`mr-2 h-3 w-3 ${isRegenerating ? 'animate-spin' : ''}`} />
+              {isRegenerating ? 'Regenerating...' : 'Regenerate Plan'}
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+
+      {/* Plan Phases */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Your Action Plan Phases</h2>
+          <Badge variant="outline">
+            {completedTasks > 0 ? 'In Progress' : 'Ready to Start'}
+          </Badge>
+        </div>
+        
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {plan.phases.map((phase, phaseIndex) => (
+            <Card key={phaseIndex} className={phaseProgress[phaseIndex] === 100 ? 'border-green-200 dark:border-green-800' : ''}>
+              <CardHeader>
+                <div className="flex justify-between items-start mb-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${
+                      phaseProgress[phaseIndex] === 100 ? 'bg-green-500' : 
+                      phaseProgress[phaseIndex] > 0 ? 'bg-yellow-500' : 
+                      'bg-gray-300'
+                    }`} />
+                    {phase.title}
+                  </CardTitle>
+                  <Badge variant={phaseProgress[phaseIndex] === 100 ? "default" : "outline"}>
+                    {phase.duration}
+                  </Badge>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        ))}
+                <div className="flex items-center gap-2 pt-2">
+                  <Progress value={phaseProgress[phaseIndex]} className="h-2 flex-1" />
+                  <span className="text-sm font-semibold text-primary">
+                    {Math.round(phaseProgress[phaseIndex])}%
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {phase.tasks.filter(t => t.completed).length} of {phase.tasks.length} tasks complete
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {phase.tasks.map((task) => (
+                  <div key={task.id} className="flex items-start space-x-3 p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                    <Checkbox
+                      id={`task-${task.id}`}
+                      checked={task.completed}
+                      onCheckedChange={() => handleTaskToggle(phaseIndex, task.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <label
+                        htmlFor={`task-${task.id}`}
+                        className={`text-sm leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+                          task.completed ? 'line-through text-muted-foreground' : ''
+                        }`}
+                      >
+                        {task.text}
+                      </label>
+                      {task.completed && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Award className="h-3 w-3 text-green-500" />
+                          <span className="text-xs text-green-600">Completed</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+              {phaseProgress[phaseIndex] === 100 && (
+                <CardFooter className="bg-green-50 dark:bg-green-900/20 border-t">
+                  <div className="flex items-center gap-2 text-green-700 dark:text-green-300 text-sm">
+                    <Award className="h-4 w-4" />
+                    Phase completed! Ready for the next phase.
+                  </div>
+                </CardFooter>
+              )}
+            </Card>
+          ))}
+        </div>
       </div>
+
+      {/* Tips & Motivation Section */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Tips for Success</CardTitle>
+          <CardDescription>
+            Stay motivated and make the most of your action plan
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-semibold mb-2">📅 Set Weekly Goals</h4>
+              <p className="text-sm text-muted-foreground">
+                Aim to complete 1-2 tasks per week to maintain steady progress without overwhelm.
+              </p>
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-semibold mb-2">🎯 Focus on One Phase</h4>
+              <p className="text-sm text-muted-foreground">
+                Complete all tasks in your current phase before moving to the next for optimal results.
+              </p>
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-semibold mb-2">📝 Track Your Progress</h4>
+              <p className="text-sm text-muted-foreground">
+                Mark tasks as complete to track your momentum and celebrate small wins.
+              </p>
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-semibold mb-2">🔄 Adjust as Needed</h4>
+              <p className="text-sm text-muted-foreground">
+                Use the "Regenerate Plan" button if your goals change or you need fresh recommendations.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="border-t pt-4">
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/dashboard">
+              <Home className="mr-2 h-4 w-4" />
+              Return to Dashboard
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
     </>
   );
 }
