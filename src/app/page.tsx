@@ -7,6 +7,7 @@ import { ArrowRight, Bot, PenSquare, Sparkles, Target } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/language-context';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 export default function Home() {
   const { t } = useLanguage();
@@ -16,7 +17,10 @@ export default function Home() {
       <header className="container z-40 bg-background">
         <div className="flex h-20 items-center justify-between py-6">
           <AppLogo />
-          <LanguageSwitcher />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+          </div>
         </div>
       </header>
       <main className="flex-1">
