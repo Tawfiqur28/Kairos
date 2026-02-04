@@ -18,7 +18,7 @@ import type { Ikigai, EducationLevel } from '@/lib/types';
 import { Save, AlertCircle, Sparkles, Target, Zap, Heart, Brain, Briefcase } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -419,7 +419,7 @@ export default function IkigaiPage() {
               <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
                 <h4 className="font-medium text-sm mb-1">Why This Matters</h4>
                 <p className="text-xs text-muted-foreground">
-                  Detailed profiles prevent generic 50% scores. The AI analyzes your unique combination to provide accurate career matches and personalized action plans.
+                  Detailed profiles prevent generic 50% scores. The AI analyzes your unique combination of passions, skills, values, and interests to provide accurate career matches and personalized action plans.
                 </p>
               </div>
             </CardContent>
