@@ -29,9 +29,21 @@ export interface JournalEntry {
   feeling: string;
 }
 
+export interface PlanTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface PlanPhase {
+  title: string;
+  duration: string;
+  tasks: PlanTask[];
+}
+
 export interface ActionPlan {
-  missionName: string;
-  threeYearPlan: string;
-  monthlyUpdates: string[];
-  spicyTips: string[];
+  careerTitle: string;
+  educationLevel: string;
+  timeline: string;
+  phases: PlanPhase[];
 }

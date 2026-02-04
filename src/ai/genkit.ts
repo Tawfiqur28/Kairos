@@ -406,63 +406,87 @@ const getScienceRequirements = (career: string): string => {
   return 'technical or analytical skills';
 };
 
-// ==================== SPICY ACTION PLAN ====================
+// ==================== STRUCTURED ACTION PLAN ====================
 export const generatePersonalizedActionPlan = async (
   careerGoal: string,
   userDetails: string,
 ): Promise<{
-  missionName: string;
-  threeYearPlan: string;
-  monthlyUpdates: string[];
-  spicyTips: string[];
+  careerTitle: string;
+  educationLevel: string;
+  timeline: string;
+  phases: { title: string; duration: string; tasks: { id: string; text: string; completed: boolean }[] }[];
 }> => {
-  const prompt = `You are a Career Gamification Master. Create a spicy, unique 3-year action plan.
+  const prompt = `You are a Career Strategist AI. Create a detailed, actionable plan for a user aiming for the career of '${careerGoal}'.
+The user's profile, including their education level, is: "${userDetails}".
 
-**CONTEXT:**
-Career: "${careerGoal}"
-User's Profile (Skills, Interests, etc.): "${userDetails}"
+The plan should be broken down into 3 distinct phases, from foundational steps to advanced specialization.
 
-**IMPORTANT:** If the User's Profile contains an "Education Level", you MUST tailor the entire plan to their stage:
-- **High School Student:** The plan should focus on foundational skills, exploration, and college prep. Phases can be "Freshman Explorer", "Sophomore Specialist", "Junior-Senior Captain". Boss fights are about school projects or winning a science fair.
-- **Undergraduate Student:** The plan should focus on key coursework, getting internships, and building a project portfolio. Phases can be "Year 1 Apprentice", "Year 2 Journeyman", "Year 3-4 Adept". Boss fights are about landing an internship or a major capstone project.
-- **Master's Student:** The plan should focus on specialization, research, and networking. Phases can be "Thesis Scoping", "Deep Dive Research", "Expert Contributor". Boss fights are about publishing a paper or presenting at a conference.
-- **PhD/Doctoral Candidate:** The plan should focus on original contribution, dissertation, and career positioning (academic or industry). Phases can be "Dissertation Architect", "Publication Push", "Career Launchpad". Boss fights are about defending the dissertation or securing a post-doc/job.
+For each phase, provide:
+- A clear, concise title (e.g., 'Phase 1: Foundation Building').
+- An estimated duration (e.g., 'Year 1').
+- A list of 3-4 concrete, actionable tasks. For each task, provide a unique ID and its text.
 
-**CREATIVE CONSTRAINTS:**
-1.  **Mission Name:** Invent a cool mission name (max 5 words).
-2.  **Metaphors:** Use metaphors from appropriate domains:
-    *   Tech careers (e.g., Software Engineer): magic, samurai, space exploration.
-    *   Creative careers (e.g., Music Producer): alchemy, poetry, composition.
-    *   Science careers (e.g., Researcher): expedition, discovery, wizardry.
-3.  **Phases:** Include 3 phases (Beginner→Apprentice→Master) with catchy, domain-appropriate names.
-4.  **Phase Content:** Each phase MUST have:
-    *   2-3 "Power-Ups" (specific skills).
-    *   1 "Boss Fight" (a challenging project).
-    *   1 "Secret Unlock" (a networking or non-obvious opportunity).
-5.  **Insider Tips:** Add 2-3 "spicyTips" (surprising but true industry advice).
-6.  **Intel:** Include 3 "monthlyUpdates" (emerging tech, market trends, etc.).
+Respond with ONLY a single, valid JSON object with NO other text, comments, or markdown.
 
-**FORMAT REQUIREMENTS:**
-*   'threeYearPlan' MUST be a single HTML string. Use emojis 🎮⚡🚀, <h3> for phase titles, and <ul>/<li> for lists.
-*   The entire output MUST be a single, valid JSON object with NO other text, comments, or markdown.
-
-**JSON-ONLY OUTPUT STRUCTURE:**
+JSON OUTPUT STRUCTURE:
 {
-  "missionName": "Your epic mission name here",
-  "threeYearPlan": "<h3>🎮 Phase 1: The Neophyte</h3><ul><li>⚡ **Power-Up:** Skill 1</li><li>...</li></ul><h3>- BOSS FIGHT -</h3><p>Project description.</p><h3>- SECRET UNLOCK -</h3><p>Opportunity description.</p>...",
-  "monthlyUpdates": ["Update 1", "Update 2", "Update 3"],
-  "spicyTips": ["Tip 1", "Tip 2"]
-}
-
-**START GENERATING for career: ${careerGoal}:**`;
+  "careerTitle": "${careerGoal}",
+  "educationLevel": "The user's education level from their profile",
+  "timeline": "3-Year Journey to ${careerGoal}",
+  "phases": [
+    {
+      "title": "Phase 1: Foundation Building",
+      "duration": "Year 1",
+      "tasks": [
+        { "id": "task-1-1", "text": "First concrete task for this phase", "completed": false },
+        { "id": "task-1-2", "text": "Second concrete task for this phase", "completed": false },
+        { "id": "task-1-3", "text": "Third concrete task for this phase", "completed": false }
+      ]
+    },
+    {
+      "title": "Phase 2: Skill Application",
+      "duration": "Year 2",
+      "tasks": [
+        { "id": "task-2-1", "text": "First concrete task for this phase", "completed": false },
+        { "id": "task-2-2", "text": "Second concrete task for this phase", "completed": false },
+        { "id": "task-2-3", "text": "Third concrete task for this phase", "completed": false }
+      ]
+    },
+    {
+      "title": "Phase 3: Specialization & Networking",
+      "duration": "Year 3",
+      "tasks": [
+        { "id": "task-3-1", "text": "First concrete task for this phase", "completed": false },
+        { "id": "task-3-2", "text": "Second concrete task for this phase", "completed": false },
+        { "id": "task-3-3", "text": "Third concrete task for this phase", "completed": false }
+      ]
+    }
+  ]
+}`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
 
   const fallback = {
-    missionName: `Mission: Conquer ${careerGoal}`,
-    threeYearPlan: `<h3>🎮 Phase 1: Basic Training</h3><ul><li>⚡ **Power-Up:** Learn the fundamentals of ${careerGoal}.</li></ul><h3>- BOSS FIGHT -</h3><p>Complete a 'Hello, World!' equivalent project for this field.</p><h3>- SECRET UNLOCK -</h3><p>Find and follow one influential person in this industry on LinkedIn or X.</p><p><em>(AI plan generation failed. This is a default starter plan.)</em></p>`,
-    monthlyUpdates: ["Market trends are currently unavailable.", "New tools and techniques are always emerging in every field."],
-    spicyTips: ["The best way to learn is by doing real projects.", "Don't be afraid to fail; it's part of the learning process."]
+    careerTitle: careerGoal,
+    educationLevel: 'N/A',
+    timeline: `3-Year Journey to ${careerGoal}`,
+    phases: [
+      {
+        title: 'Phase 1: Getting Started',
+        duration: 'Year 1',
+        tasks: [{ id: 'fb-1', text: `Research the basics of the ${careerGoal} field.`, completed: false }],
+      },
+      {
+        title: 'Phase 2: Building Skills',
+        duration: 'Year 2',
+        tasks: [{ id: 'fb-2', text: 'Take an introductory online course.', completed: false }],
+      },
+      {
+        title: 'Phase 3: Gaining Experience',
+        duration: 'Year 3',
+        tasks: [{ id: 'fb-3', text: 'Work on a personal project.', completed: false }],
+      },
+    ],
   };
 
   if (response.startsWith('ERROR:')) {
@@ -474,14 +498,14 @@ User's Profile (Skills, Interests, etc.): "${userDetails}"
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
-      if (parsed.missionName && parsed.threeYearPlan) {
+      if (parsed.phases && parsed.phases.length === 3) {
         return parsed;
       }
     }
     console.warn('Action Plan generation did not return valid JSON:', response);
     return fallback;
   } catch (e) {
-    console.error('Failed to parse Spicy Action Plan JSON:', e);
+    console.error('Failed to parse Action Plan JSON:', e);
     return fallback;
   }
 };

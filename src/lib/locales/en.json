@@ -31,7 +31,12 @@
     "ikigai": "Ikigai Canvas",
     "journal": "Journal",
     "careers": "Careers",
+    "actionPlan": "Your Action Plan",
     "learnMore": "Learn More"
+  },
+  "plan": {
+    "title": "Your Action Plan",
+    "description": "This is your personalized roadmap to success. Check off tasks as you complete them."
   },
   "dashboard": {
     "title": "Welcome to Your Journey",

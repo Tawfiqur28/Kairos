@@ -24,13 +24,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import careerData from '@/lib/careers.json';
-import type { Career, Ikigai, ActionPlan as SpicyPlanData } from '@/lib/types';
-import { Bot, Loader2, Sparkles, ArrowLeft, Lightbulb, Zap, GanttChartSquare } from 'lucide-react';
+import type { Career, Ikigai, ActionPlan } from '@/lib/types';
+import { Bot, Loader2, Sparkles, GanttChartSquare } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized-action-plan';
 import { useLanguage } from '@/context/language-context';
+import { useRouter } from 'next/navigation';
 
 type MatchResult = {
   explanation: string;
@@ -39,129 +39,6 @@ type MatchResult = {
   valueAlignment: number;
   fitScore: number;
 };
-
-// New Spicy Action Plan component
-function GamifiedActionPlan({
-  plan,
-  careerTitle,
-  onBack,
-  isLoading,
-  onRegenerate,
-}: {
-  plan: SpicyPlanData | null;
-  careerTitle: string;
-  onBack: () => void;
-  isLoading: boolean;
-  onRegenerate: () => void;
-}) {
-  const { t } = useLanguage();
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl">
-              {t('careers.plan_loading_title')}
-            </CardTitle>
-            <Button variant="ghost" onClick={onBack} disabled>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('careers.plan_back_button')}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center p-8 space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground">{t('careers.plan_loading_text', { careerTitle: careerTitle })}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!plan) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl">
-              {t('careers.plan_error_title')}
-            </CardTitle>
-            <Button variant="ghost" onClick={onBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('careers.plan_back_button')}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="text-center p-8">
-            <p className="mb-4 text-muted-foreground">{t('careers.plan_error_text')}</p>
-            <Button onClick={onRegenerate}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              {t('careers.plan_regenerate_button')}
-            </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="border-2 border-primary/20 rounded-xl p-6 bg-gradient-to-br from-card to-muted/30">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            🎯 {plan.missionName}
-          </h2>
-          <p className="text-muted-foreground">{t('careers.plan_title', { careerTitle: careerTitle })}</p>
-        </div>
-        <Button variant="ghost" onClick={onBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t('careers.plan_back_button')}
-        </Button>
-      </div>
-    
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 mt-6 p-4 bg-background/50 rounded-lg shadow-inner border">
-            <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-h3:font-headline prose-h3:text-primary prose-h3:flex prose-h3:items-center prose-strong:text-foreground prose-ul:list-none prose-ul:p-0 prose-li:mb-2 prose-li:flex prose-li:items-start" 
-                dangerouslySetInnerHTML={{ __html: plan.threeYearPlan }} />
-        </div>
-        
-        <div className="space-y-6">
-          <div className="mt-6 p-4 bg-background/50 rounded-lg shadow-inner border">
-            <h3 className="text-lg font-bold flex items-center mb-4 font-headline">
-              <Lightbulb className="mr-2 text-yellow-400" />
-              {t('careers.plan_insider_tips')}
-            </h3>
-            <ul className="space-y-3 text-sm">
-              {plan.spicyTips.map((tip, i) => (
-                <li key={i} className="flex items-start">
-                  <span className="mr-2 mt-1">💡</span>
-                  <span className="text-muted-foreground">{tip}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="p-4 bg-background/50 rounded-lg shadow-inner border">
-            <h3 className="text-lg font-bold flex items-center mb-4 font-headline">
-              <Zap className="mr-2 text-blue-400" />
-              {t('careers.plan_monthly_intel')}
-            </h3>
-            <ul className="space-y-3 text-sm">
-              {plan.monthlyUpdates.map((update, i) => (
-                <li key={i} className="flex items-start">
-                  <span className="mr-2 mt-1">📈</span>
-                  <span className="text-muted-foreground">{update}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 
 export default function CareersPage() {
   const allCareers: Career[] = careerData.careers;
@@ -172,18 +49,17 @@ export default function CareersPage() {
     interests: '',
   });
   const { t } = useLanguage();
+  const router = useRouter();
 
   const [sortedCareers, setSortedCareers] = useState<Career[]>(allCareers);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [_, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
+
 
   const [hasMounted, setHasMounted] = useState(false);
-  const [view, setView] = useState<'careers' | 'plan'>('careers');
-  const [careerForPlan, setCareerForPlan] = useState<Career | null>(null);
-  const [gamifiedPlan, setGamifiedPlan] = useState<SpicyPlanData | null>(null);
-  const [isLoadingPlan, setIsLoadingPlan] = useState(false);
 
   const isProfileComplete = useMemo(() => 
     ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests,
@@ -265,11 +141,9 @@ export default function CareersPage() {
   };
 
   const handleGeneratePlan = async (career: Career) => {
-    setView('plan');
-    setCareerForPlan(career);
-    setIsLoadingPlan(true);
-    setGamifiedPlan(null);
-    setSelectedCareer(null);
+    setSelectedCareer(null); // Close dialog
+
+    toast({ title: 'Generating Your Action Plan...', description: 'The AI is building your roadmap. This may take a moment.' });
 
     try {
       const result = await generatePersonalizedActionPlan({
@@ -277,10 +151,11 @@ export default function CareersPage() {
         userDetails: userProfileString,
       });
 
-      if (!result || !result.missionName) {
+      if (!result || !result.phases || result.phases.length === 0) {
         throw new Error('AI failed to generate a valid plan.');
       }
-      setGamifiedPlan(result);
+      setActionPlan(result);
+      router.push('/plan');
     } catch (error: any) {
       console.error(error);
       toast({
@@ -289,11 +164,6 @@ export default function CareersPage() {
           error.message || t('toasts.aiErrorActionPlan'),
         variant: 'destructive',
       });
-      // Go back to careers view on error
-      setView('careers');
-      setCareerForPlan(null);
-    } finally {
-      setIsLoadingPlan(false);
     }
   };
 
@@ -315,7 +185,7 @@ export default function CareersPage() {
                  <Skeleton className="h-10 w-40" />
             </CardFooter>
         </Card>
-      ) : !isProfileComplete && view === 'careers' && (
+      ) : !isProfileComplete && (
         <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <CardHeader>
                 <CardTitle className="text-yellow-900 dark:text-yellow-300">{t('careers.completeProfileTitle')}</CardTitle>
@@ -331,61 +201,32 @@ export default function CareersPage() {
         </Card>
       )}
 
-      <AnimatePresence mode="wait">
-        {view === 'careers' && hasMounted ? (
-          <motion.div
-            key="careers-view"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {sortedCareers.map((career) => (
-                <Card key={career.id}>
-                  <CardHeader>
-                    <CardTitle>{career.title}</CardTitle>
-                    <CardDescription>{career.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <h4 className="text-sm font-semibold mb-2">{t('careers.keySkills')}</h4>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground">
-                      {career.requiredSkills.map((skill) => (
-                        <li key={skill}>{skill}</li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => handleCheckFit(career)} disabled={!hasMounted || !isProfileComplete}>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      {t('careers.checkFit')}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </motion.div>
-        ) : view === 'plan' && careerForPlan && (
-          <motion.div
-            key="plan-view"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <GamifiedActionPlan
-              plan={gamifiedPlan}
-              careerTitle={careerForPlan.title}
-              isLoading={isLoadingPlan}
-              onBack={() => {
-                setView('careers');
-                setCareerForPlan(null);
-              }}
-              onRegenerate={() => handleGeneratePlan(careerForPlan)}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {hasMounted && (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sortedCareers.map((career) => (
+            <Card key={career.id}>
+                <CardHeader>
+                <CardTitle>{career.title}</CardTitle>
+                <CardDescription>{career.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                <h4 className="text-sm font-semibold mb-2">{t('careers.keySkills')}</h4>
+                <ul className="list-disc list-inside text-sm text-muted-foreground">
+                    {career.requiredSkills.map((skill) => (
+                    <li key={skill}>{skill}</li>
+                    ))}
+                </ul>
+                </CardContent>
+                <CardFooter>
+                <Button onClick={() => handleCheckFit(career)} disabled={!hasMounted || !isProfileComplete}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {t('careers.checkFit')}
+                </Button>
+                </CardFooter>
+            </Card>
+            ))}
+        </div>
+      )}
 
       <Dialog open={!!selectedCareer} onOpenChange={(isOpen) => !isOpen && setSelectedCareer(null)}>
         <DialogContent className="sm:max-w-[425px]">

@@ -22,12 +22,25 @@ export type GeneratePersonalizedActionPlanInput = z.infer<
   typeof GeneratePersonalizedActionPlanInputSchema
 >;
 
-const GeneratePersonalizedActionPlanOutputSchema = z.object({
-  missionName: z.string().describe('The gamified mission name for the action plan.'),
-  threeYearPlan: z.string().describe('The gamified 3-year action plan in HTML format.'),
-  monthlyUpdates: z.array(z.string()).describe('A list of monthly field intelligence updates.'),
-  spicyTips: z.array(z.string()).describe('A list of industry insider tips.'),
+const PlanTaskSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  completed: z.boolean(),
 });
+
+const PlanPhaseSchema = z.object({
+  title: z.string(),
+  duration: z.string(),
+  tasks: z.array(PlanTaskSchema),
+});
+
+const GeneratePersonalizedActionPlanOutputSchema = z.object({
+  careerTitle: z.string(),
+  educationLevel: z.string(),
+  timeline: z.string(),
+  phases: z.array(PlanPhaseSchema),
+});
+
 export type GeneratePersonalizedActionPlanOutput = z.infer<
   typeof GeneratePersonalizedActionPlanOutputSchema
 >;
@@ -37,5 +50,5 @@ export async function generatePersonalizedActionPlan(
 ): Promise<GeneratePersonalizedActionPlanOutput> {
   const plan = await generatePersonalizedActionPlanFromModel(input.careerGoal, input.userDetails);
   // The model function now returns the full object which matches our output schema
-  return plan;
+  return GeneratePersonalizedActionPlanOutputSchema.parse(plan);
 }

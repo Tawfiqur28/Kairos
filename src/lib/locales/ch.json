@@ -31,7 +31,12 @@
     "ikigai": "Ikigai 画布",
     "journal": "日志",
     "careers": "职业",
+    "actionPlan": "你的行动计划",
     "learnMore": "了解更多"
+  },
+  "plan": {
+    "title": "你的行动计划",
+    "description": "这是你通往成功的个性化路线图。完成任务后请勾选。"
   },
   "dashboard": {
     "title": "欢迎来到你的旅程",

@@ -6,6 +6,7 @@ import {
   Info,
   LayoutDashboard,
   Target,
+  ClipboardList,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,6 +19,7 @@ const navItemsConfig = [
   { href: '/ikigai', icon: Target, labelKey: 'nav.ikigai' },
   { href: '/journal', icon: BookText, labelKey: 'nav.journal' },
   { href: '/careers', icon: Briefcase, labelKey: 'nav.careers' },
+  { href: '/plan', icon: ClipboardList, labelKey: 'nav.actionPlan' },
   { href: '/learn-more', icon: Info, labelKey: 'nav.learnMore' },
 ];
 
