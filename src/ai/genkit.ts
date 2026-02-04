@@ -76,7 +76,7 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
   const API_KEY = process.env.MODELSCOPE_API_KEY;
 
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-    console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
+    console.error('MODELSCOPE_API_KEY is missing or not set in .env file');
     return 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
   }
 
@@ -114,7 +114,7 @@ async function callModelScopeChat(messages: {role: string, content: string}[], m
   const API_KEY = process.env.MODELSCOPE_API_KEY;
 
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-    console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
+    console.error('MODELSCOPE_API_KEY is missing or not set in .env file');
     return 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
   }
 
@@ -427,12 +427,12 @@ const checkEducationCompatibility = (career: string, educationLevel?: string) =>
       if (isCompatible && typicalPath) {
         return {
           score: 25,
-          explanation: `✅ **Education Compatible**: ${career} is suitable for ${educationLevel} students. Typical path includes: ${typicalPath.join(', ')}.`
+          explanation: `Education Compatible: ${career} is suitable for ${educationLevel} students. Typical path includes: ${typicalPath.join(', ')}.`
         };
       } else if (!isCompatible) {
         return {
           score: -20,
-          explanation: `⚠️ **Education Consideration**: ${career} typically requires different education level. Consider these alternatives or plan for further education.`
+          explanation: `Education Consideration: ${career} typically requires different education level. Consider these alternatives or plan for further education.`
         };
       }
       break;
@@ -830,6 +830,4 @@ const extractEducationLevel = (userDetails: string): string => {
 
 export {
   callModelScopeAI,
-  CAREER_DATABASE,
-  extractEducationLevel
 };
