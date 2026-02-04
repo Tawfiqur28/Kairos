@@ -18,7 +18,6 @@ import {
   Sparkles,
   GanttChartSquare,
   AlertCircle,
-  CheckCircle,
   Zap,
   BarChart,
   Code,
@@ -72,9 +71,9 @@ export default function LearnMorePage() {
     },
     {
       icon: <GanttChartSquare className="h-8 w-8 text-primary" />,
-      title: "Personalized Action Plans",
-      description: "Get a customized 3-phase roadmap with specific tasks, timelines, and resources for your chosen career path.",
-      highlight: "Structured 3-phase career roadmaps",
+      title: t('learnMore.feature6_title'),
+      description: t('learnMore.feature6_text'),
+      highlight: t('learnMore.feature6_highlight'),
       color: "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
     }
   ];
@@ -105,22 +104,22 @@ export default function LearnMorePage() {
 
   const problemSolution = [
     {
-      problem: "Generic 50% Scores",
-      solution: "Dynamic Theme-Based Matching",
+      problem: t('learnMore.problem1'),
+      solution: t('learnMore.solution1'),
       icon: <AlertCircle className="h-5 w-5 text-yellow-500" />,
-      description: "Instead of showing 50% for every career, KAIROS analyzes your unique profile themes to provide accurate scores."
+      description: t('learnMore.problem1_desc')
     },
     {
-      problem: "No Clear Next Steps",
-      solution: "Personalized Action Plans",
+      problem: t('learnMore.problem2'),
+      solution: t('learnMore.solution2'),
       icon: <Rocket className="h-5 w-5 text-green-500" />,
-      description: "Get a customized roadmap with specific tasks, timelines, and resources for your chosen career path."
+      description: t('learnMore.problem2_desc')
     },
     {
-      problem: "One-Size-Fits-All Advice",
-      solution: "AI-Powered Personalization",
+      problem: t('learnMore.problem3'),
+      solution: t('learnMore.solution3'),
       icon: <Bot className="h-5 w-5 text-purple-500" />,
-      description: "AI analyzes your unique combination of passions, skills, values, and interests for tailored recommendations."
+      description: t('learnMore.problem3_desc')
     }
   ];
 
@@ -135,22 +134,21 @@ export default function LearnMorePage() {
       <div className="mb-8 p-6 bg-gradient-to-r from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-900/10 rounded-xl border">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
           <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-3">How KAIROS Fixes Common Career Guidance Problems</h2>
+            <h2 className="text-2xl font-bold mb-3">{t('learnMore.heroTitle')}</h2>
             <p className="text-muted-foreground mb-4">
-              Traditional career tools often show generic results. KAIROS uses AI to provide personalized, 
-              actionable career guidance based on your unique profile.
+              {t('learnMore.heroSubtitle')}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
-              <Badge className="bg-primary/10 text-primary">No More 50% Scores</Badge>
-              <Badge className="bg-green-500/10 text-green-600">Personalized Action Plans</Badge>
-              <Badge className="bg-purple-500/10 text-purple-600">Theme-Based Matching</Badge>
-              <Badge className="bg-orange-500/10 text-orange-600">Dynamic Career Scores</Badge>
+              <Badge className="bg-primary/10 text-primary">{t('learnMore.heroBadge1')}</Badge>
+              <Badge className="bg-green-500/10 text-green-600">{t('learnMore.heroBadge2')}</Badge>
+              <Badge className="bg-purple-500/10 text-purple-600">{t('learnMore.heroBadge3')}</Badge>
+              <Badge className="bg-orange-500/10 text-orange-600">{t('learnMore.heroBadge4')}</Badge>
             </div>
           </div>
           <Button asChild size="lg">
             <Link href="/ikigai">
               <Sparkles className="mr-2 h-4 w-4" />
-              Start Your Journey
+              {t('learnMore.heroCta')}
             </Link>
           </Button>
         </div>
@@ -161,10 +159,10 @@ export default function LearnMorePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-500" />
-            Solving Career Guidance Challenges
+            {t('learnMore.problemSolutionTitle')}
           </CardTitle>
           <CardDescription>
-            How KAIROS addresses common issues with career matching tools
+            {t('learnMore.problemSolutionDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -179,12 +177,12 @@ export default function LearnMorePage() {
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-red-600 dark:text-red-400 line-through">Problem:</span>
+                      <span className="font-medium text-red-600 dark:text-red-400 line-through">{t('Problem')}:</span>
                       <span className="font-semibold">{item.problem}</span>
                     </div>
                     <span className="hidden md:block text-muted-foreground">→</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-green-600 dark:text-green-400">Solution:</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">{t('Solution')}:</span>
                       <span className="font-semibold text-primary">{item.solution}</span>
                     </div>
                   </div>
@@ -220,28 +218,19 @@ export default function LearnMorePage() {
                 
                 {step.step === 1 && (
                   <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <p className="text-sm text-blue-800 dark:text-blue-300">
-                      <strong>Tip:</strong> The more detailed your profile, the more accurate your career matches will be. 
-                      This prevents generic 50% scores.
-                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip1') }} />
                   </div>
                 )}
                 
                 {step.step === 2 && (
                   <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <p className="text-sm text-green-800 dark:text-green-300">
-                      <strong>How it works:</strong> Each career gets a unique score based on theme matching (Tech, Science, Arts, etc.), 
-                      not a fixed percentage.
-                    </p>
+                    <p className="text-sm text-green-800 dark:text-green-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip2') }} />
                   </div>
                 )}
                 
                 {step.step === 3 && (
                   <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <p className="text-sm text-purple-800 dark:text-purple-300">
-                      <strong>Result:</strong> A personalized 3-phase action plan with specific tasks, resources, and timelines 
-                      for your chosen career path.
-                    </p>
+                    <p className="text-sm text-purple-800 dark:text-purple-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip3') }} />
                   </div>
                 )}
               </div>
@@ -252,7 +241,7 @@ export default function LearnMorePage() {
           <Button asChild className="w-full" size="lg">
             <Link href="/ikigai">
               <Sparkles className="mr-2 h-4 w-4" />
-              Start with Step 1: Create Your Profile
+              {t('learnMore.startWithStep1')}
             </Link>
           </Button>
         </CardFooter>
@@ -290,60 +279,57 @@ export default function LearnMorePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Code className="h-5 w-5" />
-            How KAIROS Works Technically
+            {t('learnMore.faqTitle')}
           </CardTitle>
           <CardDescription>
-            Understanding the technology behind accurate career matching
+            {t('learnMore.faqDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-muted/30 rounded-lg">
-            <h4 className="font-semibold mb-2">🤔 Why don't all careers show 50%?</h4>
+            <h4 className="font-semibold mb-2">{t('learnMore.faq1_q')}</h4>
             <p className="text-sm text-muted-foreground">
-              KAIROS uses theme extraction and keyword analysis to match your profile with career requirements. 
-              Each career gets a unique score based on how well your themes (Tech, Science, Arts, etc.) align with the career's requirements.
+              {t('learnMore.faq1_a')}
             </p>
           </div>
           
           <div className="p-4 bg-muted/30 rounded-lg">
-            <h4 className="font-semibold mb-2">🎯 What makes the action plans personalized?</h4>
+            <h4 className="font-semibold mb-2">{t('learnMore.faq2_q')}</h4>
             <p className="text-sm text-muted-foreground">
-              Plans are generated based on your specific education level, existing skills, and career goals. 
-              AI creates 3-phase roadmaps with timeline-adjusted tasks and resources tailored to your starting point.
+              {t('learnMore.faq2_a')}
             </p>
           </div>
           
           <div className="p-4 bg-muted/30 rounded-lg">
-            <h4 className="font-semibold mb-2">🔍 How are career themes detected?</h4>
+            <h4 className="font-semibold mb-2">{t('learnMore.faq3_q')}</h4>
             <p className="text-sm text-muted-foreground">
-              AI analyzes keywords in your profile to identify dominant themes. For example, mentions of "code," "programming," 
-              and "software" trigger the "Tech" theme, which influences matching with tech-related careers.
+              {t('learnMore.faq3_a')}
             </p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <div className="flex items-center gap-4 w-full">
             <div className="flex-1 border-t" />
-            <span className="text-sm text-muted-foreground">Ready to get started?</span>
+            <span className="text-sm text-muted-foreground">{t('learnMore.readyToStart')}</span>
             <div className="flex-1 border-t" />
           </div>
           <div className="flex gap-3 w-full">
             <Button asChild variant="outline" className="flex-1">
               <Link href="/ikigai">
                 <Target className="mr-2 h-4 w-4" />
-                Create Profile
+                {t('learnMore.ctaCreateProfile')}
               </Link>
             </Button>
             <Button asChild variant="outline" className="flex-1">
               <Link href="/careers">
                 <Users className="mr-2 h-4 w-4" />
-                Explore Careers
+                {t('learnMore.ctaExploreCareers')}
               </Link>
             </Button>
             <Button asChild className="flex-1">
               <Link href="/dashboard">
                 <Rocket className="mr-2 h-4 w-4" />
-                View Dashboard
+                {t('learnMore.ctaViewDashboard')}
               </Link>
             </Button>
           </div>

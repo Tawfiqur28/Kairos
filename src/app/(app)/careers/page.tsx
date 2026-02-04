@@ -8,6 +8,8 @@ import {
   Card,
   CardHeader,
   CardFooter,
+  CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import {
   Dialog,
@@ -107,7 +109,7 @@ export default function CareersPage() {
     } else {
       setSortedCareers(allCareers);
     }
-  }, [isProfileComplete, userProfileString]);
+  }, [isProfileComplete, userProfileString, allCareers]);
 
   const handleCheckFit = useCallback(async (career: Career) => {
     if (!isProfileComplete) {
@@ -138,8 +140,6 @@ export default function CareersPage() {
         fitScore: result.overallScore 
       });
 
-      console.log(`Career: ${career.title}, Score: ${result.overallScore}%, Theme Mismatch: ${result.themeMismatch}`);
-
     } catch (error: any) {
       console.error('Career match error:', error);
       toast({
@@ -167,8 +167,8 @@ export default function CareersPage() {
     
     setSelectedCareer(null); // Close dialog
     toast({ 
-      title: 'Generating Your Action Plan...', 
-      description: 'Building your personalized career roadmap. This may take a moment.' 
+      title: t('careers.generatingPlanToast'), 
+      description: t('careers.generatingPlanToastDesc')
     });
 
     try {
@@ -185,8 +185,8 @@ export default function CareersPage() {
       setActionPlan(result);
       
       toast({
-        title: 'Plan Generated Successfully!',
-        description: `Your ${career.title} action plan is ready.`,
+        title: t('careers.planGeneratedToast'),
+        description: t('careers.planGeneratedToastDesc', { careerTitle: career.title }),
         variant: 'default'
       });
       
@@ -201,6 +201,15 @@ export default function CareersPage() {
       });
     }
   }, [userProfileString, router, setActionPlan, t, toast]);
+
+  const getConfidenceText = (confidence: 'high' | 'medium' | 'low') => {
+    switch (confidence) {
+      case 'high': return t('careers.high');
+      case 'medium': return t('careers.medium');
+      case 'low': return t('careers.low');
+      default: return '';
+    }
+  };
 
   const getConfidenceColor = (confidence: 'high' | 'medium' | 'low') => {
     switch (confidence) {
@@ -250,10 +259,10 @@ export default function CareersPage() {
       {hasMounted && isProfileComplete && userThemes.length > 0 && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            <span className="font-semibold">Your Profile Themes:</span> {userThemes.join(', ')}
+            <span className="font-semibold">{t('careers.yourProfileThemes')}</span> {userThemes.join(', ')}
           </p>
           <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-            Careers matching your themes are shown first.
+            {t('careers.themesDescription')}
           </p>
         </div>
       )}
@@ -291,8 +300,8 @@ export default function CareersPage() {
             {isLoading && (
               <div className="flex flex-col items-center justify-center space-y-4 py-8">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <p className="text-muted-foreground">Analyzing your fit with {selectedCareer?.title}...</p>
-                <p className="text-xs text-muted-foreground">Generating personalized score...</p>
+                <p className="text-muted-foreground">{t('careers.analyzingFit', { careerTitle: selectedCareer?.title })}</p>
+                <p className="text-xs text-muted-foreground">{t('careers.generatingScore')}</p>
               </div>
             )}
             
@@ -301,7 +310,7 @@ export default function CareersPage() {
                 {/* Score Display */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <h4 className="font-semibold text-lg">Fit Score</h4>
+                    <h4 className="font-semibold text-lg">{t('careers.fitScore')}</h4>
                     <div className="text-right">
                       <div className={`text-2xl font-bold ${
                         matchResult.fitScore >= 70 ? 'text-green-600' : 
@@ -311,7 +320,7 @@ export default function CareersPage() {
                         {matchResult.fitScore}%
                       </div>
                       <div className={`text-xs ${getConfidenceColor(matchResult.confidence)}`}>
-                        {matchResult.confidence.charAt(0).toUpperCase() + matchResult.confidence.slice(1)} Confidence
+                        {getConfidenceText(matchResult.confidence)} {t('careers.confidence')}
                       </div>
                     </div>
                   </div>
@@ -320,15 +329,15 @@ export default function CareersPage() {
                   {/* Breakdown */}
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
                     <div className="p-2 bg-muted rounded">
-                      <div className="font-medium">Skill Match</div>
+                      <div className="font-medium">{t('careers.skillMatch')}</div>
                       <div className="text-primary font-bold">{matchResult.skillMatch}%</div>
                     </div>
                     <div className="p-2 bg-muted rounded">
-                      <div className="font-medium">Interest Match</div>
+                      <div className="font-medium">{t('careers.interestMatch')}</div>
                       <div className="text-primary font-bold">{matchResult.interestMatch}%</div>
                     </div>
                     <div className="p-2 bg-muted rounded">
-                      <div className="font-medium">Value Alignment</div>
+                      <div className="font-medium">{t('careers.valueAlignment')}</div>
                       <div className="text-primary font-bold">{matchResult.valueAlignment}%</div>
                     </div>
                   </div>
@@ -340,9 +349,9 @@ export default function CareersPage() {
                     <div className="flex items-start gap-2">
                       <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                       <div>
-                        <p className="font-medium text-yellow-900 dark:text-yellow-300">Theme Mismatch Detected</p>
+                        <p className="font-medium text-yellow-900 dark:text-yellow-300">{t('careers.themeMismatch')}</p>
                         <p className="text-sm text-yellow-800 dark:text-yellow-400">
-                          Your profile themes may not align perfectly with this career. Consider this carefully.
+                          {t('careers.themeMismatchDesc')}
                         </p>
                       </div>
                     </div>
@@ -353,7 +362,7 @@ export default function CareersPage() {
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <Bot className="h-4 w-4" />
-                    AI Analysis
+                    {t('careers.aiAnalysis')}
                   </h4>
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-sm whitespace-pre-wrap">{matchResult.explanation}</p>
@@ -366,10 +375,10 @@ export default function CareersPage() {
                     <div className="p-4 bg-primary/10 dark:bg-primary/5 rounded-lg border border-primary/20 space-y-3">
                       <h4 className="font-semibold text-primary flex items-center gap-2">
                         <GanttChartSquare className="h-5 w-5" />
-                        Ready to Pursue This Path?
+                        {t('careers.generatePlanTitle')}
                       </h4>
                       <p className="text-sm text-muted-foreground">
-                        Generate a personalized 3-phase action plan with specific tasks, timelines, and resources.
+                        {t('careers.generatePlanDescription')}
                       </p>
                       <div className="space-y-2">
                         <Button 
@@ -378,18 +387,18 @@ export default function CareersPage() {
                           size="lg"
                         >
                           <GanttChartSquare className="mr-2 h-4 w-4" />
-                          Generate My Action Plan
+                          {t('careers.generatePlan')}
                         </Button>
                         <p className="text-xs text-center text-muted-foreground">
-                          Includes: Skill roadmap, course recommendations, project ideas, networking strategies
+                          {t('careers.includes')}
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div className="p-4 bg-muted/50 rounded-lg border space-y-3 text-center">
-                      <p className="font-semibold">Keep Exploring!</p>
+                      <p className="font-semibold">{t('careers.keepExploring')}</p>
                       <p className="text-sm text-muted-foreground">
-                        This career might not be the strongest match right now. Check out other options that better align with your profile.
+                        {t('careers.notStrongMatch')}
                       </p>
                       <div className="flex gap-2">
                         <Button 
@@ -397,14 +406,14 @@ export default function CareersPage() {
                           onClick={() => setSelectedCareer(null)}
                           className="flex-1"
                         >
-                          View Other Careers
+                          {t('careers.viewOtherCareers')}
                         </Button>
                         <Button 
                           variant="secondary"
                           onClick={() => handleGeneratePlan(selectedCareer!)}
                           className="flex-1"
                         >
-                          Generate Plan Anyway
+                          {t('careers.generatePlanAnyway')}
                         </Button>
                       </div>
                     </div>
@@ -415,16 +424,16 @@ export default function CareersPage() {
                     onClick={() => setSelectedCareer(null)}
                     className="w-full"
                   >
-                    Back to Careers List
+                    {t('careers.backToCareers')}
                   </Button>
                 </div>
               </>
             )}
 
-            {!matchResult && !isLoading && !selectedCareer && (
+            {!matchResult && !isLoading && (
               <div className="flex flex-col items-center justify-center space-y-4 text-center py-8">
                 <Bot size={48} className="mx-auto mb-4 text-muted-foreground"/>
-                <p>Select a career to see your personalized fit score.</p>
+                <p>{t('careers.selectCareerPrompt')}</p>
               </div>
             )}
           </div>

@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, ActionPlan } from '@/lib/types';
 import { useState, useEffect, useMemo } from 'react';
+import { useLanguage } from '@/context/language-context';
 
 export default function AppLayout({
   children,
@@ -28,7 +29,8 @@ export default function AppLayout({
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
+  
+  const { t } = useLanguage();
   const pathname = usePathname();
   const [ikigai] = useLocalStorage<Ikigai>('ikigai-profile', {
     passions: '',
@@ -60,12 +62,12 @@ export default function AppLayout({
 
   // Get current section for breadcrumb/context
   const getCurrentSection = () => {
-    if (pathname === '/dashboard') return 'Dashboard';
-    if (pathname === '/ikigai') return 'Ikigai Profile';
-    if (pathname === '/careers') return 'Career Explorer';
-    if (pathname === '/plan') return 'Action Plan';
-    if (pathname === '/learn-more') return 'Learn More';
-    if (pathname === '/journal') return 'Journal';
+    if (pathname === '/dashboard') return t('layout.sectionDashboard');
+    if (pathname === '/ikigai') return t('layout.sectionIkigai');
+    if (pathname === '/careers') return t('layout.sectionCareers');
+    if (pathname === '/plan') return t('layout.sectionPlan');
+    if (pathname === '/learn-more') return t('layout.sectionLearnMore');
+    if (pathname === '/journal') return t('layout.sectionJournal');
     return '';
   };
 
@@ -78,7 +80,7 @@ export default function AppLayout({
             <AppLogo />
             {hasActionPlan && (
               <Badge variant="secondary" className="hidden lg:flex">
-                Active Plan
+                {t('layout.activePlan')}
               </Badge>
             )}
           </div>
@@ -91,7 +93,7 @@ export default function AppLayout({
             <div className="space-y-3">
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium">Profile Completion</span>
+                  <span className="font-medium">{t('layout.profileCompletion')}</span>
                   <span className="font-bold text-primary">{profileCompletion}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -105,7 +107,7 @@ export default function AppLayout({
               {hasMounted && !isProfileComplete && (
                 <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
                   <p className="text-xs text-yellow-800 dark:text-yellow-300 font-medium">
-                    Complete profile for better matches
+                    {t('layout.completeProfilePrompt')}
                   </p>
                 </div>
               )}
@@ -113,7 +115,7 @@ export default function AppLayout({
               {hasActionPlan && (
                 <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
                   <p className="text-xs text-green-800 dark:text-green-300 font-medium">
-                    Active plan: {actionPlan!.careerTitle}
+                    {t('layout.activePlanFor', { careerTitle: actionPlan!.careerTitle })}
                   </p>
                 </div>
               )}
@@ -134,12 +136,12 @@ export default function AppLayout({
                 className="shrink-0 md:hidden"
               >
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
+                <span className="sr-only">{t('layout.menu')}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 mb-4">
-                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <SheetTitle className="sr-only">{t('layout.menu')}</SheetTitle>
                 <AppLogo />
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -153,7 +155,7 @@ export default function AppLayout({
                       <Button asChild variant="outline" size="sm" className="w-full">
                         <Link href="/ikigai" className="flex items-center justify-center gap-1">
                           <Target className="h-3 w-3" />
-                          <span>Complete Profile</span>
+                          <span>{t('layout.completeProfile')}</span>
                         </Link>
                       </Button>
                     )}
@@ -161,7 +163,7 @@ export default function AppLayout({
                        <Button asChild variant="outline" size="sm" className="w-full">
                         <Link href="/plan" className="flex items-center justify-center gap-1">
                           <Sparkles className="h-3 w-3" />
-                          <span>View Plan</span>
+                          <span>{t('layout.viewPlan')}</span>
                         </Link>
                       </Button>
                     )}
@@ -169,7 +171,7 @@ export default function AppLayout({
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium">Profile Status</span>
+                        <span className="font-medium">{t('layout.profileStatus')}</span>
                         <span className="font-bold text-primary">{profileCompletion}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -181,7 +183,7 @@ export default function AppLayout({
                     </div>
                     {hasActionPlan && (
                       <p className="text-xs text-muted-foreground">
-                        Active plan: {actionPlan!.careerTitle}
+                        {t('layout.activePlanFor', { careerTitle: actionPlan!.careerTitle })}
                       </p>
                     )}
                   </div>
@@ -196,7 +198,7 @@ export default function AppLayout({
               <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
                 <Link href="/dashboard">
                   <Home className="h-4 w-4 mr-1" />
-                  Dashboard
+                  {t('layout.sectionDashboard')}
                 </Link>
               </Button>
             )}
@@ -211,23 +213,25 @@ export default function AppLayout({
                   {/* Contextual Badges */}
                   {hasMounted && pathname === '/ikigai' && !isProfileComplete && (
                     <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
-                      {profileCompletion < 50 ? 'Incomplete' : `${profileCompletion}%`}
+                      {profileCompletion < 50 ? t('layout.statusIncomplete') : `${profileCompletion}%`}
                     </Badge>
                   )}
                   
                   {hasMounted && pathname === '/careers' && !isProfileComplete && (
                     <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
-                      Profile Required
+                      {t('layout.statusProfileRequired')}
                     </Badge>
                   )}
                   
                   {hasMounted && pathname === '/plan' && hasActionPlan && (
                     <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-300">
-                      {Math.round(
-                        (actionPlan!.phases.reduce((acc, phase) => 
-                          acc + phase.tasks.filter(t => t.completed).length, 0) / 
-                        actionPlan!.phases.reduce((acc, phase) => acc + phase.tasks.length, 1)) * 100
-                      )}% Progress
+                      {t('layout.progressPercent', {
+                        progress: Math.round(
+                          (actionPlan!.phases.reduce((acc, phase) => 
+                            acc + phase.tasks.filter(t => t.completed).length, 0) / 
+                          actionPlan!.phases.reduce((acc, phase) => acc + phase.tasks.length, 1)) * 100
+                        )
+                      })}
                     </Badge>
                   )}
                 </>
@@ -242,7 +246,7 @@ export default function AppLayout({
               <Button asChild variant="outline" size="sm" className="hidden sm:flex">
                 <Link href="/ikigai" className="flex items-center gap-1">
                   <Target className="h-3 w-3" />
-                  <span className="text-xs">Complete Profile</span>
+                  <span className="text-xs">{t('layout.completeProfile')}</span>
                 </Link>
               </Button>
             )}
@@ -252,7 +256,7 @@ export default function AppLayout({
               <Button asChild variant="outline" size="sm" className="hidden sm:flex">
                 <Link href="/plan" className="flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
-                  <span className="text-xs">View Plan</span>
+                  <span className="text-xs">{t('layout.viewPlan')}</span>
                 </Link>
               </Button>
             )}
@@ -269,23 +273,23 @@ export default function AppLayout({
         {/* Footer Status Bar (Desktop only) */}
         <footer className="hidden md:flex items-center justify-between border-t px-6 py-3 text-xs text-muted-foreground bg-muted/20">
           <div className="flex items-center gap-4">
-            <span className="font-medium">KAIROS Career Planner</span>
+            <span className="font-medium">{t('layout.footerTitle')}</span>
             <span className="text-xs">•</span>
-            <span>Dynamic Career Matching</span>
+            <span>{t('layout.footerSubtitle1')}</span>
             <span className="text-xs">•</span>
-            <span>Personalized Action Plans</span>
+            <span>{t('layout.footerSubtitle2')}</span>
           </div>
           <div className="flex items-center gap-4">
             {hasMounted && isProfileComplete ? (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span>Profile Complete</span>
+                <span>{t('layout.footerProfileComplete')}</span>
               </div>
             ) : hasMounted && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></div>
                 <Link href="/ikigai" className="text-primary hover:underline">
-                  Complete Profile ({profileCompletion}%)
+                  {t('layout.footerCompleteProfilePrompt', { completion: profileCompletion })}
                 </Link>
               </div>
             )}

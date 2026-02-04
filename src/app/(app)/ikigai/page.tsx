@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, EducationLevel } from '@/lib/types';
-import { Save, AlertCircle, Sparkles, Target, Zap, Heart, Brain, Briefcase } from 'lucide-react';
+import { Save, AlertCircle, Sparkles, Target, Zap, Heart, Brain } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect, useState, useMemo } from 'react';
@@ -36,24 +36,10 @@ export default function IkigaiPage() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const [hasMounted, setHasMounted] = useState(false);
-  const [characterCounts, setCharacterCounts] = useState({
-    passions: 0,
-    skills: 0,
-    values: 0,
-    interests: 0,
-  });
 
   useEffect(() => {
     setHasMounted(true);
-    if(ikigai) {
-      setCharacterCounts({
-        passions: ikigai.passions?.length || 0,
-        skills: ikigai.skills?.length || 0,
-        values: ikigai.values?.length || 0,
-        interests: ikigai.interests?.length || 0,
-      });
-    }
-  }, [ikigai]);
+  }, []);
 
   const completionPercentage = useMemo(() => {
     if (!hasMounted || !ikigai) return 0;
@@ -75,8 +61,8 @@ export default function IkigaiPage() {
   const handleSave = () => {
     if (completionPercentage < 50) {
       toast({
-        title: 'Profile Incomplete',
-        description: 'Please fill in more details for better career matching.',
+        title: t('ikigai.profileIncompleteToast'),
+        description: t('ikigai.profileIncompleteToastDesc'),
         variant: 'destructive',
       });
       return;
@@ -85,15 +71,15 @@ export default function IkigaiPage() {
     toast({
       title: t('toasts.profileSavedTitle'),
       description: isProfileComplete 
-        ? 'Your profile is complete! You can now explore careers with accurate matching.' 
+        ? t('ikigai.bannerCompleteDesc')
         : t('toasts.profileSavedDescription'),
     });
 
     if (isProfileComplete) {
       setTimeout(() => {
         toast({
-          title: '🎉 Profile Complete!',
-          description: 'You can now explore careers with personalized matching scores.',
+          title: t('ikigai.profileCompleteToast'),
+          description: t('ikigai.profileCompleteToastDesc'),
           variant: 'default',
         });
       }, 1000);
@@ -118,37 +104,37 @@ export default function IkigaiPage() {
     }
   };
   
-  const getStatusText = (field: keyof typeof characterCounts) => {
+  const getStatusText = (field: 'passions' | 'skills' | 'values' | 'interests') => {
     const value = ikigai?.[field] || '';
     const count = value.length;
     const status = getFieldStatus(value);
     switch (status) {
-      case 'good': return `${count} characters - Good detail`;
-      case 'fair': return `${count} characters - Add more details`;
-      case 'poor': return 'Please provide more information';
+      case 'good': return t('ikigai.statusGood', { count });
+      case 'fair': return t('ikigai.statusFair', { count });
+      case 'poor': return t('ikigai.statusPoor');
     }
   };
 
   const tips = [
     {
       icon: <Target className="h-4 w-4" />,
-      title: 'Be Specific',
-      description: 'Instead of "I like computers", say "I enjoy building web applications with React and Node.js"'
+      title: t('ikigai.beSpecific'),
+      description: t('ikigai.beSpecificDesc')
     },
     {
       icon: <Sparkles className="h-4 w-4" />,
-      title: 'Include Keywords',
-      description: 'Mention specific skills, tools, and technologies you know or want to learn'
+      title: t('ikigai.includeKeywords'),
+      description: t('ikigai.includeKeywordsDesc')
     },
     {
       icon: <Zap className="h-4 w-4" />,
-      title: 'Think About Values',
-      description: 'What matters most to you? Work-life balance, impact, creativity, stability?'
+      title: t('ikigai.thinkAboutValues'),
+      description: t('ikigai.thinkAboutValuesDesc')
     },
     {
       icon: <Brain className="h-4 w-4" />,
-      title: 'Career Goals',
-      description: 'Mention any specific career paths or industries you\'re curious about'
+      title: t('ikigai.careerGoals'),
+      description: t('ikigai.careerGoalsDesc')
     }
   ];
 
@@ -179,7 +165,7 @@ export default function IkigaiPage() {
                   ? 'text-green-900 dark:text-green-300' 
                   : 'text-blue-900 dark:text-blue-300'
               }`}>
-                {isProfileComplete ? 'Profile Complete!' : 'Complete Your Profile for Better Results'}
+                {isProfileComplete ? t('ikigai.bannerCompleteTitle') : t('ikigai.bannerIncompleteTitle')}
               </h3>
               <p className={`text-sm mt-1 ${
                 isProfileComplete 
@@ -187,19 +173,19 @@ export default function IkigaiPage() {
                   : 'text-blue-800 dark:text-blue-400'
               }`}>
                 {isProfileComplete 
-                  ? 'Your detailed profile ensures accurate career matching. Scores will be based on your unique profile.' 
-                  : 'A complete profile prevents generic 50% scores and ensures personalized career matching.'}
+                  ? t('ikigai.bannerCompleteDesc')
+                  : t('ikigai.bannerIncompleteDesc')}
               </p>
               
               <div className="mt-3">
                 <div className="flex justify-between text-xs mb-1">
-                  <span>Profile Completion</span>
+                  <span>{t('dashboard.profileCompletion')}</span>
                   <span>{completionPercentage}%</span>
                 </div>
                 <Progress value={completionPercentage} className="h-2" />
                 {completionPercentage < 80 && (
                   <p className="text-xs mt-2 text-muted-foreground">
-                    Fill all sections with detailed information to unlock accurate career matching.
+                    {t('ikigai.bannerProgressDesc')}
                   </p>
                 )}
               </div>
@@ -207,7 +193,7 @@ export default function IkigaiPage() {
             
             {isProfileComplete && (
               <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                Ready for Careers
+                {t('ikigai.readyForCareers')}
               </Badge>
             )}
           </div>
@@ -227,7 +213,7 @@ export default function IkigaiPage() {
                 </div>
                 {hasMounted && (
                   <Badge variant={isProfileComplete ? "default" : "outline"}>
-                    {completionPercentage}% Complete
+                    {t('ikigai.completion', { completionPercentage })}
                   </Badge>
                 )}
               </div>
@@ -250,7 +236,7 @@ export default function IkigaiPage() {
                     onChange={(e) => handleInputChange('passions', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    What excites you? What would you do even if you weren't paid?
+                    {t('ikigai.passionDesc')}
                   </p>
                 </div>
 
@@ -270,7 +256,7 @@ export default function IkigaiPage() {
                     onChange={(e) => handleInputChange('skills', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Technical abilities, soft skills, languages, tools, certifications
+                    {t('ikigai.skillsDesc')}
                   </p>
                 </div>
 
@@ -290,7 +276,7 @@ export default function IkigaiPage() {
                     onChange={(e) => handleInputChange('values', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    What principles guide your decisions? What matters most in a workplace?
+                    {t('ikigai.valuesDesc')}
                   </p>
                 </div>
 
@@ -310,15 +296,15 @@ export default function IkigaiPage() {
                     onChange={(e) => handleInputChange('interests', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Topics you enjoy learning about, industries you follow, hobbies
+                    {t('ikigai.interestsDesc')}
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4 pt-4 border-t">
-                <Label className="text-lg font-medium">Where are you right now?</Label>
+                <Label className="text-lg font-medium">{t('ikigai.educationLevelTitle')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  This helps tailor career recommendations and action plans to your current stage.
+                  {t('ikigai.educationLevelDesc')}
                 </p>
                 <RadioGroup
                   value={ikigai?.educationLevel}
@@ -331,31 +317,31 @@ export default function IkigaiPage() {
                     ikigai?.educationLevel === 'highSchool' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="highSchool" id="r1" />
-                    <Label htmlFor="r1" className="cursor-pointer">🎓 High School</Label>
+                    <Label htmlFor="r1" className="cursor-pointer">🎓 {t('ikigai.highSchool')}</Label>
                   </div>
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
                     ikigai?.educationLevel === 'undergrad' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="undergrad" id="r2" />
-                    <Label htmlFor="r2" className="cursor-pointer">🏫 Undergraduate</Label>
+                    <Label htmlFor="r2" className="cursor-pointer">🏫 {t('ikigai.undergrad')}</Label>
                   </div>
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
                     ikigai?.educationLevel === 'masters' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="masters" id="r3" />
-                    <Label htmlFor="r3" className="cursor-pointer">📚 Master's</Label>
+                    <Label htmlFor="r3" className="cursor-pointer">📚 {t('ikigai.masters')}</Label>
                   </div>
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
                     ikigai?.educationLevel === 'phd' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="phd" id="r4" />
-                    <Label htmlFor="r4" className="cursor-pointer">🎓 PhD/Doctoral</Label>
+                    <Label htmlFor="r4" className="cursor-pointer">🎓 {t('ikigai.phd')}</Label>
                   </div>
                    <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
                     ikigai?.educationLevel === 'professional' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="professional" id="r5" />
-                    <Label htmlFor="r5" className="cursor-pointer">💼 Professional</Label>
+                    <Label htmlFor="r5" className="cursor-pointer">💼 {t('ikigai.professional')}</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -366,15 +352,15 @@ export default function IkigaiPage() {
                   <>
                     {completionPercentage < 50 ? (
                       <p className="text-sm text-yellow-600">
-                        ⚠️ More details needed for accurate career matching
+                        ⚠️ {t('ikigai.footerWarning')}
                       </p>
                     ) : completionPercentage < 80 ? (
                       <p className="text-sm text-blue-600">
-                        📝 Almost there! Add more details for the best results
+                        📝 {t('ikigai.footerAlmostThere')}
                       </p>
                     ) : (
                       <p className="text-sm text-green-600">
-                        ✅ Ready for personalized career exploration
+                        ✅ {t('ikigai.footerReady')}
                       </p>
                     )}
                   </>
@@ -382,8 +368,10 @@ export default function IkigaiPage() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
-                  <Link href="/careers" disabled={!isProfileComplete}>
-                    Skip to Careers
+                  <Link href="/careers" passHref legacyBehavior>
+                    <a className={!isProfileComplete ? "pointer-events-none opacity-50" : ""}>
+                      {t('ikigai.skipToCareers')}
+                    </a>
                   </Link>
                 </Button>
                 <Button onClick={handleSave} disabled={!hasMounted || completionPercentage < 30}>
@@ -399,10 +387,10 @@ export default function IkigaiPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                Tips for Better Results
+                {t('ikigai.tipsTitle')}
               </CardTitle>
               <CardDescription>
-                Improve career matching accuracy
+                {t('ikigai.tipsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -417,9 +405,9 @@ export default function IkigaiPage() {
               ))}
               
               <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                <h4 className="font-medium text-sm mb-1">Why This Matters</h4>
+                <h4 className="font-medium text-sm mb-1">{t('ikigai.whyItMatters')}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Detailed profiles prevent generic 50% scores. The AI analyzes your unique combination of passions, skills, values, and interests to provide accurate career matches and personalized action plans.
+                  {t('ikigai.whyItMattersDesc')}
                 </p>
               </div>
             </CardContent>
@@ -427,9 +415,9 @@ export default function IkigaiPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Next Steps</CardTitle>
+              <CardTitle>{t('ikigai.nextSteps')}</CardTitle>
               <CardDescription>
-                What happens after you save?
+                {t('ikigai.nextStepsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -438,8 +426,8 @@ export default function IkigaiPage() {
                   <span className="text-primary font-bold">1</span>
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Theme Extraction</p>
-                  <p className="text-xs text-muted-foreground">AI identifies your key themes (Tech, Science, Arts, etc.)</p>
+                  <p className="font-medium text-sm">{t('ikigai.step1')}</p>
+                  <p className="text-xs text-muted-foreground">{t('ikigai.step1_desc')}</p>
                 </div>
               </div>
               
@@ -448,8 +436,8 @@ export default function IkigaiPage() {
                   <span className="text-primary font-bold">2</span>
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Career Matching</p>
-                  <p className="text-xs text-muted-foreground">Dynamic scores based on your profile, not fixed percentages</p>
+                  <p className="font-medium text-sm">{t('ikigai.step2')}</p>
+                  <p className="text-xs text-muted-foreground">{t('ikigai.step2_desc')}</p>
                 </div>
               </div>
               
@@ -458,15 +446,15 @@ export default function IkigaiPage() {
                   <span className="text-primary font-bold">3</span>
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Action Plans</p>
-                  <p className="text-xs text-muted-foreground">Personalized 3-phase plans with specific tasks</p>
+                  <p className="font-medium text-sm">{t('ikigai.step3')}</p>
+                  <p className="text-xs text-muted-foreground">{t('ikigai.step3_desc')}</p>
                 </div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button asChild variant="outline" className="w-full" disabled={!isProfileComplete}>
+               <Button asChild variant="outline" className="w-full" disabled={!isProfileComplete}>
                 <Link href="/careers">
-                  {isProfileComplete ? 'Explore Careers Now' : 'Complete Profile First'}
+                  {isProfileComplete ? t('ikigai.exploreCareersNow') : t('ikigai.completeProfileFirst')}
                 </Link>
               </Button>
             </CardFooter>

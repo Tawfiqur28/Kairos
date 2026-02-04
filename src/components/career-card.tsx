@@ -31,13 +31,13 @@ const CareerCard: React.FC<CareerCardProps> = ({ career, matchesTheme, onCheckFi
           <CardTitle>{career.title}</CardTitle>
           {matchesTheme && (
             <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-full">
-              Matches Your Profile
+              {t('careers.matchesYourProfile')}
             </span>
           )}
         </div>
         <CardDescription>{career.description}</CardDescription>
         <div className="text-xs text-muted-foreground">
-          Cluster: {career.cluster}
+          {t('careers.cluster', { cluster: career.cluster })}
         </div>
       </CardHeader>
       <CardContent>
