@@ -21,7 +21,6 @@ import { Bot, Loader2, Mic, MicOff, Send, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { processJournalEntriesForCareerSuggestions } from '@/ai/flows/process-journal-entries-for-career-suggestions';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -61,7 +60,14 @@ export default function JournalPage() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const [hasMounted, setHasMounted] = useState(false);
-  const [journalPlaceholder, setJournalPlaceholder] = useState(t('journal.thoughtsPlaceholder'));
+  const [journalPlaceholder, setJournalPlaceholder] = useState('');
+
+  const chatSuggestions = [
+    "How do I prepare for a software engineering interview?",
+    "Explain the concept of relativity like I'm a high school student.",
+    "Give me some study tips for my final exams.",
+    "What are some good portfolio projects for a UX designer?"
+  ];
 
   useEffect(() => {
     setHasMounted(true);
@@ -69,14 +75,9 @@ export default function JournalPage() {
       setIsSpeechRecognitionSupported(true);
     }
   }, []);
-
+  
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatHistory]);
-
-  useEffect(() => {
+    if(!hasMounted) return;
     const getPlaceholder = () => {
       switch (ikigai.educationLevel) {
         case 'highSchool':
@@ -92,7 +93,13 @@ export default function JournalPage() {
       }
     };
     setJournalPlaceholder(getPlaceholder());
-  }, [ikigai.educationLevel, t]);
+  }, [ikigai.educationLevel, t, hasMounted]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
 
   const handleToggleListening = () => {
@@ -168,13 +175,14 @@ export default function JournalPage() {
     });
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!chatInput.trim() || isChatLoading) return;
 
     const userMessage: ChatMessage = { role: 'user', content: chatInput };
-    const newChatHistory = [...chatHistory, userMessage, { role: 'assistant', content: '' }];
-    setChatHistory(newChatHistory);
+    const messagesForApi = [...chatHistory, userMessage];
+    
+    setChatHistory(prev => [...prev, userMessage, { role: 'assistant', content: '' }]);
     setChatInput('');
     setIsChatLoading(true);
 
@@ -183,7 +191,7 @@ export default function JournalPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [userMessage],
+          messages: messagesForApi,
           ikigai: ikigai,
         }),
       });
@@ -291,7 +299,7 @@ export default function JournalPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex flex-col">
+              <div className="h-[500px] flex flex-col">
                 <ScrollArea className="flex-1 p-4 border rounded-md bg-muted/20" ref={chatContainerRef}>
                   {chatHistory.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
@@ -319,17 +327,41 @@ export default function JournalPage() {
                     </div>
                   )}
                 </ScrollArea>
-                <form onSubmit={handleSendMessage} className="mt-4 flex items-center gap-2">
-                  <Input
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Ask a question..."
-                    disabled={isChatLoading}
-                  />
-                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()}>
-                    <Send className="h-4 w-4" />
-                    <span className="sr-only">Send</span>
-                  </Button>
+                <form onSubmit={handleSendMessage} className="mt-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Textarea
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Message KAIROS Assistant..."
+                      disabled={isChatLoading}
+                      rows={1}
+                      className="resize-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <Button type="submit" disabled={isChatLoading || !chatInput.trim()}>
+                      <Send className="h-4 w-4" />
+                      <span className="sr-only">Send</span>
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {chatHistory.length === 0 && chatSuggestions.map((suggestion) => (
+                      <Button
+                        key={suggestion}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => setChatInput(suggestion)}
+                        disabled={isChatLoading}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </div>
                 </form>
               </div>
             </CardContent>
