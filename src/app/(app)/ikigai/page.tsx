@@ -18,6 +18,7 @@ import type { Ikigai, EducationLevel } from '@/lib/types';
 import { Save } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useEffect, useState } from 'react';
 
 const initialIkigai: Ikigai = {
   passions: '',
@@ -31,6 +32,11 @@ export default function IkigaiPage() {
   const [ikigai, setIkigai] = useLocalStorage<Ikigai>('ikigai-profile', initialIkigai);
   const { toast } = useToast();
   const { t } = useLanguage();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const handleSave = () => {
     // The useLocalStorage hook already saves on change, but this provides explicit user feedback.
@@ -99,7 +105,7 @@ export default function IkigaiPage() {
           <div className="space-y-4 pt-4">
             <Label className="text-lg font-medium">Where are you right now?</Label>
             <RadioGroup
-              value={ikigai.educationLevel}
+              value={hasMounted ? ikigai.educationLevel : undefined}
               onValueChange={(value) =>
                 setIkigai({ ...ikigai, educationLevel: value as EducationLevel })
               }
