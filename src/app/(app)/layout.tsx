@@ -9,6 +9,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function AppLayout({
   children,
@@ -53,6 +54,7 @@ export default function AppLayout({
           <div className="w-full flex-1">
             {/* Can add search or other header elements here */}
           </div>
+          <LanguageSwitcher />
           <UserNav />
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized-action-plan';
+import { useLanguage } from '@/context/language-context';
 
 type MatchResult = {
   explanation: string;
@@ -53,24 +54,26 @@ function GamifiedActionPlan({
   isLoading: boolean;
   onRegenerate: () => void;
 }) {
+  const { t } = useLanguage();
+
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl">
-              Crafting Your Quest...
+              {t('careers.plan_loading_title')}
             </CardTitle>
             <Button variant="ghost" onClick={onBack} disabled>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Careers
+              {t('careers.plan_back_button')}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center p-8 space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground">AI is forging your epic journey into {careerTitle}!</p>
+            <p className="text-muted-foreground">{t('careers.plan_loading_text', { careerTitle: careerTitle })}</p>
           </div>
         </CardContent>
       </Card>
@@ -83,19 +86,19 @@ function GamifiedActionPlan({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl">
-              Action Plan Generation
+              {t('careers.plan_error_title')}
             </CardTitle>
             <Button variant="ghost" onClick={onBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Careers
+              {t('careers.plan_back_button')}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="text-center p-8">
-            <p className="mb-4 text-muted-foreground">Something went wrong. Click to try generating your plan again.</p>
+            <p className="mb-4 text-muted-foreground">{t('careers.plan_error_text')}</p>
             <Button onClick={onRegenerate}>
               <Sparkles className="mr-2 h-4 w-4" />
-              Re-generate Plan
+              {t('careers.plan_regenerate_button')}
             </Button>
         </CardContent>
       </Card>
@@ -109,11 +112,11 @@ function GamifiedActionPlan({
           <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             🎯 {plan.missionName}
           </h2>
-          <p className="text-muted-foreground">Your Gamified Action Plan for becoming a {careerTitle}</p>
+          <p className="text-muted-foreground">{t('careers.plan_title', { careerTitle: careerTitle })}</p>
         </div>
         <Button variant="ghost" onClick={onBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Careers
+            {t('careers.plan_back_button')}
         </Button>
       </div>
     
@@ -127,7 +130,7 @@ function GamifiedActionPlan({
           <div className="mt-6 p-4 bg-background/50 rounded-lg shadow-inner border">
             <h3 className="text-lg font-bold flex items-center mb-4 font-headline">
               <Lightbulb className="mr-2 text-yellow-400" />
-              Industry Insider Tips
+              {t('careers.plan_insider_tips')}
             </h3>
             <ul className="space-y-3 text-sm">
               {plan.spicyTips.map((tip, i) => (
@@ -142,7 +145,7 @@ function GamifiedActionPlan({
           <div className="p-4 bg-background/50 rounded-lg shadow-inner border">
             <h3 className="text-lg font-bold flex items-center mb-4 font-headline">
               <Zap className="mr-2 text-blue-400" />
-              Monthly Field Intel
+              {t('careers.plan_monthly_intel')}
             </h3>
             <ul className="space-y-3 text-sm">
               {plan.monthlyUpdates.map((update, i) => (
@@ -168,6 +171,7 @@ export default function CareersPage() {
     values: '',
     interests: '',
   });
+  const { t } = useLanguage();
 
   const [sortedCareers, setSortedCareers] = useState<Career[]>(allCareers);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
@@ -215,8 +219,8 @@ export default function CareersPage() {
   const handleCheckFit = async (career: Career) => {
     if (!isProfileComplete) {
       toast({
-        title: 'Profile Incomplete',
-        description: 'Please complete your Ikigai Canvas before checking for a career match.',
+        title: t('toasts.profileIncompleteTitle'),
+        description: t('toasts.profileIncompleteDescription'),
         variant: 'destructive',
       });
       return;
@@ -241,8 +245,8 @@ export default function CareersPage() {
     } catch (error: any) {
       console.error(error);
       toast({
-        title: 'AI Error',
-        description: error.message || 'Could not generate a career match at this time.',
+        title: t('toasts.aiErrorTitle'),
+        description: error.message || t('toasts.aiErrorCareerMatch'),
         variant: 'destructive',
       });
       setSelectedCareer(null);
@@ -271,9 +275,9 @@ export default function CareersPage() {
     } catch (error: any) {
       console.error(error);
       toast({
-        title: 'AI Error',
+        title: t('toasts.aiErrorTitle'),
         description:
-          error.message || 'Could not generate an action plan at this time.',
+          error.message || t('toasts.aiErrorActionPlan'),
         variant: 'destructive',
       });
       // Go back to careers view on error
@@ -288,8 +292,8 @@ export default function CareersPage() {
   return (
     <>
       <PageHeader
-        title="Career Explorer"
-        description="Discover careers that align with your unique Ikigai profile."
+        title={t('careers.title')}
+        description={t('careers.description')}
       />
 
       {!hasMounted ? (
@@ -305,14 +309,14 @@ export default function CareersPage() {
       ) : !isProfileComplete && view === 'careers' && (
         <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <CardHeader>
-                <CardTitle className="text-yellow-900 dark:text-yellow-300">Complete Your Profile</CardTitle>
+                <CardTitle className="text-yellow-900 dark:text-yellow-300">{t('careers.completeProfileTitle')}</CardTitle>
                 <CardDescription className="text-yellow-800 dark:text-yellow-400">
-                    Your Ikigai Canvas is empty. Please fill it out to enable AI career matching and sorting.
+                    {t('careers.completeProfileDescription')}
                 </CardDescription>
             </CardHeader>
             <CardFooter>
                 <Button variant="secondary" asChild>
-                    <Link href="/ikigai">Go to Ikigai Canvas</Link>
+                    <Link href="/ikigai">{t('careers.goToIkigai')}</Link>
                 </Button>
             </CardFooter>
         </Card>
@@ -335,7 +339,7 @@ export default function CareersPage() {
                     <CardDescription>{career.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <h4 className="text-sm font-semibold mb-2">Key Skills:</h4>
+                    <h4 className="text-sm font-semibold mb-2">{t('careers.keySkills')}</h4>
                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {career.requiredSkills.map((skill) => (
                         <li key={skill}>{skill}</li>
@@ -345,7 +349,7 @@ export default function CareersPage() {
                   <CardFooter>
                     <Button onClick={() => handleCheckFit(career)} disabled={!hasMounted || !isProfileComplete}>
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Check Fit
+                      {t('careers.checkFit')}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -377,29 +381,29 @@ export default function CareersPage() {
       <Dialog open={!!selectedCareer} onOpenChange={(isOpen) => !isOpen && setSelectedCareer(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>AI Career Match: {selectedCareer?.title}</DialogTitle>
+            <DialogTitle>{t('careers.dialogTitle', { career: selectedCareer?.title })}</DialogTitle>
             <DialogDescription>
-              Here's how this career aligns with your profile.
+              {t('careers.dialogDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             {isLoading && (
               <div className="flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <p>Our AI is analyzing your profile...</p>
+                <p>{t('careers.aiLoading')}</p>
               </div>
             )}
             {matchResult && !isLoading && (
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <h4 className="font-semibold">Fit Score</h4>
+                    <h4 className="font-semibold">{t('careers.fitScore')}</h4>
                     <span className="text-primary font-bold">{matchResult.fitScore}%</span>
                   </div>
                   <Progress value={matchResult.fitScore} />
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Personalized Explanation</h4>
+                  <h4 className="font-semibold mb-2">{t('careers.explanation')}</h4>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {matchResult.explanation}
                   </p>
@@ -407,12 +411,12 @@ export default function CareersPage() {
                 {matchResult.fitScore > 60 ? (
                     <Button onClick={() => handleGeneratePlan(selectedCareer!)} className="w-full">
                        <GanttChartSquare className="mr-2 h-4 w-4" />
-                        Generate Your Action Plan
+                        {t('careers.generatePlan')}
                     </Button>
                 ) : (
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <p className="font-semibold">Keep Exploring!</p>
-                    <p className="text-sm text-muted-foreground">This career might not be the strongest match right now. Check out other options!</p>
+                    <p className="font-semibold">{t('careers.keepExploring')}</p>
+                    <p className="text-sm text-muted-foreground">{t('careers.notStrongMatch')}</p>
                   </div>
                 )}
               </div>
@@ -420,7 +424,7 @@ export default function CareersPage() {
             {!matchResult && !isLoading && (
                 <div className="flex flex-col items-center justify-center space-y-4 text-center">
                     <Bot size={48} className="mx-auto mb-4 text-muted-foreground"/>
-                    <p>Something went wrong, or the AI is still thinking.</p>
+                    <p>{t('careers.errorText')}</p>
                 </div>
             )}
           </div>

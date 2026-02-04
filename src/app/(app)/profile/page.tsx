@@ -18,6 +18,7 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { UserProfile } from '@/lib/types';
 import { Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { useLanguage } from '@/context/language-context';
 
 const initialProfile: UserProfile = {
   name: 'User',
@@ -33,21 +34,22 @@ export default function ProfilePage() {
   const [profile, setProfile] = useLocalStorage<UserProfile>('user-profile', initialProfile);
   const [ikigai, setIkigai] = useLocalStorage('ikigai-profile', initialProfile.ikigai);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleSave = () => {
     // The useLocalStorage hook already saves on change, but this provides explicit user feedback.
     setProfile({ ...profile, ikigai: ikigai });
     toast({
-      title: 'Profile Saved!',
-      description: 'Your profile has been successfully updated.',
+      title: t('toasts.profileSavedTitle'),
+      description: t('toasts.profileChangesSavedDescription'),
     });
   };
 
   return (
     <>
       <PageHeader
-        title="Your Profile"
-        description="Manage your account information and Ikigai."
+        title={t('profile.title')}
+        description={t('profile.description')}
       />
       <Card>
         <CardHeader>
@@ -57,14 +59,14 @@ export default function ProfilePage() {
               <AvatarFallback>{profile.name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle>@{profile.name}</CardTitle>
-              <CardDescription>Update your personal details and Ikigai below.</CardDescription>
+              <CardTitle>{t('profile.cardTitle', { name: profile.name })}</CardTitle>
+              <CardDescription>{t('profile.cardDescription')}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('profile.nameLabel')}</Label>
             <Input
               id="name"
               value={profile.name}
@@ -73,7 +75,7 @@ export default function ProfilePage() {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="passions">Passions</Label>
+              <Label htmlFor="passions">{t('profile.passionsLabel')}</Label>
               <Textarea
                 id="passions"
                 value={ikigai.passions}
@@ -82,7 +84,7 @@ export default function ProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="skills">Skills</Label>
+              <Label htmlFor="skills">{t('profile.skillsLabel')}</Label>
               <Textarea
                 id="skills"
                 value={ikigai.skills}
@@ -95,7 +97,7 @@ export default function ProfilePage() {
         <CardFooter>
           <Button onClick={handleSave}>
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {t('profile.saveButton')}
           </Button>
         </CardFooter>
       </Card>

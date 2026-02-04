@@ -19,6 +19,7 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry } from '@/lib/types';
 import { Bot, Loader2, Mic, MicOff, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '@/context/language-context';
 
 type CareerSuggestions = {
   careerSuggestions: string;
@@ -39,6 +40,7 @@ export default function JournalPage() {
   const [suggestions, setSuggestions] = useState<CareerSuggestions | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [isListening, setIsListening] = useState(false);
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false);
@@ -59,8 +61,8 @@ export default function JournalPage() {
 
     if (!isSpeechRecognitionSupported) {
       toast({
-        title: "Browser Not Supported",
-        description: "Your browser doesn't support voice recognition.",
+        title: t('toasts.voiceNotSupportedTitle'),
+        description: t('toasts.voiceNotSupportedDescription'),
         variant: "destructive"
       });
       return;
@@ -89,8 +91,8 @@ export default function JournalPage() {
     recognitionRef.current.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
       toast({
-        title: "Voice Recognition Error",
-        description: event.error === 'not-allowed' ? "Please grant microphone permissions." : "An error occurred during voice recognition.",
+        title: t('toasts.voiceErrorTitle'),
+        description: event.error === 'not-allowed' ? t('toasts.voiceErrorPermission') : t('toasts.voiceErrorGeneral'),
         variant: "destructive"
       });
       setIsListening(false);
@@ -102,8 +104,8 @@ export default function JournalPage() {
   const handleSaveEntry = () => {
     if (!currentContent.trim() || !currentFeeling.trim()) {
       toast({
-        title: 'Incomplete Entry',
-        description: 'Please fill out both your thoughts and feelings.',
+        title: t('toasts.incompleteEntryTitle'),
+        description: t('toasts.incompleteEntryDescription'),
         variant: 'destructive',
       });
       return;
@@ -118,16 +120,16 @@ export default function JournalPage() {
     setCurrentContent('');
     setCurrentFeeling('');
     toast({
-      title: 'Entry Saved',
-      description: 'Your journal has been updated.',
+      title: t('toasts.entrySavedTitle'),
+      description: t('toasts.entrySavedDescription'),
     });
   };
 
   const handleGetSuggestions = async () => {
     if (entries.length === 0) {
       toast({
-        title: 'Not Enough Data',
-        description: 'Please write at least one journal entry first.',
+        title: t('toasts.notEnoughDataTitle'),
+        description: t('toasts.notEnoughDataDescription'),
         variant: 'destructive',
       });
       return;
@@ -149,8 +151,8 @@ export default function JournalPage() {
     } catch (error) {
       console.error(error);
       toast({
-        title: 'AI Error',
-        description: 'Could not generate career suggestions at this time.',
+        title: t('toasts.aiErrorTitle'),
+        description: t('toasts.aiErrorJournal'),
         variant: 'destructive',
       });
     } finally {
@@ -161,28 +163,28 @@ export default function JournalPage() {
   return (
     <>
       <PageHeader
-        title="Daily Journal"
-        description="Reflect on your day. Your thoughts can reveal hidden career passions."
+        title={t('journal.title')}
+        description={t('journal.description')}
       />
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>New Entry</CardTitle>
+              <CardTitle>{t('journal.newEntryTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="feeling">How are you feeling today?</Label>
+                <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
                 <Input
                   id="feeling"
-                  placeholder="e.g., Energized, curious, a bit tired..."
+                  placeholder={t('journal.feelingPlaceholder')}
                   value={currentFeeling}
                   onChange={(e) => setCurrentFeeling(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="content">What's on your mind?</Label>
+                  <Label htmlFor="content">{t('journal.thoughtsLabel')}</Label>
                   {isSpeechRecognitionSupported && (
                     <Button
                       variant="ghost"
@@ -197,7 +199,7 @@ export default function JournalPage() {
                 </div>
                 <Textarea
                   id="content"
-                  placeholder="Describe your day, your tasks, what you enjoyed, and what you didn't."
+                  placeholder={t('journal.thoughtsPlaceholder')}
                   className="min-h-32"
                   value={currentContent}
                   onChange={(e) => setCurrentContent(e.target.value)}
@@ -205,31 +207,31 @@ export default function JournalPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleSaveEntry}>Save Entry</Button>
+              <Button onClick={handleSaveEntry}>{t('journal.saveButton')}</Button>
             </CardFooter>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>AI Career Insights</CardTitle>
+              <CardTitle>{t('journal.aiInsightsTitle')}</CardTitle>
               <CardDescription>
-                Based on your journal, here are some career paths you might find fulfilling.
+                {t('journal.aiInsightsDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading && (
                 <div className="flex items-center justify-center p-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="ml-4">AI is analyzing your journal...</p>
+                  <p className="ml-4">{t('journal.aiLoading')}</p>
                 </div>
               )}
               {suggestions && !isLoading && (
                 <div className="space-y-4 text-sm">
                   <div>
-                    <h4 className="font-bold mb-2 font-headline">Analysis:</h4>
+                    <h4 className="font-bold mb-2 font-headline">{t('journal.analysisLabel')}</h4>
                     <p className="text-muted-foreground whitespace-pre-wrap">{suggestions.analysis}</p>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-2 font-headline">Suggestions:</h4>
+                    <h4 className="font-bold mb-2 font-headline">{t('journal.suggestionsLabel')}</h4>
                     <p className="text-muted-foreground whitespace-pre-wrap">{suggestions.careerSuggestions}</p>
                   </div>
                 </div>
@@ -237,28 +239,28 @@ export default function JournalPage() {
                {!suggestions && !isLoading && (
                  <div className="text-center text-muted-foreground py-8">
                     <Bot size={48} className="mx-auto mb-4"/>
-                    <p>Click the button to generate suggestions from your entries.</p>
+                    <p>{t('journal.generatePrompt')}</p>
                  </div>
                )}
             </CardContent>
             <CardFooter>
               <Button onClick={handleGetSuggestions} disabled={isLoading}>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Generate Suggestions
+                {t('journal.generateButton')}
               </Button>
             </CardFooter>
           </Card>
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-xl font-bold font-headline">Past Entries</h3>
+          <h3 className="text-xl font-bold font-headline">{t('journal.pastEntriesTitle')}</h3>
           {entries.length > 0 ? (
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
               {entries.map((entry) => (
                 <Card key={entry.id}>
                   <CardHeader>
                     <CardTitle className="text-lg">{entry.date}</CardTitle>
-                    <CardDescription>Feeling: {entry.feeling}</CardDescription>
+                    <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">{entry.content}</p>
@@ -268,7 +270,7 @@ export default function JournalPage() {
             </div>
           ) : (
             <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
-                <p>No journal entries yet.</p>
+                <p>{t('journal.noEntries')}</p>
             </div>
           )}
         </div>

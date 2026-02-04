@@ -15,46 +15,47 @@ import {
   Mic,
   Target,
 } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 export default function LearnMorePage() {
+  const { t } = useLanguage();
+
   return (
     <>
       <PageHeader
-        title="How Kairos Compass Works"
-        description="Your automated guide to a fulfilling career path."
+        title={t('learnMore.title')}
+        description={t('learnMore.description')}
       />
 
       <div className="space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>A Simple, Powerful Flow</CardTitle>
-            <CardDescription>We guide you from self-discovery to a concrete action plan in three simple steps.</CardDescription>
+            <CardTitle>{t('learnMore.flowTitle')}</CardTitle>
+            <CardDescription>{t('learnMore.flowDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
               <div className="flex items-start gap-4">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold shrink-0">1</div>
                   <div>
-                      <h4 className="font-semibold">Discover Yourself</h4>
-                      <p className="text-muted-foreground">
-                          Start with our interactive <strong>Ikigai Canvas</strong>. It's a space for you to articulate what you love, what you're good at, what the world needs, and what you can be paid for. This creates a unique profile that powers our AI.
-                      </p>
+                      <h4 className="font-semibold">{t('learnMore.step1_title')}</h4>
+                      <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: t('learnMore.step1_text') }} />
                   </div>
               </div>
               <div className="flex items-start gap-4">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold shrink-0">2</div>
                   <div>
-                      <h4 className="font-semibold">Get AI-Matched Careers</h4>
+                      <h4 className="font-semibold">{t('learnMore.step2_title')}</h4>
                       <p className="text-muted-foreground">
-                        Our AI analyzes your Ikigai profile and suggests careers that truly align with you. You'll see a personalized "fit score" and a detailed explanation for each match.
+                        {t('learnMore.step2_text')}
                       </p>
                   </div>
               </div>
               <div className="flex items-start gap-4">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold shrink-0">3</div>
                   <div>
-                      <h4 className="font-semibold">Receive a Dynamic Action Plan</h4>
+                      <h4 className="font-semibold">{t('learnMore.step3_title')}</h4>
                       <p className="text-muted-foreground">
-                        Once you pick a career, our AI generates a specific, step-by-step 3-year plan to help you achieve it. No more guesswork—just a clear path forward.
+                        {t('learnMore.step3_text')}
                       </p>
                   </div>
               </div>
@@ -63,43 +64,43 @@ export default function LearnMorePage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>Core Features & Automation</CardTitle>
-                <CardDescription>We use smart technology to make your career planning journey seamless.</CardDescription>
+                <CardTitle>{t('learnMore.featuresTitle')}</CardTitle>
+                <CardDescription>{t('learnMore.featuresDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
                 <div className="flex items-start gap-4">
                     <Target className="h-8 w-8 text-primary mt-1 shrink-0" />
                     <div>
-                        <h4 className="font-semibold">Ikigai Canvas</h4>
-                        <p className="text-sm text-muted-foreground">An interactive canvas to input your passions, skills, values, and interests.</p>
+                        <h4 className="font-semibold">{t('learnMore.feature1_title')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('learnMore.feature1_text')}</p>
                     </div>
                 </div>
                 <div className="flex items-start gap-4">
                     <Mic className="h-8 w-8 text-primary mt-1 shrink-0" />
                     <div>
-                        <h4 className="font-semibold">Voice and Text Input</h4>
-                        <p className="text-sm text-muted-foreground">Use voice commands or text to interact with the app and fill out your journal entries.</p>
+                        <h4 className="font-semibold">{t('learnMore.feature2_title')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('learnMore.feature2_text')}</p>
                     </div>
                 </div>
                 <div className="flex items-start gap-4">
                     <Bot className="h-8 w-8 text-primary mt-1 shrink-0" />
                     <div>
-                        <h4 className="font-semibold">AI Career Match</h4>
-                        <p className="text-sm text-muted-foreground">Our AI analyzes your profile to match you with careers from our curated database.</p>
+                        <h4 className="font-semibold">{t('learnMore.feature3_title')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('learnMore.feature3_text')}</p>
                     </div>
                 </div>
                 <div className="flex items-start gap-4">
                     <PenSquare className="h-8 w-8 text-primary mt-1 shrink-0" />
                     <div>
-                        <h4 className="font-semibold">Dynamic 3-Year Plan</h4>
-                        <p className="text-sm text-muted-foreground">Get a specific, actionable plan tailored to your chosen career goal.</p>
+                        <h4 className="font-semibold">{t('learnMore.feature4_title')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('learnMore.feature4_text')}</p>
                     </div>
                 </div>
                 <div className="flex items-start gap-4">
                     <BrainCircuit className="h-8 w-8 text-primary mt-1 shrink-0" />
                     <div>
-                        <h4 className="font-semibold">Smart Automation</h4>
-                        <p className="text-sm text-muted-foreground">The app learns from your inputs, like journal entries, to refine suggestions over time and prefills information to save you time.</p>
+                        <h4 className="font-semibold">{t('learnMore.feature5_title')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('learnMore.feature5_text')}</p>
                     </div>
                 </div>
             </CardContent>

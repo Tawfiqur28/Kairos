@@ -20,6 +20,7 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import { Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { useLanguage } from '@/context/language-context';
 
 export function UserNav() {
   const [profile] = useLocalStorage('user-profile', { name: 'User' });
@@ -27,6 +28,7 @@ export function UserNav() {
     'theme',
     'dark'
   );
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -53,14 +55,14 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{profile.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              user@email.com
+              {t('userNav.email')}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <Link href="/profile">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem>{t('userNav.profile')}</DropdownMenuItem>
           </Link>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
@@ -69,7 +71,7 @@ export function UserNav() {
               ) : (
                 <Moon className="mr-2 h-4 w-4" />
               )}
-              <span>Theme</span>
+              <span>{t('userNav.theme')}</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup
@@ -78,14 +80,14 @@ export function UserNav() {
                   setTheme(value as 'light' | 'dark')
                 }
               >
-                <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="light">{t('userNav.light')}</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="dark">{t('userNav.dark')}</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Log out</DropdownMenuItem>
+        <DropdownMenuItem>{t('userNav.logout')}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

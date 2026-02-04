@@ -11,17 +11,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/language-context';
 
-const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/ikigai', icon: Target, label: 'Ikigai Canvas' },
-  { href: '/journal', icon: BookText, label: 'Journal' },
-  { href: '/careers', icon: Briefcase, label: 'Careers' },
-  { href: '/learn-more', icon: Info, label: 'Learn More' },
+const navItemsConfig = [
+  { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+  { href: '/ikigai', icon: Target, labelKey: 'nav.ikigai' },
+  { href: '/journal', icon: BookText, labelKey: 'nav.journal' },
+  { href: '/careers', icon: Briefcase, labelKey: 'nav.careers' },
+  { href: '/learn-more', icon: Info, labelKey: 'nav.learnMore' },
 ];
 
 export function MainNav() {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const navItems = navItemsConfig.map(item => ({...item, label: t(item.labelKey)}));
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
