@@ -4,8 +4,14 @@
 let dashscopeGeneration: any;
 async function getDashscopeGeneration() {
   if (!dashscopeGeneration) {
-    const dashscope = await import('dashscope');
-    dashscopeGeneration = dashscope.Generation;
+    try {
+      // Use destructuring for a more robust import of the Generation class
+      const { Generation } = await import('dashscope');
+      dashscopeGeneration = Generation;
+    } catch (e) {
+      console.error('Failed to import or find Generation in dashscope', e);
+      return null; // Return null if import fails
+    }
   }
   return dashscopeGeneration;
 }
@@ -27,6 +33,10 @@ export async function callModelScopeAI(prompt: string, model: string): Promise<s
 
   try {
     const Generation = await getDashscopeGeneration();
+    // Check if the Generation module was loaded successfully
+    if (!Generation) {
+      throw new Error('Dashscope Generation module could not be loaded.');
+    }
     const result = await Generation.call({
       model: model,
       prompt: prompt,
@@ -75,6 +85,10 @@ export async function* callModelScopeChatStream(messages: {role: string, content
 
   try {
     const Generation = await getDashscopeGeneration();
+    // Check if the Generation module was loaded successfully
+    if (!Generation) {
+      throw new Error('Dashscope Generation module could not be loaded.');
+    }
     const result = await Generation.call({
       model: model,
       messages: messages,
