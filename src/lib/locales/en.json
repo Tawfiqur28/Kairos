@@ -113,7 +113,14 @@
     "plan_regenerate_button": "Re-generate Plan",
     "plan_title": "Your Gamified Action Plan for becoming a {careerTitle}",
     "plan_insider_tips": "Industry Insider Tips",
-    "plan_monthly_intel": "Monthly Field Intel"
+    "plan_monthly_intel": "Monthly Field Intel",
+    "generatePlanTitle": "Ready to pursue this path?",
+    "generatePlanDescription": "Generate a customized action plan with:",
+    "generatePlanFeature1": "Skill development roadmap",
+    "generatePlanFeature2": "Recommended courses & certifications",
+    "generatePlanFeature3": "Portfolio project ideas",
+    "generatePlanFeature4": "Networking strategies",
+    "viewOtherCareers": "View Other Careers"
   },
   "learnMore": {
     "title": "How Kairos Compass Works",

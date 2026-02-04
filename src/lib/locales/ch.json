@@ -113,7 +113,14 @@
     "plan_regenerate_button": "重新生成计划",
     "plan_title": "你成为 {careerTitle} 的游戏化行动计划",
     "plan_insider_tips": "行业内部提示",
-    "plan_monthly_intel": "每月领域情报"
+    "plan_monthly_intel": "每月领域情报",
+    "generatePlanTitle": "准备好走这条路了吗？",
+    "generatePlanDescription": "生成一个包含以下内容的定制行动计划：",
+    "generatePlanFeature1": "技能发展路线图",
+    "generatePlanFeature2": "推荐课程和认证",
+    "generatePlanFeature3": "作品集项目点子",
+    "generatePlanFeature4": "社交策略",
+    "viewOtherCareers": "查看其他职业"
   },
   "learnMore": {
     "title": "Kairos Compass 如何运作",

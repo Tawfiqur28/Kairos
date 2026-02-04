@@ -259,14 +259,27 @@ export default function CareersPage() {
                   </p>
                 </div>
                 {matchResult.fitScore > 60 ? (
-                    <Button onClick={() => handleGeneratePlan(selectedCareer!)} className="w-full">
-                       <GanttChartSquare className="mr-2 h-4 w-4" />
-                        {t('careers.generatePlan')}
-                    </Button>
+                    <div className="p-4 bg-primary/10 dark:bg-primary/5 rounded-lg border border-primary/20">
+                        <h4 className="font-semibold mb-2 text-primary">{t('careers.generatePlanTitle')}</h4>
+                        <p className="text-sm text-muted-foreground mb-3">{t('careers.generatePlanDescription')}</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 mb-4">
+                            <li>{t('careers.generatePlanFeature1')}</li>
+                            <li>{t('careers.generatePlanFeature2')}</li>
+                            <li>{t('careers.generatePlanFeature3')}</li>
+                            <li>{t('careers.generatePlanFeature4')}</li>
+                        </ul>
+                        <Button onClick={() => handleGeneratePlan(selectedCareer!)} className="w-full">
+                           <GanttChartSquare className="mr-2 h-4 w-4" />
+                            {t('careers.generatePlan')}
+                        </Button>
+                    </div>
                 ) : (
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg space-y-3">
                     <p className="font-semibold">{t('careers.keepExploring')}</p>
                     <p className="text-sm text-muted-foreground">{t('careers.notStrongMatch')}</p>
+                    <Button variant="outline" onClick={() => setSelectedCareer(null)}>
+                        {t('careers.viewOtherCareers')}
+                    </Button>
                   </div>
                 )}
               </div>
