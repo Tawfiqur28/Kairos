@@ -15,7 +15,7 @@ async function getDashscopeGeneration() {
   return dashscopeGeneration;
 }
 
-export const runtime = 'edge'; // or 'nodejs' depending on your needs
+export const runtime = 'nodejs'; // Use Node.js runtime for compatibility
 
 export async function POST(request: NextRequest) {
   try {
