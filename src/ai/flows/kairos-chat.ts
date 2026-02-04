@@ -12,14 +12,14 @@ const ChatMessageSchema = z.object({
   content: z.string(),
 });
 
-export const KairosChatInputSchema = z.object({
+const KairosChatInputSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty.'),
   history: z.array(ChatMessageSchema).optional(),
   userProfile: z.string().optional(),
 });
 export type KairosChatInput = z.infer<typeof KairosChatInputSchema>;
 
-export const KairosChatOutputSchema = z.object({
+const KairosChatOutputSchema = z.object({
   message: z.string(),
 });
 export type KairosChatOutput = z.infer<typeof KairosChatOutputSchema>;
