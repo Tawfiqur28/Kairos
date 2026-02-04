@@ -21,6 +21,7 @@ import type { JournalEntry, Ikigai } from '@/lib/types';
 import { Bot, Loader2, Mic, MicOff, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -59,8 +60,11 @@ export default function JournalPage() {
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    setHasMounted(true);
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       setIsSpeechRecognitionSupported(true);
     }
@@ -237,7 +241,7 @@ export default function JournalPage() {
                 </div>
                 <Textarea
                   id="content"
-                  placeholder={getJournalPlaceholder()}
+                  placeholder={hasMounted ? getJournalPlaceholder() : t('journal.thoughtsPlaceholder')}
                   className="min-h-32"
                   value={currentContent}
                   onChange={(e) => setCurrentContent(e.target.value)}
