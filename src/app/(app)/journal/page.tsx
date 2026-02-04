@@ -182,6 +182,7 @@ export default function JournalPage() {
         message: chatInput,
         history: chatHistory,
         userProfile: userProfileString,
+        educationLevel: ikigai.educationLevel,
       });
 
       const assistantMessage: ChatMessage = { role: 'assistant', content: result.message };
