@@ -5,7 +5,8 @@
  */
 
 import { z } from 'zod';
-import { processJournalEntriesForCareerSuggestions as processJournalEntriesFromModel } from '@/ai/genkit';
+import { callModelScopeAI } from '@/ai/utils';
+
 
 const JournalEntryInputSchema = z.object({
   journalEntries: z.string()
@@ -32,6 +33,41 @@ const CareerSuggestionsOutputSchema = z.object({
     .describe('Whether the analysis was successful'),
 });
 export type CareerSuggestionsOutput = z.infer<typeof CareerSuggestionsOutputSchema>;
+
+
+const processJournalEntriesFromModel = async (journalEntries: string, feelings: string): Promise<CareerSuggestionsOutput> => {
+    const prompt = `Analyze the following journal entries and feelings to suggest 3-5 suitable career paths.
+
+Journal Entries:
+"${journalEntries}"
+
+Feelings:
+"${feelings}"
+
+Provide an analysis of the user's potential strengths and interests based on their writing, and then list the career suggestions.
+
+Respond with a JSON object in this exact format:
+{
+  "analysis": "Your writing suggests you are...",
+  "careerSuggestions": "1. Career 1\\n2. Career 2\\n3. Career 3"
+}`;
+
+    const response = await callModelScopeAI(prompt, 'qwen-max');
+
+    if (response.startsWith('ERROR:')) {
+        throw new Error(response);
+    }
+    
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.analysis && parsed.careerSuggestions) {
+            return CareerSuggestionsOutputSchema.parse(parsed);
+        }
+    }
+
+    throw new Error('Failed to parse AI response for journal analysis.');
+};
 
 // Local keyword analysis function (fast, no AI dependency)
 const analyzeJournalEntriesLocally = (

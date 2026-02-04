@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry, Ikigai } from '@/lib/types';
-import { Bot, Loader2, Mic, MicOff, Send, Sparkles } from 'lucide-react';
+import { Bot, Loader2, Mic, MicOff, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -65,16 +65,44 @@ export default function JournalPage() {
   const chatSuggestions = [
     "How do I prepare for a software engineering interview?",
     "Explain the concept of relativity like I'm a high school student.",
+    "What is Next.js 15?",
     "Give me some study tips for my final exams.",
-    "What are some good portfolio projects for a UX designer?"
   ];
 
   useEffect(() => {
     setHasMounted(true);
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       setIsSpeechRecognitionSupported(true);
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true; 
+
+      recognitionRef.current.onresult = (event: any) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + '. ';
+          }
+        }
+        setCurrentContent(prev => prev ? `${prev} ${finalTranscript}` : finalTranscript);
+      };
+      
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        toast({
+          title: t('toasts.voiceErrorTitle'),
+          description: event.error === 'not-allowed' ? t('toasts.voiceErrorPermission') : t('toasts.voiceErrorGeneral'),
+          variant: "destructive"
+        });
+        setIsListening(false);
+      }
     }
-  }, []);
+  }, [t]);
   
   useEffect(() => {
     if(!hasMounted) return;
@@ -103,12 +131,6 @@ export default function JournalPage() {
 
 
   const handleToggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
-
     if (!isSpeechRecognitionSupported) {
       toast({
         title: t('toasts.voiceNotSupportedTitle'),
@@ -117,38 +139,13 @@ export default function JournalPage() {
       });
       return;
     }
-
-    setIsListening(true);
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true; 
-
-    recognitionRef.current.onresult = (event: any) => {
-      let finalTranscript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + '. ';
-        }
-      }
-      setCurrentContent(prev => prev ? `${prev} ${finalTranscript}` : finalTranscript);
-    };
     
-    recognitionRef.current.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
-      toast({
-        title: t('toasts.voiceErrorTitle'),
-        description: event.error === 'not-allowed' ? t('toasts.voiceErrorPermission') : t('toasts.voiceErrorGeneral'),
-        variant: "destructive"
-      });
-      setIsListening(false);
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
     }
-
-    recognitionRef.current.start();
+    setIsListening(prev => !prev);
   };
 
   const handleSaveEntry = () => {
@@ -175,11 +172,12 @@ export default function JournalPage() {
     });
   };
 
-  const handleSendMessage = async (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent, suggestion?: string) => {
     e?.preventDefault();
-    if (!chatInput.trim() || isChatLoading) return;
+    const messageContent = suggestion || chatInput;
+    if (!messageContent.trim() || isChatLoading) return;
 
-    const userMessage: ChatMessage = { role: 'user', content: chatInput };
+    const userMessage: ChatMessage = { role: 'user', content: messageContent };
     const messagesForApi = [...chatHistory, userMessage];
     
     setChatHistory(prev => [...prev, userMessage, { role: 'assistant', content: '' }]);
@@ -202,18 +200,36 @@ export default function JournalPage() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let accumulatedResponse = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
+        accumulatedResponse += decoder.decode(value, { stream: true });
         
+        if (accumulatedResponse.startsWith('ERROR:')) {
+            toast({
+              title: t('toasts.aiErrorTitle'),
+              description: accumulatedResponse,
+              variant: 'destructive',
+            });
+            setChatHistory(prev => {
+              const updatedHistory = [...prev];
+              const lastMessage = updatedHistory[updatedHistory.length - 1];
+              if (lastMessage.role === 'assistant') {
+                lastMessage.content = "Sorry, I encountered an error. Please try again.";
+              }
+              return updatedHistory;
+            });
+            break; // Stop processing the stream on error
+        }
+
         setChatHistory(prev => {
           const updatedHistory = [...prev];
           const lastMessage = updatedHistory[updatedHistory.length - 1];
           if (lastMessage.role === 'assistant') {
-            lastMessage.content += chunk;
+            lastMessage.content = accumulatedResponse;
           }
           return updatedHistory;
         });
@@ -355,7 +371,7 @@ export default function JournalPage() {
                         size="sm"
                         variant="outline"
                         className="text-xs"
-                        onClick={() => setChatInput(suggestion)}
+                        onClick={(e) => handleSendMessage(e, suggestion)}
                         disabled={isChatLoading}
                       >
                         {suggestion}

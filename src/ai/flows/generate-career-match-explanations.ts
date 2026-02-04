@@ -4,8 +4,9 @@
  */
 
 import { z } from 'zod';
-import { generateCareerMatchExplanations as generateCareerMatchExplanationsFromModel } from '@/ai/genkit';
-import { extractCareerThemes } from './extract-career-themes'; // Import the theme extraction function
+import { extractCareerThemes } from './extract-career-themes'; 
+import { callModelScopeAI } from '@/ai/utils';
+
 
 const GenerateCareerMatchExplanationsInputSchema = z.object({
   userProfile: z.string().describe('A detailed description of the user profile, including their passions, skills, values, and interests.'),
@@ -27,6 +28,61 @@ const GenerateCareerMatchExplanationsOutputSchema = z.object({
 });
 
 export type GenerateCareerMatchExplanationsOutput = z.infer<typeof GenerateCareerMatchExplanationsOutputSchema>;
+
+
+const generateCareerMatchExplanationsFromModel = async (
+  userProfile: string, 
+  career: string, 
+  careerDetails: string,
+  userThemes: string[],
+  baseScore: number
+): Promise<GenerateCareerMatchExplanationsOutput> => {
+    
+    const prompt = `Analyze career fit.
+
+USER PROFILE (Themes: [${userThemes.join(', ')}]): ${userProfile}
+
+CAREER: ${career}
+CAREER DETAILS: ${careerDetails}
+
+**SCORING CONSIDERATIONS:**
+1. skillMatch (0-100): Current skill alignment.
+2. interestMatch (0-100): Interest alignment.
+3. valueAlignment (0-100): How well career fits personal values.
+
+**BASE CALCULATION:** Start from a base score of ${baseScore}% (derived from theme match) and adjust based on the profile details.
+
+Calculate: overallScore = (skillMatch * 0.5) + (interestMatch * 0.3) + (valueAlignment * 0.2)
+
+**REQUIRED OUTPUT (JSON):**
+{
+  "explanation": "Detailed analysis of the match...",
+  "skillMatch": 85,
+  "interestMatch": 90,
+  "valueAlignment": 70,
+  "overallScore": 83,
+  "themeMismatch": false,
+  "confidence": "high"
+}`;
+
+    const response = await callModelScopeAI(prompt, 'qwen-max');
+    
+    if (response.startsWith('ERROR:')) {
+        throw new Error(response);
+    }
+    
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      // Basic validation
+      if(parsed.overallScore) {
+        return GenerateCareerMatchExplanationsOutputSchema.parse(parsed);
+      }
+    }
+  
+  throw new Error("Failed to parse AI response for career match.");
+};
+
 
 // Local fast scoring function to avoid always returning 50%
 const calculateBaseScoreFromThemes = (userThemes: string[], career: string, careerCluster?: string): number => {
@@ -212,7 +268,9 @@ export async function generateCareerMatchExplanations(
       aiResult = await generateCareerMatchExplanationsFromModel(
         input.userProfile,
         input.career,
-        input.careerDetails
+        input.careerDetails,
+        userThemes,
+        baseScore
       );
     } catch (aiError) {
       console.warn('AI analysis failed, using dynamic scoring:', aiError);
@@ -294,119 +352,6 @@ export async function generateCareerMatchExplanations(
       overallScore: fallbackScore,
       themeMismatch: false,
       confidence: 'medium'
-    });
-  }
-}
-
-// ==================== NEW: GENERATION PLAN FUNCTION ====================
-const GeneratePlanInputSchema = z.object({
-  careerGoal: z.string().describe('The career the user wants to pursue'),
-  userProfile: z.string().describe('The user\'s profile including education level, skills, and interests'),
-});
-
-export type GeneratePlanInput = z.infer<typeof GeneratePlanInputSchema>;
-
-const GeneratePlanOutputSchema = z.object({
-  careerTitle: z.string(),
-  educationLevel: z.string(),
-  timeline: z.string(),
-  phases: z.array(z.object({
-    title: z.string(),
-    duration: z.string(),
-    tasks: z.array(z.object({
-      id: z.string(),
-      text: z.string(),
-      completed: z.boolean()
-    }))
-  }))
-});
-
-export type GeneratePlanOutput = z.infer<typeof GeneratePlanOutputSchema>;
-
-export async function generatePersonalizedActionPlan(
-  input: GeneratePlanInput
-): Promise<GeneratePlanOutput> {
-  try {
-    // Extract education level from profile
-    const extractEducationLevel = (profile: string): string => {
-      const lower = profile.toLowerCase();
-      if (lower.includes('phd') || lower.includes('doctorate')) return 'PhD';
-      if (lower.includes('master')) return 'Master\'s';
-      if (lower.includes('bachelor') || lower.includes('undergrad') || lower.includes('college')) return 'Undergraduate';
-      if (lower.includes('high school')) return 'High School';
-      if (lower.includes('professional') || lower.includes('working')) return 'Professional';
-      return 'Not Specified';
-    };
-    
-    const educationLevel = extractEducationLevel(input.userProfile);
-    
-    // Create a dynamic plan based on career and education level
-    const plan = {
-      careerTitle: input.careerGoal,
-      educationLevel,
-      timeline: `3-Year Journey to ${input.careerGoal}`,
-      phases: [
-        {
-          title: 'Phase 1: Foundation Building',
-          duration: educationLevel === 'High School' ? 'Next 12 Months' : 'Year 1',
-          tasks: [
-            { id: 'task-1-1', text: `Research ${input.careerGoal} career path, salary expectations, and job market`, completed: false },
-            { id: 'task-1-2', text: `Identify 3-5 core skills needed for ${input.careerGoal} and assess your current level`, completed: false },
-            { id: 'task-1-3', text: `Complete an introductory online course or certification related to ${input.careerGoal}`, completed: false },
-            { id: 'task-1-4', text: `Connect with 2 professionals in the field on LinkedIn for informational interviews`, completed: false }
-          ]
-        },
-        {
-          title: 'Phase 2: Skill Development',
-          duration: 'Year 2',
-          tasks: [
-            { id: 'task-2-1', text: `Build a portfolio project demonstrating ${input.careerGoal} skills`, completed: false },
-            { id: 'task-2-2', text: `Complete an intermediate-level certification or course`, completed: false },
-            { id: 'task-2-3', text: `Attend industry conferences, webinars, or local meetups`, completed: false },
-            { id: 'task-2-4', text: `Start a blog or GitHub repository documenting your learning journey`, completed: false }
-          ]
-        },
-        {
-          title: 'Phase 3: Career Entry',
-          duration: 'Year 3',
-          tasks: [
-            { id: 'task-3-1', text: `Apply for internships, entry-level positions, or freelance opportunities`, completed: false },
-            { id: 'task-3-2', text: `Prepare and practice for technical and behavioral interviews`, completed: false },
-            { id: 'task-3-3', text: `Finalize your resume, LinkedIn profile, and professional portfolio`, completed: false },
-            { id: 'task-3-4', text: `Secure a mentor or career coach in the ${input.careerGoal} field`, completed: false }
-          ]
-        }
-      ]
-    };
-    
-    return GeneratePlanOutputSchema.parse(plan);
-    
-  } catch (error) {
-    console.error('Error generating action plan:', error);
-    
-    // Simple fallback plan
-    return GeneratePlanOutputSchema.parse({
-      careerTitle: input.careerGoal,
-      educationLevel: 'Not Specified',
-      timeline: `Path to ${input.careerGoal}`,
-      phases: [
-        {
-          title: 'Getting Started',
-          duration: 'First 6 Months',
-          tasks: [
-            { id: 'fallback-1', text: `Research ${input.careerGoal} requirements and opportunities`, completed: false },
-            { id: 'fallback-2', text: 'Take an introductory online course', completed: false }
-          ]
-        },
-        {
-          title: 'Skill Building',
-          duration: 'Next 6 Months',
-          tasks: [
-            { id: 'fallback-3', text: 'Work on a practical project', completed: false },
-            { id: 'fallback-4', text: 'Network with professionals in the field', completed: false }
-          ]
-        }
-      ]
     });
   }
 }

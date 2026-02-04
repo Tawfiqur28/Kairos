@@ -46,4 +46,6 @@ export interface ActionPlan {
   educationLevel: string;
   timeline: string;
   phases: PlanPhase[];
+  generatedAt?: string;
+  success?: boolean;
 }

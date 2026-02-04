@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { generatePersonalizedActionPlan as generatePersonalizedActionPlanFromModel } from '@/ai/genkit';
+import { callModelScopeAI } from '@/ai/utils';
 
 const GeneratePersonalizedActionPlanInputSchema = z.object({
   careerGoal: z.string().min(2, 'Career goal must be at least 2 characters').describe('The user\'s desired career goal.'),
@@ -43,6 +43,83 @@ const GeneratePersonalizedActionPlanOutputSchema = z.object({
 export type GeneratePersonalizedActionPlanOutput = z.infer<
   typeof GeneratePersonalizedActionPlanOutputSchema
 >;
+
+const getEducationLevelPrompt = (educationLevel?: string): string => {
+  const prompts = {
+    high_school: `For HIGH SCHOOL student: Focus on foundational skills, college prep, and exploration. Suggest AP courses, extracurriculars, and summer programs. Timeline: 4-6 years to entry level.`,
+    undergrad: `For UNDERGRADUATE student: Focus on major courses, internships, skill-building, and networking. Timeline: 2-4 years to entry level.`,
+    masters: `For MASTER'S student: Focus on specialization, research projects, professional networking, and industry connections. Timeline: 1-3 years to specialized role.`,
+    phd: `For PhD student: Focus on research contribution, publication strategy, academic networking, and career positioning. Timeline: Variable based on dissertation completion.`,
+    professional: `For a WORKING PROFESSIONAL: Focus on upskilling, certifications, networking for senior roles, and transitioning skills. Timeline: 1-2 years to pivot or advance.`
+  };
+  
+  return (prompts as any)[educationLevel as any] || 'Provide general career guidance.';
+};
+
+
+const extractEducationLevelFromDetails = (userDetails: string): string => {
+  const details = userDetails.toLowerCase();
+  if (details.includes('high school') || details.includes('highschool')) return 'high_school';
+  if (details.includes('undergraduate') || details.includes('bachelor') || details.includes('college')) return 'undergrad';
+  if (details.includes('master') || details.includes('graduate')) return 'masters';
+  if (details.includes('phd') || details.includes('doctorate')) return 'phd';
+  if (details.includes('professional') || details.includes('working')) return 'professional';
+  return 'not_specified';
+};
+
+const generatePersonalizedActionPlanFromModel = async (
+  careerGoal: string,
+  userDetails: string
+): Promise<GeneratePersonalizedActionPlanOutput> => {
+  const extractedLevel = extractEducationLevelFromDetails(userDetails);
+  
+  const prompt = `Create a SPICY, engaging 3-year action plan for becoming a '${careerGoal}'.
+  
+User Profile: "${userDetails}"
+Education Level: "${extractedLevel}"
+
+**REQUIREMENTS:**
+1. Tailor ALL content to ${extractedLevel} level
+2. Include 3 phases with catchy names
+3. Each phase must have 3-4 actionable tasks
+4. Use emojis and motivational language
+
+**EDUCATION-LEVEL SPECIFIC:**
+${getEducationLevelPrompt(extractedLevel)}
+
+**FORMAT (STRICT JSON):**
+{
+  "careerTitle": "${careerGoal}",
+  "educationLevel": "${extractedLevel}",
+  "timeline": "3-Year Journey to ${careerGoal}",
+  "phases": [
+    {
+      "title": "Phase 1: Catchy Name",
+      "duration": "Months 1-12",
+      "tasks": [
+        { "id": "task-1-1", "text": "Actionable task", "completed": false }
+      ]
+    }
+  ]
+}`;
+
+  const response = await callModelScopeAI(prompt, 'qwen-max');
+
+  if (response.startsWith('ERROR:')) {
+    throw new Error(response);
+  }
+
+  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.phases) {
+        return GeneratePersonalizedActionPlanOutputSchema.parse(parsed);
+      }
+  }
+
+  throw new Error("Failed to parse AI response for action plan.");
+};
+
 
 // Helper function to extract education level from user details
 const extractEducationLevel = (userDetails: string): string => {
@@ -264,10 +341,9 @@ export async function generatePersonalizedActionPlan(
     }
     
     // Ensure all tasks have unique IDs
-    let taskCounter = 1;
     plan.phases.forEach((phase, phaseIndex) => {
       phase.tasks.forEach((task, taskIndex) => {
-        if (!task.id || task.id.startsWith('task-')) {
+        if (!task.id || !task.id.startsWith('task-')) {
           task.id = `phase-${phaseIndex + 1}-task-${taskIndex + 1}`;
         }
       });

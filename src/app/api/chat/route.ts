@@ -1,11 +1,11 @@
-import { callModelScopeChatStream } from '@/ai/genkit';
+import { callModelScopeChatStream } from '@/ai/utils';
 import type { EducationLevel } from '@/lib/types';
 import { z } from 'zod';
 
 // Helper function to provide context based on education level
 const getEducationLevelChatContext = (educationLevel?: string): string => {
   const contexts = {
-    high_school: `HIGH SCHOOL focus: Foundational concepts, exam prep, college applications, study skills, time management.`,
+    highSchool: `HIGH SCHOOL focus: Foundational concepts, exam prep, college applications, study skills, time management.`,
     undergrad: `UNDERGRAD focus: Coursework, assignments, projects, internships, networking, grad school prep.`,
     masters: `MASTER'S focus: Research methodology, thesis writing, specialization, professional networking.`,
     phd: `PhD focus: Dissertation, publications, academic networking, grant writing, career positioning.`,
@@ -14,10 +14,24 @@ const getEducationLevelChatContext = (educationLevel?: string): string => {
   return (contexts as any)[educationLevel as any] || 'Provide general student and career guidance.';
 };
 
+// Simulated web search function
+async function searchWeb(query: string): Promise<string> {
+    console.log(`Simulating web search for: "${query}"`);
+    // In a real application, you would call a search API like SerpAPI, Google Search API, etc.
+    // For this simulation, we return a static, helpful response.
+    if (query.toLowerCase().includes('next.js 15')) {
+        return `Web Search Results for "Next.js 15 features":\n- React 19 and the new React Compiler.\n- Partial Prerendering (experimental).\n- Improved caching and performance optimizations.\n- More intuitive fetching and data handling.`;
+    }
+    if (query.toLowerCase().includes('ikigai')) {
+        return `Web Search Results for "ikigai":\n- Ikigai is a Japanese concept that means "a reason for being."\n- It's the intersection of what you love, what you're good at, what the world needs, and what you can be paid for.\n- Finding your Ikigai is believed to lead to a more fulfilling and happy life.`;
+    }
+    return `No specific web search results found for "${query}". Try a different query.`;
+}
+
 // Schema for validating the incoming request body
 const ChatRequestSchema = z.object({
   messages: z.array(z.object({
-    role: z.enum(['user', 'assistant']),
+    role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
   })),
   ikigai: z.object({
@@ -37,26 +51,33 @@ export async function POST(request: Request) {
     const educationLevel = ikigai?.educationLevel;
     const userProfileString = `Passions: ${ikigai?.passions || 'N/A'}. Skills: ${ikigai?.skills || 'N/A'}. Values: ${ikigai?.values || 'N/A'}. Interests: ${ikigai?.interests || 'N/A'}. Current Education Level: ${educationLevel || 'N/A'}.`;
 
-    const modelEducationLevel = educationLevel === 'highSchool' ? 'high_school' : educationLevel;
+    let lastUserMessageContent = messages[messages.length - 1]?.content || '';
+    
+    let searchResultsContext = '';
+    // Check if the user's message implies a search query
+    if (lastUserMessageContent.toLowerCase().startsWith('search for:') || lastUserMessageContent.toLowerCase().startsWith('what is ')) {
+        const searchQuery = lastUserMessageContent.replace(/^(search for:|what is)\s*/i, '');
+        const searchResults = await searchWeb(searchQuery);
+        searchResultsContext = `\n\n**Web Search Results:**\n${searchResults}`;
+    }
 
-    const systemPrompt = `You are KAIROS, a specialized, empathetic, and highly knowledgeable AI assistant for academic and career guidance, similar to top-tier assistants like Gemini. Provide detailed, actionable, and structured answers. Use markdown for formatting like lists, bold text, and code snippets where appropriate.
 
-**EDUCATION LEVEL: ${modelEducationLevel?.toUpperCase() || 'NOT SPECIFIED'}**
-${getEducationLevelChatContext(modelEducationLevel)}
+    const systemPrompt = `You are KAIROS, a specialized, empathetic, and highly knowledgeable AI assistant for academic and career guidance. Provide detailed, actionable, and structured answers. Use markdown for formatting like lists, bold text, and code snippets where appropriate.
 
-User Profile: ${userProfileString}
+**USER'S EDUCATION LEVEL: ${educationLevel?.toUpperCase() || 'NOT SPECIFIED'}**
+${getEducationLevelChatContext(educationLevel)}
+
+**USER'S PROFILE:** ${userProfileString}
+
+**CONTEXT:** If web search results are provided below, use them to inform your answer.
+${searchResultsContext}
 
 **RESPONSE FORMAT:** Always provide comprehensive, well-structured, and helpful responses. Be proactive and encouraging.`;
 
-    const lastUserMessage = messages.pop();
-    if (!lastUserMessage || lastUserMessage.role !== 'user') {
-        return new Response('Error: No user message found.', { status: 400 });
-    }
-
     const modelMessages = [
       { role: 'system', content: systemPrompt },
-      ...messages, // older history
-      lastUserMessage // the latest message
+      // include all messages
+      ...messages
     ];
     
     const streamGenerator = callModelScopeChatStream(modelMessages, 'qwen-max');
@@ -65,11 +86,6 @@ User Profile: ${userProfileString}
     const stream = new ReadableStream({
       async start(controller) {
         for await (const chunk of streamGenerator) {
-          if (chunk.startsWith('ERROR:')) {
-            controller.enqueue(encoder.encode(chunk));
-            controller.close();
-            return;
-          }
           controller.enqueue(encoder.encode(chunk));
         }
         controller.close();
@@ -84,13 +100,11 @@ User Profile: ${userProfileString}
     let errorMessage = 'An unexpected error occurred.';
     if (error instanceof z.ZodError) {
       errorMessage = 'Invalid request body.';
+      console.error('[Chat API ZodError]', error.errors);
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
     console.error('[Chat API Error]', error);
-    return new Response(`Error: ${errorMessage}`, { status: 500 });
+    return new Response(`ERROR: ${errorMessage}`, { status: 500 });
   }
 }
-
-// To prevent issues with some hosting providers, we can specify the runtime.
-export const runtime = 'edge';

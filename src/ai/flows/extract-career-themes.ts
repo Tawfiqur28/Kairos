@@ -4,17 +4,7 @@
  */
 
 import { z } from 'zod';
-import { extractCareerThemes as extractCareerThemesFromModel } from '@/ai/genkit';
-
-const ExtractCareerThemesInputSchema = z.object({
-  profile: z.string().min(10, 'Profile must be at least 10 characters').describe('The user\'s Ikigai profile text'),
-  useFastMethod: z.boolean().optional().default(true).describe('Use fast keyword detection instead of AI model')
-}).or(z.string().min(10, 'Profile must be at least 10 characters')).describe('Either a string profile or an object with profile and options');
-
-export type ExtractCareerThemesInput = z.infer<typeof ExtractCareerThemesInputSchema>;
-
-const ExtractCareerThemesOutputSchema = z.array(z.string()).describe('An array of career theme strings, e.g., ["Tech", "Arts"]');
-export type ExtractCareerThemesOutput = z.infer<typeof ExtractCareerThemesOutputSchema>;
+import { callModelScopeAI } from '@/ai/utils';
 
 // Local keyword detection function (fallback)
 const detectCareerThemesFromKeywords = (profile: string): string[] => {
@@ -77,6 +67,57 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
   return themes.length > 0 ? themes : ['General']; // Default theme if none detected
 };
 
+
+const ExtractCareerThemesInputSchema = z.object({
+  profile: z.string().min(10, 'Profile must be at least 10 characters').describe('The user\'s Ikigai profile text'),
+  useFastMethod: z.boolean().optional().default(true).describe('Use fast keyword detection instead of AI model')
+}).or(z.string().min(10, 'Profile must be at least 10 characters')).describe('Either a string profile or an object with profile and options');
+
+export type ExtractCareerThemesInput = z.infer<typeof ExtractCareerThemesInputSchema>;
+
+const ExtractCareerThemesOutputSchema = z.array(z.string()).describe('An array of career theme strings, e.g., ["Tech", "Arts"]');
+export type ExtractCareerThemesOutput = z.infer<typeof ExtractCareerThemesOutputSchema>;
+
+
+const extractCareerThemesFromModel = async (userProfile: string, educationLevel?: string): Promise<string[]> => {
+  const educationContext = educationLevel ? `Education Level: ${educationLevel}. ` : '';
+  
+  const prompt = `Analyze this user's profile for career themes.
+${educationContext}User Profile: "${userProfile}"
+
+Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business", "Arts", "Healthcare", "Education"]
+
+**EDUCATION LEVEL GUIDANCE:**
+- High School: Focus on interests and basic skills
+- Undergraduate: Consider major and coursework
+- Master's: Focus on specialization areas
+- PhD: Consider research focus and expertise
+
+Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
+
+  const response = await callModelScopeAI(prompt, 'qwen-max');
+  
+  if (response.startsWith('ERROR:')) {
+    throw new Error(response);
+  }
+  
+  try {
+    const jsonMatch = response.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if(Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Theme extraction JSON parse failed:', e);
+    // Fallback to keyword detection below
+  }
+  
+  return detectCareerThemesFromKeywords(userProfile);
+};
+
+
 export async function extractCareerThemes(
   input: ExtractCareerThemesInput
 ): Promise<ExtractCareerThemesOutput> {
@@ -104,16 +145,13 @@ export async function extractCareerThemes(
     if (useFastMethod) {
       // Use local keyword detection (fast)
       result = detectCareerThemesFromKeywords(profileText);
-      console.log('Using fast keyword detection, found themes:', result);
     } else {
       try {
         // Try AI model extraction
-        console.log('Attempting AI theme extraction...');
         result = await extractCareerThemesFromModel(profileText);
         
         // Validate AI output
         if (!Array.isArray(result) || result.length === 0) {
-          console.warn('AI returned empty or invalid result, falling back to keyword detection');
           result = detectCareerThemesFromKeywords(profileText);
         }
       } catch (aiError) {
@@ -140,7 +178,6 @@ export async function extractCareerThemes(
   } catch (error) {
     console.error('Error in extractCareerThemes:', error);
     
-    // Handle different error types
     if (error instanceof z.ZodError) {
       throw new Error(`Input validation failed: ${error.errors.map(e => `${e.path}: ${e.message}`).join(', ')}`);
     }
