@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-import type { JournalEntry } from '@/lib/types';
+import type { JournalEntry, Ikigai } from '@/lib/types';
 import { Bot, Loader2, Mic, MicOff, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
@@ -33,6 +33,14 @@ declare global {
     }
 }
 
+const initialIkigai: Ikigai = {
+  passions: '',
+  skills: '',
+  values: '',
+  interests: '',
+  educationLevel: undefined,
+};
+
 export default function JournalPage() {
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>('journal-entries', []);
   const [currentContent, setCurrentContent] = useState('');
@@ -41,6 +49,7 @@ export default function JournalPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
+  const [ikigai] = useLocalStorage<Ikigai>('ikigai-profile', initialIkigai);
 
   const [isListening, setIsListening] = useState(false);
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false);
@@ -51,6 +60,21 @@ export default function JournalPage() {
       setIsSpeechRecognitionSupported(true);
     }
   }, []);
+
+  const getJournalPlaceholder = () => {
+    switch (ikigai.educationLevel) {
+      case 'highSchool':
+        return 'What did you learn in math class today?';
+      case 'undergrad':
+        return 'Describe a concept you struggled with this week.';
+      case 'masters':
+        return 'Log your research progress and challenges.';
+      case 'phd':
+        return 'Document breakthrough ideas and paper references.';
+      default:
+        return t('journal.thoughtsPlaceholder');
+    }
+  };
 
   const handleToggleListening = () => {
     if (isListening) {
@@ -199,7 +223,7 @@ export default function JournalPage() {
                 </div>
                 <Textarea
                   id="content"
-                  placeholder={t('journal.thoughtsPlaceholder')}
+                  placeholder={getJournalPlaceholder()}
                   className="min-h-32"
                   value={currentContent}
                   onChange={(e) => setCurrentContent(e.target.value)}

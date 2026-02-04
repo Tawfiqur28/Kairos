@@ -14,15 +14,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-import type { Ikigai } from '@/lib/types';
+import type { Ikigai, EducationLevel } from '@/lib/types';
 import { Save } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const initialIkigai: Ikigai = {
   passions: '',
   skills: '',
   values: '',
   interests: '',
+  educationLevel: undefined,
 };
 
 export default function IkigaiPage() {
@@ -93,6 +95,33 @@ export default function IkigaiPage() {
                 onChange={(e) => setIkigai({ ...ikigai, interests: e.target.value })}
               />
             </div>
+          </div>
+          <div className="space-y-4 pt-4">
+            <Label className="text-lg font-medium">Where are you right now?</Label>
+            <RadioGroup
+              value={ikigai.educationLevel}
+              onValueChange={(value) =>
+                setIkigai({ ...ikigai, educationLevel: value as EducationLevel })
+              }
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="highSchool" id="r1" />
+                <Label htmlFor="r1" className="cursor-pointer">🎓 High School Student</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="undergrad" id="r2" />
+                <Label htmlFor="r2" className="cursor-pointer">🏫 Undergraduate Student</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="masters" id="r3" />
+                <Label htmlFor="r3" className="cursor-pointer">📚 Master's Student</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="phd" id="r4" />
+                <Label htmlFor="r4" className="cursor-pointer">🎓 PhD/Doctoral Candidate</Label>
+              </div>
+            </RadioGroup>
           </div>
         </CardContent>
         <CardFooter>

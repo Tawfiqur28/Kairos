@@ -1,8 +1,11 @@
+export type EducationLevel = 'highSchool' | 'undergrad' | 'masters' | 'phd';
+
 export interface Ikigai {
   passions: string;
   skills: string;
   values: string;
   interests:string;
+  educationLevel?: EducationLevel;
 }
 
 export interface UserProfile {

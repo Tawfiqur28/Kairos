@@ -190,10 +190,19 @@ export default function CareersPage() {
     [ikigai]
   );
   
-  const userProfileString = useMemo(() => 
-    `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}.`,
-    [ikigai]
-  );
+  const userProfileString = useMemo(() => {
+    const educationLevelMap = {
+      highSchool: 'High School Student',
+      undergrad: 'Undergraduate Student',
+      masters: 'Master\'s Student',
+      phd: 'PhD/Doctoral Candidate',
+    };
+    const educationLevelText = ikigai.educationLevel ? educationLevelMap[ikigai.educationLevel] : 'Not specified';
+
+    return `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}. Current Education Level: ${educationLevelText}.`;
+  },
+  [ikigai]
+);
 
   useEffect(() => {
     setHasMounted(true);

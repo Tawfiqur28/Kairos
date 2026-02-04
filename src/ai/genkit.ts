@@ -219,6 +219,12 @@ CAREER DETAILS: ${careerDetails}
 
 ${specializedPrompt}
 
+**IMPORTANT:** The user profile contains their "Current Education Level". You MUST tailor the "explanation" to their academic stage. Provide actionable, stage-specific advice.
+- High School: Recommend foundational skills, courses (like AP), and exploration activities.
+- Undergraduate: Recommend specific coursework, project ideas, and internship strategies.
+- Master's: Recommend areas of specialization, research topics, and networking opportunities.
+- PhD: Recommend strategies for dissertation, publication, and positioning for high-level roles.
+
 **SCIENCE-SPECIFIC SCORING CRITERIA:**
 1. skillMatch (0-100): Match between user's technical/math/lab skills and career requirements
 2. interestMatch (0-100): Alignment between user's scientific interests and this field's research areas
@@ -348,6 +354,12 @@ export const generatePersonalizedActionPlan = async (
 **CONTEXT:**
 Career: "${careerGoal}"
 User's Profile (Skills, Interests, etc.): "${userDetails}"
+
+**IMPORTANT:** If the User's Profile contains an "Education Level", you MUST tailor the entire plan to their stage:
+- **High School Student:** The plan should focus on foundational skills, exploration, and college prep. Phases can be "Freshman Explorer", "Sophomore Specialist", "Junior-Senior Captain". Boss fights are about school projects or winning a science fair.
+- **Undergraduate Student:** The plan should focus on key coursework, getting internships, and building a project portfolio. Phases can be "Year 1 Apprentice", "Year 2 Journeyman", "Year 3-4 Adept". Boss fights are about landing an internship or a major capstone project.
+- **Master's Student:** The plan should focus on specialization, research, and networking. Phases can be "Thesis Scoping", "Deep Dive Research", "Expert Contributor". Boss fights are about publishing a paper or presenting at a conference.
+- **PhD/Doctoral Candidate:** The plan should focus on original contribution, dissertation, and career positioning (academic or industry). Phases can be "Dissertation Architect", "Publication Push", "Career Launchpad". Boss fights are about defending the dissertation or securing a post-doc/job.
 
 **CREATIVE CONSTRAINTS:**
 1.  **Mission Name:** Invent a cool mission name (max 5 words).
