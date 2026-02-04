@@ -1,6 +1,5 @@
 'use client';
 
-import { kairosChat } from '@/ai/flows/kairos-chat';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,10 +17,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry, Ikigai } from '@/lib/types';
-import { Bot, Loader2, Mic, MicOff, Send } from 'lucide-react';
+import { Bot, Loader2, Mic, MicOff, Send, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { processJournalEntriesForCareerSuggestions } from '@/ai/flows/process-journal-entries-for-career-suggestions';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -55,13 +55,13 @@ export default function JournalPage() {
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
 
-  // Chatbot states
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const [hasMounted, setHasMounted] = useState(false);
+  const [journalPlaceholder, setJournalPlaceholder] = useState(t('journal.thoughtsPlaceholder'));
 
   useEffect(() => {
     setHasMounted(true);
@@ -71,27 +71,29 @@ export default function JournalPage() {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom of chat
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatHistory]);
 
+  useEffect(() => {
+    const getPlaceholder = () => {
+      switch (ikigai.educationLevel) {
+        case 'highSchool':
+          return 'What did you learn in math class today?';
+        case 'undergrad':
+          return 'Describe a concept you struggled with this week.';
+        case 'masters':
+          return 'Log your research progress and challenges.';
+        case 'phd':
+          return 'Document breakthrough ideas and paper references.';
+        default:
+          return t('journal.thoughtsPlaceholder');
+      }
+    };
+    setJournalPlaceholder(getPlaceholder());
+  }, [ikigai.educationLevel, t]);
 
-  const getJournalPlaceholder = () => {
-    switch (ikigai.educationLevel) {
-      case 'highSchool':
-        return 'What did you learn in math class today?';
-      case 'undergrad':
-        return 'Describe a concept you struggled with this week.';
-      case 'masters':
-        return 'Log your research progress and challenges.';
-      case 'phd':
-        return 'Document breakthrough ideas and paper references.';
-      default:
-        return t('journal.thoughtsPlaceholder');
-    }
-  };
 
   const handleToggleListening = () => {
     if (isListening) {
@@ -171,37 +173,64 @@ export default function JournalPage() {
     if (!chatInput.trim() || isChatLoading) return;
 
     const userMessage: ChatMessage = { role: 'user', content: chatInput };
-    setChatHistory(prev => [...prev, userMessage]);
+    const newChatHistory = [...chatHistory, userMessage, { role: 'assistant', content: '' }];
+    setChatHistory(newChatHistory);
     setChatInput('');
     setIsChatLoading(true);
 
     try {
-      const userProfileString = `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}. Current Education Level: ${ikigai.educationLevel}.`;
-      
-      const result = await kairosChat({
-        message: chatInput,
-        history: chatHistory,
-        userProfile: userProfileString,
-        educationLevel: ikigai.educationLevel,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [userMessage],
+          ikigai: ikigai,
+        }),
       });
 
-      const assistantMessage: ChatMessage = { role: 'assistant', content: result.message };
-      setChatHistory(prev => [...prev, assistantMessage]);
+      if (!response.ok || !response.body) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
 
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        
+        setChatHistory(prev => {
+          const updatedHistory = [...prev];
+          const lastMessage = updatedHistory[updatedHistory.length - 1];
+          if (lastMessage.role === 'assistant') {
+            lastMessage.content += chunk;
+          }
+          return updatedHistory;
+        });
+      }
     } catch (error) {
       console.error(error);
+      const errorMessage = error instanceof Error ? error.message : t('toasts.aiErrorJournal');
       toast({
         title: t('toasts.aiErrorTitle'),
-        description: t('toasts.aiErrorJournal'),
+        description: errorMessage,
         variant: 'destructive',
       });
-      // Add error message to chat
-      const errorMessage: ChatMessage = { role: 'assistant', content: "Sorry, I'm having trouble connecting right now. Please try again later." };
-      setChatHistory(prev => [...prev, errorMessage]);
+      setChatHistory(prev => {
+          const updatedHistory = [...prev];
+          const lastMessage = updatedHistory[updatedHistory.length - 1];
+          if (lastMessage.role === 'assistant' && lastMessage.content === '') {
+            lastMessage.content = "Sorry, I'm having trouble connecting right now. Please try again later.";
+          }
+          return updatedHistory;
+      });
     } finally {
       setIsChatLoading(false);
     }
   };
+
 
   return (
     <>
@@ -242,7 +271,7 @@ export default function JournalPage() {
                 </div>
                 <Textarea
                   id="content"
-                  placeholder={hasMounted ? getJournalPlaceholder() : t('journal.thoughtsPlaceholder')}
+                  placeholder={journalPlaceholder}
                   className="min-h-32"
                   value={currentContent}
                   onChange={(e) => setCurrentContent(e.target.value)}
@@ -279,7 +308,7 @@ export default function JournalPage() {
                           </div>
                         </div>
                       ))}
-                      {isChatLoading && (
+                      {isChatLoading && chatHistory[chatHistory.length - 1]?.content === '' && (
                         <div className="flex gap-2">
                           <Avatar className="h-8 w-8"><AvatarFallback><Bot size={16}/></AvatarFallback></Avatar>
                           <div className="p-3 rounded-lg bg-background flex items-center">

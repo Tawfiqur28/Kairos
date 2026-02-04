@@ -1,4 +1,4 @@
-export type EducationLevel = 'highSchool' | 'undergrad' | 'masters' | 'phd';
+export type EducationLevel = 'highSchool' | 'undergrad' | 'masters' | 'phd' | 'professional';
 
 export interface Ikigai {
   passions: string;

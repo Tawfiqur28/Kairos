@@ -19,12 +19,13 @@ type CareerEntry = {
   name: string;
   requiredThemes: string[];
   incompatibleThemes: string[];
-  educationLevels: ('high_school' | 'undergrad' | 'masters' | 'phd')[]; // NEW: Added education levels
+  educationLevels: ('high_school' | 'undergrad' | 'masters' | 'phd' | 'professional')[]; // NEW: Added education levels
   typicalPath: {
     high_school?: string[];
     undergrad?: string[];
     masters?: string[];
     phd?: string[];
+    professional?: string[];
   };
 };
 
@@ -38,33 +39,36 @@ const CAREER_DATABASE: CareerDatabase = {
       name: 'Software Engineer', 
       requiredThemes: ['Tech'], 
       incompatibleThemes: ['Music', 'Arts'],
-      educationLevels: ['high_school', 'undergrad', 'masters', 'phd'],
+      educationLevels: ['high_school', 'undergrad', 'masters', 'phd', 'professional'],
       typicalPath: {
         high_school: ['AP Computer Science', 'Join coding club', 'Build simple apps'],
         undergrad: ['CS degree', 'Internships', 'Build portfolio'],
         masters: ['Specialize in AI/ML', 'Research project', 'Industry projects'],
-        phd: ['Dissertation in CS', 'Publications', 'Academic/Industry research']
+        phd: ['Dissertation in CS', 'Publications', 'Academic/Industry research'],
+        professional: ['Advanced Certifications (e.g., Cloud)', 'Lead a project', 'Mentor junior developers']
       }
     },
     { 
       name: 'Cloud Architect', 
       requiredThemes: ['Tech'], 
       incompatibleThemes: ['Music', 'Arts'],
-      educationLevels: ['undergrad', 'masters'],
+      educationLevels: ['undergrad', 'masters', 'professional'],
       typicalPath: {
         undergrad: ['CS/IT degree', 'Cloud certifications', 'Network fundamentals'],
-        masters: ['Cloud computing specialization', 'Enterprise projects', 'Security focus']
+        masters: ['Cloud computing specialization', 'Enterprise projects', 'Security focus'],
+        professional: ['Gain experience as Cloud Engineer', 'Achieve expert-level certs', 'Design multi-cloud strategies']
       }
     },
     { 
       name: 'Data Scientist', 
       requiredThemes: ['Tech', 'Science'], 
       incompatibleThemes: ['Music'],
-      educationLevels: ['undergrad', 'masters', 'phd'],
+      educationLevels: ['undergrad', 'masters', 'phd', 'professional'],
       typicalPath: {
         undergrad: ['Statistics/CS degree', 'Python/R skills', 'Data analysis projects'],
         masters: ['ML specialization', 'Kaggle competitions', 'Business analytics'],
-        phd: ['Statistical research', 'Algorithm development', 'Published papers']
+        phd: ['Statistical research', 'Algorithm development', 'Published papers'],
+        professional: ['Transition from Data Analyst', 'Specialize in an industry', 'Lead data science teams']
       }
     },
   ],
@@ -109,13 +113,14 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
   }
 }
 
-// ==================== API CALLER for CHAT ====================
-async function callModelScopeChat(messages: {role: string, content: string}[], model: string): Promise<string> {
+// ==================== API CALLER for CHAT (STREAMING) ====================
+export async function* callModelScopeChatStream(messages: {role: string, content: string}[], model: string): AsyncGenerator<string> {
   const API_KEY = process.env.MODELSCOPE_API_KEY;
 
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
     console.error('MODELSCOPE_API_KEY is missing or not set in .env file');
-    return 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
+    yield 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
+    return;
   }
 
   try {
@@ -124,19 +129,23 @@ async function callModelScopeChat(messages: {role: string, content: string}[], m
       model: model,
       messages: messages,
       apiKey: API_KEY,
+      stream: true, 
     });
 
-    if (result.statusCode === 200 && result.output?.choices?.[0]?.message?.content) {
-      return result.output.choices[0].message.content;
-    } else {
-      const errorMessage = result.message || (result.output ? JSON.stringify(result.output) : 'Unknown error');
-      console.error('ModelScope Chat API Error:', errorMessage);
-      return `ERROR: API call failed with status ${result.statusCode}. Message: ${errorMessage}`;
+    let content = '';
+    for await (const chunk of result) {
+      const newContent = chunk.output?.choices?.[0]?.message?.content;
+      if (newContent && newContent !== content) {
+        const diff = newContent.substring(content.length);
+        content = newContent;
+        yield diff;
+      }
     }
+
   } catch (error) {
-    console.error('Error calling ModelScope Chat API:', error);
+    console.error('Error calling ModelScope Chat Stream API:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return `ERROR: An unexpected error occurred while calling the AI model. Details: ${errorMessage}`;
+    yield `ERROR: An unexpected error occurred while calling the AI model. Details: ${errorMessage}`;
   }
 }
 
@@ -448,10 +457,11 @@ const getEducationLevelPrompt = (educationLevel?: string): string => {
     high_school: `For HIGH SCHOOL student: Focus on foundational skills, college prep, and exploration. Suggest AP courses, extracurriculars, and summer programs. Timeline: 4-6 years to entry level.`,
     undergrad: `For UNDERGRADUATE student: Focus on major courses, internships, skill-building, and networking. Timeline: 2-4 years to entry level.`,
     masters: `For MASTER'S student: Focus on specialization, research projects, professional networking, and industry connections. Timeline: 1-3 years to specialized role.`,
-    phd: `For PhD student: Focus on research contribution, publication strategy, academic networking, and career positioning. Timeline: Variable based on dissertation completion.`
+    phd: `For PhD student: Focus on research contribution, publication strategy, academic networking, and career positioning. Timeline: Variable based on dissertation completion.`,
+    professional: `For a WORKING PROFESSIONAL: Focus on upskilling, certifications, networking for senior roles, and transitioning skills. Timeline: 1-2 years to pivot or advance.`
   };
   
-  return prompts[educationLevel as keyof typeof prompts] || 'Provide general career guidance.';
+  return (prompts as any)[educationLevel as any] || 'Provide general career guidance.';
 };
 
 // NEW: Get timeline estimate
@@ -460,10 +470,11 @@ const getTimelineEstimate = (career: string, educationLevel?: string): string =>
     high_school: '4-6 years (including college)',
     undergrad: '2-4 years',
     masters: '1-3 years',
-    phd: 'Variable (3-5+ years)'
+    phd: 'Variable (3-5+ years)',
+    professional: '1-2 years'
   };
   
-  const baseTimeline = timelines[educationLevel as keyof typeof timelines] || '2-5 years';
+  const baseTimeline = (timelines as any)[educationLevel as any] || '2-5 years';
   return `Estimated: ${baseTimeline} to entry-level ${career}`;
 };
 
@@ -493,18 +504,22 @@ const getNextSteps = (career: string, educationLevel?: string): string[] => {
       'Start publishing research',
       'Network with senior academics',
       'Explore post-doc or industry options'
+    ],
+    professional: [
+      'Identify skill gaps for advancement',
+      'Pursue advanced certifications',
+      'Network for senior-level opportunities',
+      'Lead a significant project'
     ]
   };
   
-  return steps[educationLevel as keyof typeof steps] || [
+  return (steps as any)[educationLevel as any] || [
     'Research career requirements',
     'Identify skill gaps',
     'Create learning plan',
     'Network with professionals'
   ];
 };
-
-// Keep existing helper functions (calculateInitialScore, checkScienceThemeMismatch) as they are...
 
 // ==================== ENHANCED ACTION PLAN WITH EDUCATION LEVEL ====================
 export const generatePersonalizedActionPlan = async (
@@ -526,7 +541,7 @@ export const generatePersonalizedActionPlan = async (
   resources: { title: string; url: string; type: string }[]; // NEW: Added resources
 }> => {
   
-  const extractedLevel = educationLevel || extractEducationLevel(userDetails);
+  const extractedLevel = educationLevel || extractEducationLevelFromDetails(userDetails);
   
   const prompt = `Create a SPICY, engaging 3-year action plan for becoming a '${careerGoal}'.
   
@@ -637,116 +652,6 @@ ${getEducationLevelPrompt(extractedLevel)}
   return fallback;
 };
 
-// ==================== ENHANCED KAIROS CHATBOT ====================
-export const kairosChat = async (input: {
-  message: string;
-  history?: { role: 'user' | 'assistant'; content: string }[];
-  userProfile?: string;
-  educationLevel?: 'high_school' | 'undergrad' | 'masters' | 'phd'; // NEW: Added
-  mode?: 'general' | 'assignment' | 'professor' | 'study'; // NEW: Added modes
-}): Promise<{
-  message: string;
-  suggestions?: string[];
-  resources?: { title: string; url: string; type: string }[];
-  professorMatches?: any[]; // NEW: For professor finding
-  nextSteps?: string[];
-}> => {
-  
-  const systemPrompt = `You are KAIROS ACADEMIC ASSISTANT, a specialized chatbot for ${input.educationLevel || 'student'} support.
-
-**MODES:**
-${input.mode === 'assignment' ? 'ASSIGNMENT HELP MODE: Provide structured guidance, outlines, and resources.' : ''}
-${input.mode === 'professor' ? 'PROFESSOR MATCHING MODE: Help find and connect with relevant professors.' : ''}
-${input.mode === 'study' ? 'STUDY HELP MODE: Provide study strategies, exam tips, and learning techniques.' : ''}
-${!input.mode ? 'GENERAL HELP MODE: Provide academic and career guidance.' : ''}
-
-**EDUCATION LEVEL: ${input.educationLevel?.toUpperCase() || 'NOT SPECIFIED'}**
-${getEducationLevelChatContext(input.educationLevel)}
-
-User Profile: ${input.userProfile || 'Not provided.'}
-
-**RESPONSE FORMAT:** Provide actionable, encouraging advice with specific examples.`;
-
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...(input.history || []),
-    { role: 'user', content: input.message },
-  ];
-
-  const response = await callModelScopeChat(messages, 'qwen-max');
-  
-  if (response.startsWith('ERROR:')) {
-    return {
-      message: getFallbackChatResponse(input.educationLevel, input.mode),
-      suggestions: ['Try rephrasing your question', 'Check your internet connection']
-    };
-  }
-  
-  // Try to parse as JSON for structured responses
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch && input.mode === 'professor') {
-      return JSON.parse(jsonMatch[0]);
-    }
-  } catch (e) {
-    console.log('Not a JSON response, using as plain text');
-  }
-  
-  return {
-    message: response,
-    suggestions: getDefaultSuggestions(input.educationLevel, input.mode)
-  };
-};
-
-// NEW: Education level chat context
-const getEducationLevelChatContext = (educationLevel?: string): string => {
-  const contexts = {
-    high_school: `HIGH SCHOOL focus: Foundational concepts, exam prep, college applications, study skills, time management.`,
-    undergrad: `UNDERGRAD focus: Coursework, assignments, projects, internships, networking, grad school prep.`,
-    masters: `MASTER'S focus: Research methodology, thesis writing, specialization, professional networking.`,
-    phd: `PhD focus: Dissertation, publications, academic networking, grant writing, career positioning.`
-  };
-  return contexts[educationLevel as keyof typeof contexts] || 'Provide general student guidance.';
-};
-
-// NEW: Fallback chat responses
-const getFallbackChatResponse = (educationLevel?: string, mode?: string): string => {
-  const baseResponses = {
-    high_school: "I can help with homework, study strategies, and college prep! What subject are you working on?",
-    undergrad: "I can assist with assignments, project ideas, and finding academic resources. What do you need help with?",
-    masters: "I can help with research methodology, literature review, and connecting with professors. What's your research topic?",
-    phd: "I can assist with dissertation structure, publication strategy, and academic networking. What aspect of your research needs attention?"
-  };
-  
-  const modeSpecific = {
-    assignment: "I can help break down assignments and provide structure guidance.",
-    professor: "I can help you find professors matching your research interests.",
-    study: "I can provide study techniques and exam preparation strategies."
-  };
-  
-  const base = baseResponses[educationLevel as keyof typeof baseResponses] || 
-               "I'm here to help with your academic questions. What do you need assistance with?";
-  const modeMsg = mode ? ` ${modeSpecific[mode as keyof typeof modeSpecific]}` : '';
-  
-  return base + modeMsg;
-};
-
-// NEW: Default suggestions
-const getDefaultSuggestions = (educationLevel?: string, mode?: string): string[] => {
-  const suggestions: Record<string, string[]> = {
-    high_school: ['Check Khan Academy', 'Create study schedule', 'Ask teacher for clarification'],
-    undergrad: ['Visit professor office hours', 'Form study group', 'Use academic support center'],
-    masters: ['Review literature databases', 'Network with researchers', 'Attend department seminars'],
-    phd: ['Attend conferences', 'Collaborate with other labs', 'Seek mentorship']
-  };
-  
-  return suggestions[educationLevel as keyof typeof suggestions] || [
-    'Break down the problem',
-    'Seek additional resources',
-    'Ask for help when needed'
-  ];
-};
-
 // ==================== GET ALL CAREER SCORES WITH EDUCATION FILTER ====================
 export const getAllCareerScores = async (
   userProfile: string,
@@ -817,16 +722,15 @@ export const getAllCareerScores = async (
 };
 
 // ==================== HELPER FUNCTIONS ====================
-const extractEducationLevel = (userDetails: string): string => {
+const extractEducationLevelFromDetails = (userDetails: string): string => {
   const details = userDetails.toLowerCase();
   if (details.includes('high school') || details.includes('highschool')) return 'high_school';
   if (details.includes('undergraduate') || details.includes('bachelor') || details.includes('college')) return 'undergrad';
   if (details.includes('master') || details.includes('graduate')) return 'masters';
   if (details.includes('phd') || details.includes('doctorate')) return 'phd';
+  if (details.includes('professional') || details.includes('working')) return 'professional';
   return 'not_specified';
 };
-
-// Keep existing helper functions (calculateInitialScore, checkScienceThemeMismatch) unchanged...
 
 export {
   callModelScopeAI,

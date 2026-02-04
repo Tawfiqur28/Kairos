@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, EducationLevel } from '@/lib/types';
-import { Save, AlertCircle, Sparkles, Target, Zap, Heart, Brain } from 'lucide-react';
+import { Save, AlertCircle, Sparkles, Target, Zap, Heart, Brain, Briefcase } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect, useState } from 'react';
@@ -45,37 +45,34 @@ export default function IkigaiPage() {
 
   useEffect(() => {
     setHasMounted(true);
-    // Calculate character counts
-    setCharacterCounts({
-      passions: ikigai.passions.length,
-      skills: ikigai.skills.length,
-      values: ikigai.values.length,
-      interests: ikigai.interests.length,
-    });
+    if(ikigai) {
+      setCharacterCounts({
+        passions: ikigai.passions?.length || 0,
+        skills: ikigai.skills?.length || 0,
+        values: ikigai.values?.length || 0,
+        interests: ikigai.interests?.length || 0,
+      });
+    }
   }, [ikigai]);
 
-  // Calculate completion percentage
-  const calculateCompletion = () => {
-    if (!hasMounted) return 0;
+  const completionPercentage = useMemo(() => {
+    if (!hasMounted || !ikigai) return 0;
     
     let completed = 0;
     const fields = ['passions', 'skills', 'values', 'interests'];
     
     fields.forEach(field => {
-      if (ikigai[field as keyof Ikigai] && ikigai[field as keyof Ikigai].length > 10) completed++;
+      if (ikigai[field as keyof Ikigai] && (ikigai[field as keyof Ikigai] as string).length > 10) completed++;
     });
     
-    // Add education level if selected
     if (ikigai.educationLevel) completed++;
     
     return Math.round((completed / 5) * 100);
-  };
+  }, [ikigai, hasMounted]);
 
-  const completionPercentage = calculateCompletion();
   const isProfileComplete = completionPercentage >= 80;
 
   const handleSave = () => {
-    // Validate profile completeness
     if (completionPercentage < 50) {
       toast({
         title: 'Profile Incomplete',
@@ -85,7 +82,6 @@ export default function IkigaiPage() {
       return;
     }
 
-    // The useLocalStorage hook already saves on change, but this provides explicit user feedback.
     toast({
       title: t('toasts.profileSavedTitle'),
       description: isProfileComplete 
@@ -93,8 +89,7 @@ export default function IkigaiPage() {
         : t('toasts.profileSavedDescription'),
     });
 
-    // If profile just became complete, show success message
-    if (isProfileComplete && completionPercentage >= 80) {
+    if (isProfileComplete) {
       setTimeout(() => {
         toast({
           title: '🎉 Profile Complete!',
@@ -106,16 +101,15 @@ export default function IkigaiPage() {
   };
 
   const handleInputChange = (field: keyof Ikigai, value: string) => {
-    setIkigai({ ...ikigai, [field]: value });
-    setCharacterCounts(prev => ({ ...prev, [field]: value.length }));
+    setIkigai(prev => ({ ...prev, [field]: value }));
   };
 
-  const getFieldStatus = (value: string): 'good' | 'fair' | 'poor' => {
-    if (value.length === 0) return 'poor';
+  const getFieldStatus = (value?: string): 'good' | 'fair' | 'poor' => {
+    if (!value || value.length === 0) return 'poor';
     if (value.length < 30) return 'fair';
     return 'good';
   };
-
+  
   const getStatusColor = (status: 'good' | 'fair' | 'poor') => {
     switch (status) {
       case 'good': return 'text-green-600';
@@ -123,8 +117,11 @@ export default function IkigaiPage() {
       case 'poor': return 'text-red-600';
     }
   };
-
-  const getStatusText = (status: 'good' | 'fair' | 'poor', count: number) => {
+  
+  const getStatusText = (field: keyof typeof characterCounts) => {
+    const value = ikigai?.[field] || '';
+    const count = value.length;
+    const status = getFieldStatus(value);
     switch (status) {
       case 'good': return `${count} characters - Good detail`;
       case 'fair': return `${count} characters - Add more details`;
@@ -132,7 +129,6 @@ export default function IkigaiPage() {
     }
   };
 
-  // Tips for better career matching
   const tips = [
     {
       icon: <Target className="h-4 w-4" />,
@@ -163,7 +159,6 @@ export default function IkigaiPage() {
         description={t('ikigai.description')}
       />
 
-      {/* Completion Status Banner */}
       {hasMounted && (
         <div className={`mb-6 p-4 rounded-lg border ${
           isProfileComplete 
@@ -239,22 +234,19 @@ export default function IkigaiPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Passions */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="passions" className="text-lg flex items-center gap-2">
                       <Heart className="h-4 w-4 text-red-500" />
                       {t('ikigai.passionsLabel')}
                     </Label>
-                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai.passions))}`}>
-                      {getStatusText(getFieldStatus(ikigai.passions), characterCounts.passions)}
-                    </span>
+                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.passions))}`}>{getStatusText('passions')}</span>}
                   </div>
                   <Textarea
                     id="passions"
                     placeholder={t('ikigai.passionsPlaceholder')}
                     className="min-h-40"
-                    value={ikigai.passions}
+                    value={ikigai?.passions || ''}
                     onChange={(e) => handleInputChange('passions', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -262,22 +254,19 @@ export default function IkigaiPage() {
                   </p>
                 </div>
 
-                {/* Skills */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="skills" className="text-lg flex items-center gap-2">
                       <Zap className="h-4 w-4 text-yellow-500" />
                       {t('ikigai.skillsLabel')}
                     </Label>
-                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai.skills))}`}>
-                      {getStatusText(getFieldStatus(ikigai.skills), characterCounts.skills)}
-                    </span>
+                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.skills))}`}>{getStatusText('skills')}</span>}
                   </div>
                   <Textarea
                     id="skills"
                     placeholder={t('ikigai.skillsPlaceholder')}
                     className="min-h-40"
-                    value={ikigai.skills}
+                    value={ikigai?.skills || ''}
                     onChange={(e) => handleInputChange('skills', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -285,22 +274,19 @@ export default function IkigaiPage() {
                   </p>
                 </div>
 
-                {/* Values */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="values" className="text-lg flex items-center gap-2">
                       <Target className="h-4 w-4 text-blue-500" />
                       {t('ikigai.valuesLabel')}
                     </Label>
-                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai.values))}`}>
-                      {getStatusText(getFieldStatus(ikigai.values), characterCounts.values)}
-                    </span>
+                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.values))}`}>{getStatusText('values')}</span>}
                   </div>
                   <Textarea
                     id="values"
                     placeholder={t('ikigai.valuesPlaceholder')}
                     className="min-h-40"
-                    value={ikigai.values}
+                    value={ikigai?.values || ''}
                     onChange={(e) => handleInputChange('values', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -308,22 +294,19 @@ export default function IkigaiPage() {
                   </p>
                 </div>
 
-                {/* Interests */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="interests" className="text-lg flex items-center gap-2">
                       <Brain className="h-4 w-4 text-purple-500" />
                       {t('ikigai.interestsLabel')}
                     </Label>
-                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai.interests))}`}>
-                      {getStatusText(getFieldStatus(ikigai.interests), characterCounts.interests)}
-                    </span>
+                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.interests))}`}>{getStatusText('interests')}</span>}
                   </div>
                   <Textarea
                     id="interests"
                     placeholder={t('ikigai.interestsPlaceholder')}
                     className="min-h-40"
-                    value={ikigai.interests}
+                    value={ikigai?.interests || ''}
                     onChange={(e) => handleInputChange('interests', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -332,60 +315,69 @@ export default function IkigaiPage() {
                 </div>
               </div>
 
-              {/* Education Level */}
               <div className="space-y-4 pt-4 border-t">
                 <Label className="text-lg font-medium">Where are you right now?</Label>
                 <p className="text-sm text-muted-foreground">
                   This helps tailor career recommendations and action plans to your current stage.
                 </p>
                 <RadioGroup
-                  value={hasMounted ? ikigai.educationLevel : undefined}
+                  value={ikigai?.educationLevel}
                   onValueChange={(value) =>
-                    setIkigai({ ...ikigai, educationLevel: value as EducationLevel })
+                    setIkigai(prev => ({ ...prev, educationLevel: value as EducationLevel }))
                   }
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+                  className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4"
                 >
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
-                    hasMounted && ikigai.educationLevel === 'highSchool' ? 'bg-primary/5 border-primary' : ''
+                    ikigai?.educationLevel === 'highSchool' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="highSchool" id="r1" />
-                    <Label htmlFor="r1" className="cursor-pointer">🎓 High School Student</Label>
+                    <Label htmlFor="r1" className="cursor-pointer">🎓 High School</Label>
                   </div>
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
-                    hasMounted && ikigai.educationLevel === 'undergrad' ? 'bg-primary/5 border-primary' : ''
+                    ikigai?.educationLevel === 'undergrad' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="undergrad" id="r2" />
-                    <Label htmlFor="r2" className="cursor-pointer">🏫 Undergraduate Student</Label>
+                    <Label htmlFor="r2" className="cursor-pointer">🏫 Undergraduate</Label>
                   </div>
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
-                    hasMounted && ikigai.educationLevel === 'masters' ? 'bg-primary/5 border-primary' : ''
+                    ikigai?.educationLevel === 'masters' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="masters" id="r3" />
-                    <Label htmlFor="r3" className="cursor-pointer">📚 Master's Student</Label>
+                    <Label htmlFor="r3" className="cursor-pointer">📚 Master's</Label>
                   </div>
                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
-                    hasMounted && ikigai.educationLevel === 'phd' ? 'bg-primary/5 border-primary' : ''
+                    ikigai?.educationLevel === 'phd' ? 'bg-primary/5 border-primary' : ''
                   }`}>
                     <RadioGroupItem value="phd" id="r4" />
-                    <Label htmlFor="r4" className="cursor-pointer">🎓 PhD/Doctoral Candidate</Label>
+                    <Label htmlFor="r4" className="cursor-pointer">🎓 PhD/Doctoral</Label>
+                  </div>
+                   <div className={`flex items-center space-x-2 p-3 rounded-lg border ${
+                    ikigai?.educationLevel === 'professional' ? 'bg-primary/5 border-primary' : ''
+                  }`}>
+                    <RadioGroupItem value="professional" id="r5" />
+                    <Label htmlFor="r5" className="cursor-pointer">💼 Professional</Label>
                   </div>
                 </RadioGroup>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between items-center">
               <div>
-                {completionPercentage < 50 ? (
-                  <p className="text-sm text-yellow-600">
-                    ⚠️ More details needed for accurate career matching
-                  </p>
-                ) : completionPercentage < 80 ? (
-                  <p className="text-sm text-blue-600">
-                    📝 Almost there! Add more details for the best results
-                  </p>
-                ) : (
-                  <p className="text-sm text-green-600">
-                    ✅ Ready for personalized career exploration
-                  </p>
+                {hasMounted && (
+                  <>
+                    {completionPercentage < 50 ? (
+                      <p className="text-sm text-yellow-600">
+                        ⚠️ More details needed for accurate career matching
+                      </p>
+                    ) : completionPercentage < 80 ? (
+                      <p className="text-sm text-blue-600">
+                        📝 Almost there! Add more details for the best results
+                      </p>
+                    ) : (
+                      <p className="text-sm text-green-600">
+                        ✅ Ready for personalized career exploration
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
               <div className="flex gap-2">
@@ -394,7 +386,7 @@ export default function IkigaiPage() {
                     Skip to Careers
                   </Link>
                 </Button>
-                <Button onClick={handleSave} disabled={completionPercentage < 30}>
+                <Button onClick={handleSave} disabled={!hasMounted || completionPercentage < 30}>
                   <Save className="mr-2 h-4 w-4" /> {t('ikigai.saveButton')}
                 </Button>
               </div>
@@ -402,7 +394,6 @@ export default function IkigaiPage() {
           </Card>
         </div>
 
-        {/* Tips Sidebar */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
