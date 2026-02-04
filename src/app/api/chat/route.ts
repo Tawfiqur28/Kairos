@@ -1,6 +1,6 @@
-import { callModelScopeChatStream } from '@/ai/utils';
 import type { EducationLevel } from '@/lib/types';
 import { z } from 'zod';
+import { NextRequest } from 'next/server';
 
 // Helper function to provide context based on education level
 const getEducationLevelChatContext = (educationLevel?: string): string => {
@@ -43,7 +43,7 @@ const ChatRequestSchema = z.object({
   }).optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { messages, ikigai } = ChatRequestSchema.parse(body);
@@ -60,7 +60,6 @@ export async function POST(request: Request) {
         const searchResults = await searchWeb(searchQuery);
         searchResultsContext = `\n\n**Web Search Results:**\n${searchResults}`;
     }
-
 
     const systemPrompt = `You are KAIROS, a specialized, empathetic, and highly knowledgeable AI assistant for academic and career guidance. Provide detailed, actionable, and structured answers. Use markdown for formatting like lists, bold text, and code snippets where appropriate.
 
@@ -79,20 +78,27 @@ ${searchResultsContext}
       // include all messages
       ...messages
     ];
-    
-    const streamGenerator = callModelScopeChatStream(modelMessages, 'qwen-max');
-    const encoder = new TextEncoder();
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of streamGenerator) {
-          controller.enqueue(encoder.encode(chunk));
-        }
-        controller.close();
-      }
+    // Get the base URL for the current request
+    const url = new URL(request.url);
+    const baseUrl = `${url.protocol}//${url.host}`;
+    
+    // Call the new ModelScope API route
+    const response = await fetch(`${baseUrl}/api/chat/modelscope`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages: modelMessages, model: 'qwen-max' }),
     });
 
-    return new Response(stream, {
+    if (!response.ok) {
+        const errorBody = await response.json();
+        throw new Error(errorBody.error || 'Failed to get response from model API');
+    }
+    
+    // Stream the response back to the client
+    return new Response(response.body, {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
 
