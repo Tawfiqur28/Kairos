@@ -53,6 +53,37 @@ async function callModelScopeAI(prompt: string, model: string): Promise<string> 
   }
 }
 
+// ==================== API CALLER for CHAT ====================
+async function callModelScopeChat(messages: {role: string, content: string}[], model: string): Promise<string> {
+  const API_KEY = process.env.MODELSCOPE_API_KEY;
+
+  if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+    console.error('❌ MODELSCOPE_API_KEY is missing or not set in .env file');
+    return 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
+  }
+
+  try {
+    const Generation = await getDashscopeGeneration();
+    const result = await Generation.call({
+      model: model,
+      messages: messages,
+      apiKey: API_KEY,
+    });
+
+    if (result.statusCode === 200 && result.output?.choices?.[0]?.message?.content) {
+      return result.output.choices[0].message.content;
+    } else {
+      const errorMessage = result.message || (result.output ? JSON.stringify(result.output) : 'Unknown error');
+      console.error('ModelScope Chat API Error:', errorMessage);
+      return `ERROR: API call failed with status ${result.statusCode}. Message: ${errorMessage}`;
+    }
+  } catch (error) {
+    console.error('Error calling ModelScope Chat API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return `ERROR: An unexpected error occurred while calling the AI model. Details: ${errorMessage}`;
+  }
+}
+
 // ==================== ENHANCED CAREER DATABASE ====================
 type CareerEntry = {
   name: string;
@@ -524,49 +555,28 @@ const extractEducationLevel = (userDetails: string): string => {
   return 'Not Specified';
 };
 
-// ==================== JOURNAL PROCESSING ====================
-export const processJournalEntriesForCareerSuggestions = async (
-  journalEntries: string,
-  feelings: string
-): Promise<{ careerSuggestions: string, analysis: string }> => {
-  const prompt = `Analyze journal entries and feelings for career suggestions.
+// ==================== NEW: KAIROS CHATBOT ====================
+export const kairosChat = async (input: {
+  message: string;
+  history?: { role: 'user' | 'assistant'; content: string }[];
+  userProfile?: string;
+}): Promise<string> => {
+  const systemPrompt = `You are KAIROS, a helpful AI assistant for students integrated into a career planning application. Your goal is to provide guidance on studies, college applications, research, and other academic or career-related problems. Be supportive, encouraging, and provide actionable advice.
+The user you are talking to has the following profile:
+${input.userProfile || 'Not provided.'}
 
-JOURNAL: "${journalEntries}"
-FEELINGS: "${feelings}"
+When answering, be concise and clear. Use markdown for formatting if it helps readability.`;
 
-Identify themes and suggest 3-5 careers.
+  const messages: {role: 'system' | 'user' | 'assistant', content: string}[] = [
+    { role: 'system', content: systemPrompt },
+    ...(input.history || []),
+    { role: 'user', content: input.message },
+  ];
 
-Respond with JSON: {
-  "analysis": "Brief analysis...",
-  "careerSuggestions": "1. Career 1\\n2. Career 2\\n3. Career 3"
-}`;
-
-  const response = await callModelScopeAI(prompt, 'qwen-max');
-
-  if (response.startsWith('ERROR:')) {
-    return {
-      analysis: 'Unable to analyze journal entries at this time.',
-      careerSuggestions: 'Try again later or provide more details.'
-    };
-  }
-
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    return {
-      analysis: 'Analysis completed.',
-      careerSuggestions: response
-    };
-  } catch (e) {
-    console.warn('Journal parse failed:', e);
-    return {
-      analysis: 'There was an issue processing your journal.',
-      careerSuggestions: 'No specific suggestions could be generated.'
-    };
-  }
+  // @ts-ignore
+  return callModelScopeChat(messages, 'qwen-max');
 };
+
 
 // ==================== NEW: GET ALL CAREERS WITH SCORES ====================
 export const getAllCareerScores = async (

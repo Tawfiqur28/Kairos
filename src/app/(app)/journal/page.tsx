@@ -1,6 +1,6 @@
 'use client';
 
-import { processJournalEntriesForCareerSuggestions } from '@/ai/flows/process-journal-entries-for-career-suggestions';
+import { kairosChat } from '@/ai/flows/kairos-chat';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,17 +13,18 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry, Ikigai } from '@/lib/types';
-import { Bot, Loader2, Mic, MicOff, Sparkles } from 'lucide-react';
+import { Bot, Loader2, Mic, MicOff, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
 
-type CareerSuggestions = {
-  careerSuggestions: string;
-  analysis: string;
+type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
 };
 
 declare global {
@@ -45,8 +46,6 @@ export default function JournalPage() {
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>('journal-entries', []);
   const [currentContent, setCurrentContent] = useState('');
   const [currentFeeling, setCurrentFeeling] = useState('');
-  const [suggestions, setSuggestions] = useState<CareerSuggestions | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
   const [ikigai] = useLocalStorage<Ikigai>('ikigai-profile', initialIkigai);
@@ -55,11 +54,25 @@ export default function JournalPage() {
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
 
+  // Chatbot states
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       setIsSpeechRecognitionSupported(true);
     }
   }, []);
+
+  useEffect(() => {
+    // Scroll to bottom of chat
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+
 
   const getJournalPlaceholder = () => {
     switch (ikigai.educationLevel) {
@@ -149,29 +162,27 @@ export default function JournalPage() {
     });
   };
 
-  const handleGetSuggestions = async () => {
-    if (entries.length === 0) {
-      toast({
-        title: t('toasts.notEnoughDataTitle'),
-        description: t('toasts.notEnoughDataDescription'),
-        variant: 'destructive',
-      });
-      return;
-    }
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || isChatLoading) return;
 
-    setIsLoading(true);
-    setSuggestions(null);
+    const userMessage: ChatMessage = { role: 'user', content: chatInput };
+    setChatHistory(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatLoading(true);
 
     try {
-      const journalData = entries
-        .map((e) => `Date: ${e.date}, Feeling: ${e.feeling}\nEntry: ${e.content}`)
-        .join('\n\n');
+      const userProfileString = `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}. Current Education Level: ${ikigai.educationLevel}.`;
       
-      const result = await processJournalEntriesForCareerSuggestions({
-        journalEntries: journalData,
-        feelings: "A summary of daily feelings across entries.", // This could be more sophisticated
+      const result = await kairosChat({
+        message: chatInput,
+        history: chatHistory,
+        userProfile: userProfileString,
       });
-      setSuggestions(result);
+
+      const assistantMessage: ChatMessage = { role: 'assistant', content: result.message };
+      setChatHistory(prev => [...prev, assistantMessage]);
+
     } catch (error) {
       console.error(error);
       toast({
@@ -179,8 +190,11 @@ export default function JournalPage() {
         description: t('toasts.aiErrorJournal'),
         variant: 'destructive',
       });
+      // Add error message to chat
+      const errorMessage: ChatMessage = { role: 'assistant', content: "Sorry, I'm having trouble connecting right now. Please try again later." };
+      setChatHistory(prev => [...prev, errorMessage]);
     } finally {
-      setIsLoading(false);
+      setIsChatLoading(false);
     }
   };
 
@@ -234,54 +248,66 @@ export default function JournalPage() {
               <Button onClick={handleSaveEntry}>{t('journal.saveButton')}</Button>
             </CardFooter>
           </Card>
+          
           <Card>
             <CardHeader>
-              <CardTitle>{t('journal.aiInsightsTitle')}</CardTitle>
+              <CardTitle>KAIROS Assistant</CardTitle>
               <CardDescription>
-                {t('journal.aiInsightsDescription')}
+                Your personal AI guide for academic and career questions.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading && (
-                <div className="flex items-center justify-center p-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="ml-4">{t('journal.aiLoading')}</p>
-                </div>
-              )}
-              {suggestions && !isLoading && (
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-bold mb-2 font-headline">{t('journal.analysisLabel')}</h4>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{suggestions.analysis}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-2 font-headline">{t('journal.suggestionsLabel')}</h4>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{suggestions.careerSuggestions}</p>
-                  </div>
-                </div>
-              )}
-               {!suggestions && !isLoading && (
-                 <div className="text-center text-muted-foreground py-8">
-                    <Bot size={48} className="mx-auto mb-4"/>
-                    <p>{t('journal.generatePrompt')}</p>
-                 </div>
-               )}
+              <div className="h-[400px] flex flex-col">
+                <ScrollArea className="flex-1 p-4 border rounded-md bg-muted/20" ref={chatContainerRef}>
+                  {chatHistory.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                      <Bot size={48} className="mb-4" />
+                      <p>Ask me anything about your studies, college applications, or career path!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {chatHistory.map((msg, index) => (
+                        <div key={index} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                          {msg.role === 'assistant' && <Avatar className="h-8 w-8"><AvatarFallback><Bot size={16}/></AvatarFallback></Avatar>}
+                          <div className={`p-3 rounded-lg max-w-[80%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {isChatLoading && (
+                        <div className="flex gap-2">
+                          <Avatar className="h-8 w-8"><AvatarFallback><Bot size={16}/></AvatarFallback></Avatar>
+                          <div className="p-3 rounded-lg bg-background flex items-center">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </ScrollArea>
+                <form onSubmit={handleSendMessage} className="mt-4 flex items-center gap-2">
+                  <Input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask a question..."
+                    disabled={isChatLoading}
+                  />
+                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()}>
+                    <Send className="h-4 w-4" />
+                    <span className="sr-only">Send</span>
+                  </Button>
+                </form>
+              </div>
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleGetSuggestions} disabled={isLoading}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                {t('journal.generateButton')}
-              </Button>
-            </CardFooter>
           </Card>
         </div>
 
         <div className="space-y-6">
           <h3 className="text-xl font-bold font-headline">{t('journal.pastEntriesTitle')}</h3>
           {entries.length > 0 ? (
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
+            <ScrollArea className="space-y-4 max-h-[700px] overflow-y-auto pr-4">
               {entries.map((entry) => (
-                <Card key={entry.id}>
+                <Card key={entry.id} className="mb-4">
                   <CardHeader>
                     <CardTitle className="text-lg">{entry.date}</CardTitle>
                     <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
@@ -291,7 +317,7 @@ export default function JournalPage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </ScrollArea>
           ) : (
             <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
                 <p>{t('journal.noEntries')}</p>
