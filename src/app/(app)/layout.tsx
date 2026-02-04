@@ -17,39 +17,46 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, ActionPlan } from '@/lib/types';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const pathname = usePathname();
-  const [ikigai, setIkigai] = useLocalStorage<Ikigai>('ikigai-profile', {
+  const [ikigai] = useLocalStorage<Ikigai>('ikigai-profile', {
     passions: '',
     skills: '',
     values: '',
     interests: '',
-    educationLevel: ''
+    educationLevel: undefined,
   });
-  const [actionPlan, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
+  const [actionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
 
-  // Check if profile is complete
-  const isProfileComplete = ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests;
-  
-  // Calculate profile completion percentage
-  const calculateProfileCompletion = () => {
+  const profileCompletion = useMemo(() => {
+    if (!hasMounted) return 0;
     let completed = 0;
-    const fields = ['passions', 'skills', 'values', 'interests', 'educationLevel'];
-    
+    const fields = ['passions', 'skills', 'values', 'interests'];
     fields.forEach(field => {
-      if (ikigai[field as keyof Ikigai]) completed++;
+      if (ikigai[field as keyof Ikigai] && ikigai[field as keyof Ikigai]!.length > 10) completed++;
     });
-    
-    return Math.round((completed / fields.length) * 100);
-  };
+    if (ikigai.educationLevel) completed++;
+    return Math.round((completed / 5) * 100);
+  }, [ikigai, hasMounted]);
 
-  const profileCompletion = calculateProfileCompletion();
-  const hasActionPlan = actionPlan && actionPlan.phases && actionPlan.phases.length > 0;
+  const isProfileComplete = useMemo(() => profileCompletion >= 80, [profileCompletion]);
+  
+  const hasActionPlan = useMemo(() => {
+    if (!hasMounted) return false;
+    return !!(actionPlan && actionPlan.phases && actionPlan.phases.length > 0);
+  }, [actionPlan, hasMounted]);
+
 
   // Get current section for breadcrumb/context
   const getCurrentSection = () => {
@@ -95,7 +102,7 @@ export default function AppLayout({
                 </div>
               </div>
               
-              {!isProfileComplete && profileCompletion < 80 && (
+              {hasMounted && !isProfileComplete && (
                 <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
                   <p className="text-xs text-yellow-800 dark:text-yellow-300 font-medium">
                     Complete profile for better matches
@@ -140,31 +147,51 @@ export default function AppLayout({
               </div>
               {/* Mobile Footer Status */}
               <div className="border-t p-4 mt-auto">
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium">Profile Status</span>
-                      <span className="font-bold text-primary">{profileCompletion}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary transition-all duration-300"
-                        style={{ width: `${profileCompletion}%` }}
-                      />
-                    </div>
+                <div className="space-y-4">
+                  <div className="sm:hidden space-y-2">
+                    {hasMounted && pathname !== '/ikigai' && !isProfileComplete && (
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/ikigai" className="flex items-center justify-center gap-1">
+                          <Target className="h-3 w-3" />
+                          <span>Complete Profile</span>
+                        </Link>
+                      </Button>
+                    )}
+                    {hasMounted && hasActionPlan && pathname !== '/plan' && (
+                       <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/plan" className="flex items-center justify-center gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          <span>View Plan</span>
+                        </Link>
+                      </Button>
+                    )}
                   </div>
-                  {hasActionPlan && (
-                    <p className="text-xs text-muted-foreground">
-                      Active plan: {actionPlan!.careerTitle}
-                    </p>
-                  )}
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium">Profile Status</span>
+                        <span className="font-bold text-primary">{profileCompletion}%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary transition-all duration-300"
+                          style={{ width: `${profileCompletion}%` }}
+                        />
+                      </div>
+                    </div>
+                    {hasActionPlan && (
+                      <p className="text-xs text-muted-foreground">
+                        Active plan: {actionPlan!.careerTitle}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </SheetContent>
           </Sheet>
 
           {/* Breadcrumb/Context Area */}
-          <div className="w-full flex-1 flex items-center gap-4">
+          <div className="w-full flex-1 flex items-center gap-4 overflow-hidden">
             {pathname !== '/dashboard' && (
               <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
                 <Link href="/dashboard">
@@ -174,32 +201,32 @@ export default function AppLayout({
               </Button>
             )}
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-hidden">
               {getCurrentSection() && (
                 <>
-                  <span className="font-medium text-sm sm:text-base">
+                  <span className="font-medium text-sm sm:text-base truncate">
                     {getCurrentSection()}
                   </span>
                   
                   {/* Contextual Badges */}
-                  {pathname === '/ikigai' && !isProfileComplete && (
+                  {hasMounted && pathname === '/ikigai' && !isProfileComplete && (
                     <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
                       {profileCompletion < 50 ? 'Incomplete' : `${profileCompletion}%`}
                     </Badge>
                   )}
                   
-                  {pathname === '/careers' && !isProfileComplete && (
+                  {hasMounted && pathname === '/careers' && !isProfileComplete && (
                     <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
                       Profile Required
                     </Badge>
                   )}
                   
-                  {pathname === '/plan' && hasActionPlan && (
+                  {hasMounted && pathname === '/plan' && hasActionPlan && (
                     <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-300">
                       {Math.round(
                         (actionPlan!.phases.reduce((acc, phase) => 
                           acc + phase.tasks.filter(t => t.completed).length, 0) / 
-                        actionPlan!.phases.reduce((acc, phase) => acc + phase.tasks.length, 0)) * 100
+                        actionPlan!.phases.reduce((acc, phase) => acc + phase.tasks.length, 1)) * 100
                       )}% Progress
                     </Badge>
                   )}
@@ -211,7 +238,7 @@ export default function AppLayout({
           {/* Header Actions */}
           <div className="flex items-center gap-2">
             {/* Quick Action Button for Profile Completion */}
-            {pathname !== '/ikigai' && !isProfileComplete && profileCompletion < 80 && (
+            {hasMounted && pathname !== '/ikigai' && !isProfileComplete && (
               <Button asChild variant="outline" size="sm" className="hidden sm:flex">
                 <Link href="/ikigai" className="flex items-center gap-1">
                   <Target className="h-3 w-3" />
@@ -221,7 +248,7 @@ export default function AppLayout({
             )}
             
             {/* Quick Action Button for Action Plan */}
-            {pathname !== '/plan' && hasActionPlan && (
+            {hasMounted && pathname !== '/plan' && hasActionPlan && (
               <Button asChild variant="outline" size="sm" className="hidden sm:flex">
                 <Link href="/plan" className="flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
@@ -249,12 +276,12 @@ export default function AppLayout({
             <span>Personalized Action Plans</span>
           </div>
           <div className="flex items-center gap-4">
-            {isProfileComplete ? (
+            {hasMounted && isProfileComplete ? (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 <span>Profile Complete</span>
               </div>
-            ) : (
+            ) : hasMounted && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></div>
                 <Link href="/ikigai" className="text-primary hover:underline">
