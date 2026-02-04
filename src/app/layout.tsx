@@ -3,6 +3,7 @@ import { Inter, Source_Code_Pro } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
+import { LanguageProvider } from '@/context/language-context';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -34,8 +35,10 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        {children}
-        <Toaster />
+        <LanguageProvider>
+          {children}
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -1,0 +1,29 @@
+{
+  "header": {
+    "logo": "KAIROS"
+  },
+  "hero": {
+    "title1": "Find Your",
+    "title2": "Perfect",
+    "title3": "Career",
+    "subtitle": "KAIROS uses the ancient Japanese concept of Ikigai and AI to match you with careers that align with your passions, skills, and the world's needs.",
+    "feature1": "Interactive Quiz",
+    "feature2": "AI-Powered Matching",
+    "feature3": "Personalized Plans",
+    "cta1": "Start Your Journey",
+    "cta2": "Learn About Ikigai"
+  },
+  "features": {
+    "title": "Features",
+    "subtitle": "Our application uses a three-step process to guide you from self-discovery to a concrete action plan.",
+    "card1_title": "Ikigai Canvas",
+    "card1_text": "An interactive space to articulate your passions, skills, values, and interests, forming the foundation of your career journey.",
+    "card2_title": "AI-Powered Matching",
+    "card2_text": "Our AI analyzes your unique profile to suggest careers that align with your Ikigai, complete with a personalized fit score.",
+    "card3_title": "Personalized Plan",
+    "card3_text": "Receive a dynamic, step-by-step 3-year action plan to achieve your career goals, generated just for you."
+  },
+  "footer": {
+    "text": "Enjoy your journey and believe in yourself."
+  }
+}
