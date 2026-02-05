@@ -368,10 +368,8 @@ export default function IkigaiPage() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
-                  <Link href="/careers" passHref legacyBehavior>
-                    <a className={!isProfileComplete ? "pointer-events-none opacity-50" : ""}>
-                      {t('ikigai.skipToCareers')}
-                    </a>
+                  <Link href="/careers" className={!isProfileComplete ? "pointer-events-none opacity-50" : ""}>
+                    {t('ikigai.skipToCareers')}
                   </Link>
                 </Button>
                 <Button onClick={handleSave} disabled={!hasMounted || completionPercentage < 30}>
