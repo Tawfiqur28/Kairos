@@ -402,7 +402,7 @@
     "profileStatus": "Profile Status",
     "statusIncomplete": "Incomplete",
     "statusProfileRequired": "Profile Required",
-    "progressPercent": "Progress",
+    "progressPercent": "Progress: {progress}%",
     "footerTitle": "KAIROS Career Planner",
     "footerSubtitle1": "Dynamic Career Matching",
     "footerSubtitle2": "Personalized Action Plans",
@@ -477,40 +477,38 @@
       "cloud_cyber": {
         "title": "Field Intelligence: Cloud & Cybersecurity",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "**Cloud Architect:** Rise of **multi-cloud and hybrid strategies**; growing demand for **FinOps and cloud cost optimization** skills.\n**Cyber Security Analyst:** Increased focus on **AI-driven threat detection**, **zero-trust frameworks**, and **cloud security posture management**.",
+        "innovation_text": "- **Cloud Architect:** Rise of **multi-cloud and hybrid strategies**; growing demand for **FinOps and cloud cost optimization** skills.\n- **Cyber Security Analyst:** Increased focus on **AI-driven threat detection**, **zero-trust frameworks**, and **cloud security posture management**.",
         "market_title": "Market Pulse",
-        "market_text": "**Job Growth:** Cloud roles up 18%; cybersecurity roles up 15%.\n**Hot Skills:** AWS/Azure/GCP certs, DevSecOps, incident response, compliance (GDPR, CCPA).\n**Hiring Hubs:** Remote-friendly, but strong in **Dallas, D.C., Bangalore, and Singapore**."
+        "market_text": "- **Job Growth:** Cloud roles up 18%; cybersecurity roles up 15%.\n- **Hot Skills:** AWS/Azure/GCP certs, DevSecOps, incident response, compliance (GDPR, CCPA).\n- **Hiring Hubs:** Remote-friendly, but strong in **Dallas, D.C., Bangalore, and Singapore**."
       },
       "data_ai": {
         "title": "Field Intelligence: Data Science & AI",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "**Data Scientist:** Shift toward **MLOps, automated ML (AutoML)**, and **explainable AI (XAI)**.\n**Research Scientist:** Growth in **generative AI, biomedical informatics, and climate modeling**.",
+        "innovation_text": "- **Data Scientist:** Shift toward **MLOps, automated ML (AutoML)**, and **explainable AI (XAI)**.\n- **Research Scientist:** Growth in **generative AI, biomedical informatics, and climate modeling**.",
         "market_title": "Market Pulse",
-        "market_text": "**Job Growth:** AI/ML roles up 20%.\n**Hot Skills:** Python, SQL, TensorFlow/PyTorch, big data tools (Spark, Hadoop).\n**Hiring Hubs:** **SF Bay Area, NYC, London, Beijing, Bengaluru**."
+        "market_text": "- **Job Growth:** AI/ML roles up 20%.\n- **Hot Skills:** Python, SQL, TensorFlow/PyTorch, big data tools (Spark, Hadoop).\n- **Hiring Hubs:** **SF Bay Area, NYC, London, Beijing, Bengaluru**."
       },
       "education_health": {
         "title": "Field Intelligence: Education & Healthcare",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "**High School Teacher:** Rise of **edtech tools, personalized learning platforms, and virtual classrooms**.\n**Registered Nurse:** Growth in **telehealth, health informatics, and AI-assisted diagnostics**.",
+        "innovation_text": "- **High School Teacher:** Rise of **edtech tools, personalized learning platforms, and virtual classrooms**.\n- **Registered Nurse:** Growth in **telehealth, health informatics, and AI-assisted diagnostics**.",
         "market_title": "Market Pulse",
-        "market_text": "**Job Growth:** Nursing roles up 12%; teaching roles steady with edtech integration.\n**Hot Skills:** Patient care, classroom tech tools, empathy, communication.\n**Hiring Hubs:** **NYC, Texas, California, urban and rural healthcare networks**."
+        "market_text": "- **Job Growth:** Nursing roles up 12%; teaching roles steady with edtech integration.\n- **Hot Skills:** Patient care, classroom tech tools, empathy, communication.\n- **Hiring Hubs:** **NYC, Texas, California, urban and rural healthcare networks**."
       },
       "software_design": {
         "title": "Field Intelligence: Software & Design",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "**Software Engineer:** Emphasis on **cloud-native development, microservices, and low-code platforms**.\n**UX Designer:** Growth in **voice/AR/VR interfaces, accessibility design, and design systems**.",
+        "innovation_text": "- **Software Engineer:** Emphasis on **cloud-native development, microservices, and low-code platforms**.\n- **UX Designer:** Growth in **voice/AR/VR interfaces, accessibility design, and design systems**.",
         "market_title": "Market Pulse",
-        "market_text": "**Job Growth:** Software roles up 15%; UX roles up 18%.\n**Hot Skills:** JavaScript frameworks (React, Node.js), Figma, Agile/Scrum, user research.\n**Hiring Hubs:** **Silicon Valley, Austin, Berlin, Tokyo, Shenzhen**."
+        "market_text": "- **Job Growth:** Software roles up 15%; UX roles up 18%.\n- **Hot Skills:** JavaScript frameworks (React, Node.js), Figma, Agile/Scrum, user research.\n- **Hiring Hubs:** **Silicon Valley, Austin, Berlin, Tokyo, Shenzhen**."
       },
       "marketing_creative": {
         "title": "Field Intelligence: Marketing & Creative",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "**Marketing Manager:** Shift toward **AI-driven analytics, hyper-personalization, and influencer marketing automation**.\n**Music Producer:** Rise of **AI music tools, spatial audio, and NFT-based distribution**.",
+        "innovation_text": "- **Marketing Manager:** Shift toward **AI-driven analytics, hyper-personalization, and influencer marketing automation**.\n- **Music Producer:** Rise of **AI music tools, spatial audio, and NFT-based distribution**.",
         "market_title": "Market Pulse",
-        "market_text": "**Job Growth:** Digital marketing roles up 14%; creative tech roles steady.\n**Hot Skills:** SEO/SEM, content strategy, DAWs, mixing/mastering, social media analytics.\n**Hiring Hubs:** **LA, NYC, London, Seoul, Amsterdam**."
+        "market_text": "- **Job Growth:** Digital marketing roles up 14%; creative tech roles steady.\n- **Hot Skills:** SEO/SEM, content strategy, DAWs, mixing/mastering, social media analytics.\n- **Hiring Hubs:** **LA, NYC, London, Seoul, Amsterdam**."
       }
     }
   }
 }
-
-    

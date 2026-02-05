@@ -175,7 +175,7 @@
     "bannerCompleteTitle": "个人资料已完成！",
     "bannerIncompleteTitle": "完成您的个人资料以获得更好的结果",
     "bannerCompleteDesc": "您详细的个人资料可确保准确的职业匹配。分数将基于您的独特个人资料。",
-    "bannerIncompleteDesc": "完整的个人资料可防止出现通用的 50% 分数，并确保个性化的职业匹配。",
+    "bannerIncompleteDesc": "完整的个人资料可防止通用的 50% 分数，并确保个性化的职业匹配。",
     "bannerProgressDesc": "请填写所有部分并提供详细信息，以解锁准确的职业匹配。",
     "readyForCareers": "准备好探索职业",
     "completion": "{completionPercentage}% 完成",
@@ -402,7 +402,7 @@
     "profileStatus": "个人资料状态",
     "statusIncomplete": "未完成",
     "statusProfileRequired": "需要个人资料",
-    "progressPercent": "进度",
+    "progressPercent": "进度: {progress}%",
     "footerTitle": "KAIROS 职业规划师",
     "footerSubtitle1": "动态职业匹配",
     "footerSubtitle2": "个性化行动计划",
@@ -477,40 +477,38 @@
       "cloud_cyber": {
         "title": "领域情报：云与网络安全",
         "innovation_title": "创新聚光灯",
-        "innovation_text": "**云架构师:** 多云和混合云策略的兴起；对FinOps和云成本优化技能的需求日益增长。\n**网络安全分析师:** 更加关注人工智能驱动的威胁检测、零信任框架和云安全状态管理。",
+        "innovation_text": "- **云架构师:** 多云和混合云策略的兴起；对FinOps和云成本优化技能的需求日益增长。\n- **网络安全分析师:** 更加关注人工智能驱动的威胁检测、零信任框架和云安全状态管理。",
         "market_title": "市场脉搏",
-        "market_text": "**职位增长:** 云计算职位增长18%；网络安全职位增长15%。\n**热门技能:** AWS/Azure/GCP认证、DevSecOps、事件响应、合规性（GDPR, CCPA）。\n**招聘中心:** 远程友好，但在**达拉斯、华盛顿特区、班加罗尔和新加坡**有强大需求。"
+        "market_text": "- **职位增长:** 云计算职位增长18%；网络安全职位增长15%。\n- **热门技能:** AWS/Azure/GCP认证、DevSecOps、事件响应、合规性（GDPR, CCPA）。\n- **招聘中心:** 远程友好，但在**达拉斯、华盛顿特区、班加罗尔和新加坡**有强大需求。"
       },
       "data_ai": {
         "title": "领域情报：数据科学与人工智能",
         "innovation_title": "创新聚光灯",
-        "innovation_text": "**数据科学家:** 转向MLOps、自动化机器学习（AutoML）和可解释人工智能（XAI）。\n**研究科学家:** 在生成式AI、生物医学信息学和气候建模领域有所增长。",
+        "innovation_text": "- **数据科学家:** 转向MLOps、自动化机器学习（AutoML）和可解释人工智能（XAI）。\n- **研究科学家:** 在生成式AI、生物医学信息学和气候建模领域有所增长。",
         "market_title": "市场脉搏",
-        "market_text": "**职位增长:** AI/ML职位增长20%。\n**热门技能:** Python、SQL、TensorFlow/PyTorch、大数据工具（Spark, Hadoop）。\n**招聘中心:** **旧金山湾区、纽约、伦敦、北京、班加卢鲁**。"
+        "market_text": "- **职位增长:** AI/ML职位增长20%。\n- **热门技能:** Python、SQL、TensorFlow/PyTorch、大数据工具（Spark, Hadoop）。\n- **招聘中心:** **旧金山湾区、纽约、伦敦、北京、班加卢鲁**。"
       },
       "education_health": {
         "title": "领域情报：教育与医疗健康",
         "innovation_title": "创新聚光灯",
-        "innovation_text": "**高中教师:** 教育技术工具、个性化学习平台和虚拟教室的兴起。\n**注册护士:** 远程医疗、健康信息学和AI辅助诊断的增长。",
+        "innovation_text": "- **高中教师:** 教育技术工具、个性化学习平台和虚拟教室的兴起。\n- **注册护士:** 远程医疗、健康信息学和AI辅助诊断的增长。",
         "market_title": "市场脉搏",
-        "market_text": "**职位增长:** 护理职位增长12%；教师职位在教育技术集成下保持稳定。\n**热门技能:** 病人护理、课堂技术工具、同理心、沟通能力。\n**招聘中心:** **纽约市、德克萨斯州、加利福尼亚州，以及城市和农村的医疗网络**。"
+        "market_text": "- **职位增长:** 护理职位增长12%；教师职位在教育技术集成下保持稳定。\n- **热门技能:** 病人护理、课堂技术工具、同理心、沟通能力。\n- **招聘中心:** **纽约市、德克萨斯州、加利福尼亚州，以及城市和农村的医疗网络**。"
       },
       "software_design": {
         "title": "领域情报：软件与设计",
         "innovation_title": "创新聚光灯",
-        "innovation_text": "**软件工程师:** 重点转向云原生开发、微服务和低代码平台。\n**UX设计师:** 在语音/AR/VR界面、无障碍设计和设计系统方面有所增长。",
+        "innovation_text": "- **软件工程师:** 重点转向云原生开发、微服务和低代码平台。\n- **UX设计师:** 在语音/AR/VR界面、无障碍设计和设计系统方面有所增长。",
         "market_title": "市场脉搏",
-        "market_text": "**职位增长:** 软件职位增长15%；UX职位增长18%。\n**热门技能:** JavaScript框架（React, Node.js）、Figma、敏捷/Scrum、用户研究。\n**招聘中心:** **硅谷、奥斯汀、柏林、东京、深圳**。"
+        "market_text": "- **职位增长:** 软件职位增长15%；UX职位增长18%。\n- **热门技能:** JavaScript框架（React, Node.js）、Figma、敏捷/Scrum、用户研究。\n- **招聘中心:** **硅谷、奥斯汀、柏林、东京、深圳**。"
       },
       "marketing_creative": {
         "title": "领域情报：市场营销与创意",
         "innovation_title": "创新聚光灯",
-        "innovation_text": "**市场经理:** 转向AI驱动的分析、超个性化和影响者营销自动化。\n**音乐制作人:** AI音乐工具、空间音频和基于NFT的发行方式的兴起。",
+        "innovation_text": "- **市场经理:** 转向AI驱动的分析、超个性化和影响者营销自动化。\n- **音乐制作人:** AI音乐工具、空间音频和基于NFT的发行方式的兴起。",
         "market_title": "市场脉搏",
-        "market_text": "**职位增长:** 数字营销职位增长14%；创意技术职位稳定。\n**热门技能:** SEO/SEM、内容策略、DAW、混音/母带处理、社交媒体分析。\n**招聘中心:** **洛杉矶、纽约、伦敦、首尔、阿姆斯特丹**。"
+        "market_text": "- **职位增长:** 数字营销职位增长14%；创意技术职位稳定。\n- **热门技能:** SEO/SEM、内容策略、DAW、混音/母带处理、社交媒体分析。\n- **招聘中心:** **洛杉矶、纽约、伦敦、首尔、阿姆斯特丹**。"
       }
     }
   }
 }
-
-    
