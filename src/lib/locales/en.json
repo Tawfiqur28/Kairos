@@ -346,7 +346,10 @@
     "ctaViewDashboard": "View Dashboard",
     "step1_keyPoint": "Detailed profiles = accurate matching",
     "step2_keyPoint": "Dynamic scores, not fixed percentages",
-    "step3_keyPoint": "Actionable 3-phase career plans"
+    "step3_keyPoint": "Actionable 3-phase career plans",
+    "step4_title": "Built for a Global Audience",
+    "step4_text": "The entire application supports both <strong>English and Chinese</strong>. Switch languages instantly to use Kairos Compass in the language you're most comfortable with.",
+    "step4_keyPoint": "English & Chinese Support"
   },
   "profile": {
     "title": "Your Profile",

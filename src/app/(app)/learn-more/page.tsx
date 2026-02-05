@@ -23,7 +23,8 @@ import {
   Code,
   BookOpen,
   Users,
-  Rocket
+  Rocket,
+  Languages,
 } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { Button } from '@/components/ui/button';
@@ -100,6 +101,13 @@ export default function LearnMorePage() {
       description: t('learnMore.step3_text'),
       icon: <GanttChartSquare className="h-6 w-6" />,
       keyPoint: t('learnMore.step3_keyPoint')
+    },
+    {
+      step: 4,
+      title: t('learnMore.step4_title'),
+      description: t('learnMore.step4_text'),
+      icon: <Languages className="h-6 w-6" />,
+      keyPoint: t('learnMore.step4_keyPoint')
     }
   ];
 
