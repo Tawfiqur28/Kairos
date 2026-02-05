@@ -335,7 +335,7 @@ export default function IkigaiPage() {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div>
+                <div className="space-y-1">
                   <CardTitle>{t('ikigai.profileTitle')}</CardTitle>
                   <CardDescription>
                     {t('ikigai.profileDescription')}
@@ -592,5 +592,3 @@ export default function IkigaiPage() {
     </>
   );
 }
-
-    
