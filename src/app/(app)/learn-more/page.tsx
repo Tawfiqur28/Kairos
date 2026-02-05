@@ -280,37 +280,9 @@ export default function LearnMorePage() {
       {/* FAQ Section */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5" />
-            {t('learnMore.faqTitle')}
-          </CardTitle>
-          <CardDescription>
-            {t('learnMore.faqDesc')}
-          </CardDescription>
+          <CardTitle>{t('learnMore.readyToStart')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h4 className="font-semibold mb-2">{t('learnMore.faq1_q')}</h4>
-            <p className="text-sm text-muted-foreground">
-              {t('learnMore.faq1_a')}
-            </p>
-          </div>
-          
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h4 className="font-semibold mb-2">{t('learnMore.faq2_q')}</h4>
-            <p className="text-sm text-muted-foreground">
-              {t('learnMore.faq2_a')}
-            </p>
-          </div>
-          
-          <div className="p-4 bg-muted/30 rounded-lg">
-            <h4 className="font-semibold mb-2">{t('learnMore.faq3_q')}</h4>
-            <p className="text-sm text-muted-foreground">
-              {t('learnMore.faq3_a')}
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-4 w-full">
             <div className="flex-1 border-t" />
             <span className="text-sm text-muted-foreground">{t('learnMore.readyToStart')}</span>
@@ -336,7 +308,7 @@ export default function LearnMorePage() {
               </Link>
             </Button>
           </div>
-        </CardFooter>
+        </CardContent>
       </Card>
     </>
   );
