@@ -335,7 +335,7 @@ export default function IkigaiPage() {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <CardTitle>{t('ikigai.profileTitle')}</CardTitle>
                   <CardDescription>
                     {t('ikigai.profileDescription')}
@@ -497,7 +497,7 @@ export default function IkigaiPage() {
                 )}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" asChild>
+                <Button asChild variant="outline">
                   <Link href="/careers" className={!isProfileComplete ? "pointer-events-none opacity-50" : ""}>
                        {t('ikigai.skipToCareers')}
                   </Link>
@@ -592,3 +592,5 @@ export default function IkigaiPage() {
     </>
   );
 }
+
+    
