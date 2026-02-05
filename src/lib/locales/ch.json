@@ -303,6 +303,9 @@
     "step2_text": "我们的 AI 会分析你的 Ikigai 个人资料，并建议与你真正相符的职业。你会看到一个个性化的“匹配分数”和每个匹配的详细解释。",
     "step3_title": "接收动态行动计划",
     "step3_text": "一旦你选择了一个职业，我们的 AI 会生成一个具体的、分步的 3 年计划，帮助你实现它。不再有猜测——只有一条清晰的前进道路。",
+    "step4_title": "为全球用户打造",
+    "step4_text": "整个应用程序支持<strong>英文和中文</strong>。即时切换语言，以您最舒适的语言使用 Kairos Compass。",
+    "step4_keyPoint": "中英文支持",
     "featuresTitle": "核心功能与自动化",
     "featuresDescription": "我们使用智能技术使你的职业规划之旅无缝衔接。",
     "feature1_title": "Ikigai 画布",
@@ -346,10 +349,7 @@
     "ctaViewDashboard": "查看仪表板",
     "step1_keyPoint": "详细的个人资料 = 准确的匹配",
     "step2_keyPoint": "动态分数，而非固定百分比",
-    "step3_keyPoint": "可行的三阶段职业规划",
-    "step4_title": "为全球用户打造",
-    "step4_text": "整个应用程序支持<strong>英文和中文</strong>。即时切换语言，以您最舒适的语言使用 Kairos Compass。",
-    "step4_keyPoint": "中英文支持"
+    "step3_keyPoint": "可行的三阶段职业规划"
   },
   "profile": {
     "title": "你的个人资料",

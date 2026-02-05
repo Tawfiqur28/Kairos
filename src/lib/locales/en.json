@@ -303,6 +303,9 @@
     "step2_text": "Our AI analyzes your Ikigai profile and suggests careers that truly align with you. You'll see a personalized \"fit score\" and a detailed explanation for each match.",
     "step3_title": "Receive a Dynamic Action Plan",
     "step3_text": "Once you pick a career, our AI generates a specific, step-by-step 3-year plan to help you achieve it. No more guesswork—just a clear path forward.",
+    "step4_title": "Built for a Global Audience",
+    "step4_text": "The entire application supports both <strong>English and Chinese</strong>. Switch languages instantly to use Kairos Compass in the language you're most comfortable with.",
+    "step4_keyPoint": "English & Chinese Support",
     "featuresTitle": "Core Features & Automation",
     "featuresDescription": "We use smart technology to make your career planning journey seamless.",
     "feature1_title": "Ikigai Canvas",
@@ -346,10 +349,7 @@
     "ctaViewDashboard": "View Dashboard",
     "step1_keyPoint": "Detailed profiles = accurate matching",
     "step2_keyPoint": "Dynamic scores, not fixed percentages",
-    "step3_keyPoint": "Actionable 3-phase career plans",
-    "step4_title": "Built for a Global Audience",
-    "step4_text": "The entire application supports both <strong>English and Chinese</strong>. Switch languages instantly to use Kairos Compass in the language you're most comfortable with.",
-    "step4_keyPoint": "English & Chinese Support"
+    "step3_keyPoint": "Actionable 3-phase career plans"
   },
   "profile": {
     "title": "Your Profile",
