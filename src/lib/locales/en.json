@@ -402,7 +402,7 @@
     "profileStatus": "Profile Status",
     "statusIncomplete": "Incomplete",
     "statusProfileRequired": "Profile Required",
-    "progressPercent": "{progress} Progress",
+    "progressPercent": "Progress",
     "footerTitle": "KAIROS Career Planner",
     "footerSubtitle1": "Dynamic Career Matching",
     "footerSubtitle2": "Personalized Action Plans",
@@ -412,6 +412,32 @@
   "opportunities": {
     "tabTitle": "Field Intelligence",
     "monthlySubtitle": "Updated: {date}",
+    "competitions": {
+      "title": "Competitions & Challenges",
+      "description": "Participate in influential competitions to showcase your skills and gain recognition.",
+      "items": {
+        "0": {
+          "title": "China \"Internet+\" College Student Innovation and Entrepreneurship Competition",
+          "description": "One of China's most significant platforms for student innovation, covering technology, business, and social impact projects. A premier event to gain venture capital attention."
+        },
+        "1": {
+          "title": "“Challenge Cup” National College Student Curricular Academic Science and Technology Contest",
+          "description": "Known as the 'China Youth Science and Technology Innovation Olympics', it focuses on academic research and deep-tech projects across science and engineering."
+        },
+        "2": {
+          "title": "National College Electronic Design Contest",
+          "description": "A top-tier competition for electronics and information technology students, focusing on practical hardware design and problem-solving abilities."
+        },
+        "3": {
+          "title": "Hult Prize (China Region)",
+          "description": "The world's largest student competition for social good. Teams develop innovative business ideas to solve pressing global issues. Winners receive seed funding."
+        },
+        "4": {
+          "title": "National College Mathematical Contest in Modeling",
+          "description": "A highly challenging competition that tests students' abilities to use mathematical modeling to solve real-world scientific and engineering problems."
+        }
+      }
+    },
     "education": {
       "title": "Stage-Specific Opportunities & Guidance",
       "description": "Actionable advice tailored to your current academic or professional stage.",

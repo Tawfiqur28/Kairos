@@ -394,7 +394,7 @@
     "sectionJournal": "日志",
     "activePlan": "有效计划",
     "profileCompletion": "个人资料完成度",
-    "activePlanFor": "有效计划：{careerTitle}",
+    "activePlanFor": "有效计划: {careerTitle}",
     "completeProfilePrompt": "完善个人资料以获得更好的匹配",
     "menu": "菜单",
     "completeProfile": "完善个人资料",
@@ -402,7 +402,7 @@
     "profileStatus": "个人资料状态",
     "statusIncomplete": "未完成",
     "statusProfileRequired": "需要个人资料",
-    "progressPercent": "{progress} 进度",
+    "progressPercent": "进度",
     "footerTitle": "KAIROS 职业规划师",
     "footerSubtitle1": "动态职业匹配",
     "footerSubtitle2": "个性化行动计划",
@@ -412,6 +412,32 @@
   "opportunities": {
     "tabTitle": "领域情报",
     "monthlySubtitle": "更新于：{date}",
+    "competitions": {
+      "title": "竞赛与挑战",
+      "description": "参加有影响力的比赛，展示你的技能并获得认可。",
+      "items": {
+        "0": {
+          "title": "中国“互联网+”大学生创新创业大赛",
+          "description": "中国最重要的学生创新平台之一，涵盖技术、商业和社会影响项目。是获得风险投资关注的顶级赛事。"
+        },
+        "1": {
+          "title": "“挑战杯”全国大学生课外学术科技作品竞赛",
+          "description": "被誉为“中国青年科技创新奥林匹克”，专注于科学和工程领域的学术研究和深度技术项目。"
+        },
+        "2": {
+          "title": "全国大学生电子设计竞赛",
+          "description": "面向电子和信息技术学生的顶级竞赛，专注于实践硬件设计和解决问题的能力。"
+        },
+        "3": {
+          "title": "霍特奖（中国区）",
+          "description": "全球最大的学生社会公益竞赛。团队开发创新的商业理念，解决紧迫的全球问题。获胜者将获得种子资金。"
+        },
+        "4": {
+          "title": "全国大学生数学建模竞赛",
+          "description": "一项极具挑战性的竞赛，考验学生运用数学模型解决现实世界科学和工程问题的能力。"
+        }
+      }
+    },
     "education": {
       "title": "分阶段机遇与指南",
       "description": "针对您当前学术或专业阶段的可行建议。",

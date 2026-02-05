@@ -9,7 +9,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/context/language-context';
 import type { EducationLevel } from '@/lib/types';
-import { BarChart, BookOpen, Bot, BrainCircuit, GanttChartSquare, Users, Zap, Rocket, AlertCircle, Target, Mic, PenSquare, Briefcase, TrendingUp } from 'lucide-react';
+import { BarChart, BookOpen, Bot, BrainCircuit, GanttChartSquare, Users, Zap, Rocket, AlertCircle, Target, Mic, PenSquare, Briefcase, TrendingUp, Trophy } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface OpportunitiesDashboardProps {
@@ -28,7 +28,7 @@ const getIntelligenceKey = (careerTitle: string): 'cloud_cyber' | 'data_ai' | 'e
   if (lowerCaseTitle.includes('teacher') || lowerCaseTitle.includes('nurse')) {
     return 'education_health';
   }
-  if (lowerCaseTitle.includes('software') || lowerCaseTitle.includes('ux designer')) {
+  if (lowerCaseTitle.includes('software') || lowerCaseTitle.includes('ux designer') || lowerCaseTitle.includes('software engineer')) {
     return 'software_design';
   }
   if (lowerCaseTitle.includes('marketing') || lowerCaseTitle.includes('music')) {
@@ -51,6 +51,42 @@ const EducationSection = ({ title, points }: { title: string; points: { title: s
         </div>
     </div>
 );
+
+const iconMap: { [key: string]: React.ElementType } = {
+  Rocket,
+  BrainCircuit,
+  Zap,
+  Users,
+  BarChart,
+};
+
+const competitions = [
+  {
+    titleKey: 'opportunities.competitions.items.0.title',
+    descriptionKey: 'opportunities.competitions.items.0.description',
+    icon: 'Rocket',
+  },
+  {
+    titleKey: 'opportunities.competitions.items.1.title',
+    descriptionKey: 'opportunities.competitions.items.1.description',
+    icon: 'BrainCircuit',
+  },
+  {
+    titleKey: 'opportunities.competitions.items.2.title',
+    descriptionKey: 'opportunities.competitions.items.2.description',
+    icon: 'Zap',
+  },
+  {
+    titleKey: 'opportunities.competitions.items.3.title',
+    descriptionKey: 'opportunities.competitions.items.3.description',
+    icon: 'Users',
+  },
+  {
+    titleKey: 'opportunities.competitions.items.4.title',
+    descriptionKey: 'opportunities.competitions.items.4.description',
+    icon: 'BarChart',
+  },
+];
 
 
 export function OpportunitiesDashboard({ careerTitle, educationLevel }: OpportunitiesDashboardProps) {
@@ -137,12 +173,37 @@ export function OpportunitiesDashboard({ careerTitle, educationLevel }: Opportun
 
         </CardContent>
       </Card>
+
+      {/* Competitions & Challenges */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-primary" />
+            {t('opportunities.competitions.title')}
+          </CardTitle>
+          <CardDescription>{t('opportunities.competitions.description')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {competitions.map((item, index) => {
+            const Icon = iconMap[item.icon] || Zap;
+            return (
+              <div key={index} className="flex items-start gap-4 p-3 bg-muted/50 rounded-lg">
+                <Icon className="h-6 w-6 text-primary mt-1" />
+                <div>
+                  <h4 className="font-semibold">{t(item.titleKey)}</h4>
+                  <p className="text-sm text-muted-foreground">{t(item.descriptionKey)}</p>
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
       
       {/* Opportunities by Education Level */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary" />
+            <BookOpen className="h-5 w-5 text-primary" />
             {t('opportunities.education.title')}
           </CardTitle>
            <CardDescription>{t('opportunities.education.description')}</CardDescription>
