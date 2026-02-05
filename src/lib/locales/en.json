@@ -343,7 +343,10 @@
     "readyToStart": "Ready to get started?",
     "ctaCreateProfile": "Create Profile",
     "ctaExploreCareers": "Explore Careers",
-    "ctaViewDashboard": "View Dashboard"
+    "ctaViewDashboard": "View Dashboard",
+    "step1_keyPoint": "Detailed profiles = accurate matching",
+    "step2_keyPoint": "Dynamic scores, not fixed percentages",
+    "step3_keyPoint": "Actionable 3-phase career plans"
   },
   "profile": {
     "title": "Your Profile",

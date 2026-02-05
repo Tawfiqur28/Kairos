@@ -343,7 +343,10 @@
     "readyToStart": "准备好开始了吗？",
     "ctaCreateProfile": "创建个人资料",
     "ctaExploreCareers": "探索职业",
-    "ctaViewDashboard": "查看仪表板"
+    "ctaViewDashboard": "查看仪表板",
+    "step1_keyPoint": "详细的个人资料 = 准确的匹配",
+    "step2_keyPoint": "动态分数，而非固定百分比",
+    "step3_keyPoint": "可行的三阶段职业规划"
   },
   "profile": {
     "title": "你的个人资料",

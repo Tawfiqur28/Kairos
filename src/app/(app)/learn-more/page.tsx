@@ -85,21 +85,21 @@ export default function LearnMorePage() {
       title: t('learnMore.step1_title'),
       description: t('learnMore.step1_text'),
       icon: <BookOpen className="h-6 w-6" />,
-      keyPoint: "Detailed profiles = accurate matching"
+      keyPoint: t('learnMore.step1_keyPoint')
     },
     {
       step: 2,
       title: t('learnMore.step2_title'),
       description: t('learnMore.step2_text'),
       icon: <BarChart className="h-6 w-6" />,
-      keyPoint: "Dynamic scores, not fixed percentages"
+      keyPoint: t('learnMore.step2_keyPoint')
     },
     {
       step: 3,
       title: t('learnMore.step3_title'),
       description: t('learnMore.step3_text'),
       icon: <GanttChartSquare className="h-6 w-6" />,
-      keyPoint: "Actionable 3-phase career plans"
+      keyPoint: t('learnMore.step3_keyPoint')
     }
   ];
 
@@ -129,9 +129,7 @@ export default function LearnMorePage() {
       <PageHeader
         title={t('learnMore.title')}
         description={t('learnMore.description')}
-      >
-        <LanguageSwitcher />
-      </PageHeader>
+      />
 
       {/* Hero Explanation */}
       <div className="mb-8 p-6 bg-gradient-to-r from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-900/10 rounded-xl border">
