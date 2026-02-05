@@ -412,109 +412,81 @@
   "opportunities": {
     "tabTitle": "领域情报",
     "monthlySubtitle": "更新于：{date}",
-    "innovationTitle": "创新聚光灯",
-    "marketPulseTitle": "市场脉搏",
     "education": {
-        "title": "分阶段机遇与指南",
-        "description": "针对您当前学术或专业阶段的可行建议。",
-        "highSchool": {
-            "title": "针对高中生",
-            "fundamentals_title": "夯实基础",
-            "fundamentals_text": "在数学、物理和编程（Python）方面打下坚实基础。参加<strong>全国青少年信息学奥林匹克竞赛（NOI）</strong>或<strong>青少年科技创新大赛</strong>。",
-            "exploration_title": "早期探索",
-            "exploration_text": "关注顶尖大学（如清华、北大、中科大）的<strong>特殊计划</strong>，并参加在线科学营。",
-            "handsOn_title": "动手实践",
-            "handsOn_text": "通过<strong>B站、中国大学MOOC</strong>等平台学习，并尝试使用开源硬件（如Arduino）进行小型项目。"
-        },
-        "undergrad": {
-            "title": "针对本科生",
-            "specialize_title": "深度钻研",
-            "specialize_text": "争取加入<strong>国家重点实验室</strong>或参与<strong>教授的行业合作项目</strong>。",
-            "competitions_title": "证书与竞赛",
-            "competitions_text": "参加<strong>“互联网+”创新创业大赛</strong>或<strong>全国大学生电子设计竞赛</strong>等竞赛，并获得行业认可的证书（如华为HCIA、阿里云ACA）。",
-            "internship_title": "实习重点",
-            "internship_text": "假期重点关注<strong>大湾区、长三角</strong>地区头部公司的实习机会。",
-            "studies_title": "深造或就业",
-            "studies_text": "考虑<strong>保研、国内考研（985/211院校）</strong>或申请<strong>海外高校（新加坡、香港、欧洲）</strong>。同时关注<strong>国企提前批招聘</strong>。"
-        },
-        "masters_phd": {
-            "title": "针对硕士/博士生",
-            "research_title": "研究与应用结合",
-            "research_text": "选择与<strong>国家战略重点（如AI、芯片、新能源）</strong>相关的论文课题，争取发表高质量论文或专利。",
-            "collaboration_title": "产学研合作",
-            "collaboration_text": "申请<strong>联合培养项目</strong>（如华为“天才少年”、阿里星计划），参与核心研发工作。",
-            "global_title": "全球视野",
-            "global_text": "参加<strong>顶级会议（如NeurIPS、ISSCC）</strong>，了解<strong>CSC公派留学</strong>机会，建立国际人脉网络。",
-            "employment_title": "高水平就业",
-            "employment_text": "目标定位于<strong>国企研究院（如CETC、CASIC）、顶尖私企实验室或跨国科技公司的中国分部</strong>的研发岗位。"
-        }
+      "title": "分阶段机遇与指南",
+      "description": "针对您当前学术或专业阶段的可行建议。",
+      "highSchool": {
+        "title": "针对高中生",
+        "fundamentals_title": "夯实基础",
+        "fundamentals_text": "在数学、物理和编程（Python）方面打下坚实基础。参加<strong>全国青少年信息学奥林匹克竞赛（NOI）</strong>或<strong>青少年科技创新大赛</strong>。",
+        "exploration_title": "早期探索",
+        "exploration_text": "关注顶尖大学（如清华、北大、中科大）的<strong>特殊计划</strong>，并参加在线科学营。",
+        "handsOn_title": "动手实践",
+        "handsOn_text": "通过<strong>B站、中国大学MOOC</strong>等平台学习，并尝试使用开源硬件（如Arduino）进行小型项目。"
+      },
+      "undergrad": {
+        "title": "针对本科生",
+        "specialize_title": "深度钻研",
+        "specialize_text": "争取加入<strong>国家重点实验室</strong>或参与<strong>教授的行业合作项目</strong>。",
+        "competitions_title": "证书与竞赛",
+        "competitions_text": "参加<strong>“互联网+”创新创业大赛</strong>或<strong>全国大学生电子设计竞赛</strong>等竞赛，并获得行业认可的证书（如华为HCIA、阿里云ACA）。",
+        "internship_title": "实习重点",
+        "internship_text": "假期重点关注<strong>大湾区、长三角</strong>地区头部公司的实习机会。",
+        "studies_title": "深造或就业",
+        "studies_text": "考虑<strong>保研、国内考研（985/211院校）</strong>或申请<strong>海外高校（新加坡、香港、欧洲）</strong>。同时关注<strong>国企提前批招聘</strong>。"
+      },
+      "masters_phd": {
+        "title": "针对硕士/博士生",
+        "research_title": "研究与应用结合",
+        "research_text": "选择与<strong>国家战略重点（如AI、芯片、新能源）</strong>相关的论文课题，争取发表高质量论文或专利。",
+        "collaboration_title": "产学研合作",
+        "collaboration_text": "申请<strong>联合培养项目</strong>（如华为“天才少年”、阿里星计划），参与核心研发工作。",
+        "global_title": "全球视野",
+        "global_text": "参加<strong>顶级会议（如NeurIPS、ISSCC）</strong>，了解<strong>CSC公派留学</strong>机会，建立国际人脉网络。",
+        "employment_title": "高水平就业",
+        "employment_text": "目标定位于<strong>国企研究院（如CETC、CASIC）、顶尖私企实验室或跨国科技公司的中国分部</strong>的研发岗位。"
+      }
     },
     "coreAdvice": {
-        "title": "核心建议：立足当下，放眼未来",
-        "text": "当前中国正处于技术自立自强的关键阶段，国内机遇丰富，但国际竞争与限制并存。建议立足国内市场需求，同时保持全球视野和技术敏感度。在“卡脖子”技术领域深化专业知识，将个人成长与国家战略需求相结合，将是这个时代最大的职业发展机遇。"
+      "title": "核心建议：立足当下，放眼未来",
+      "text": "当前中国正处于技术自立自强的关键阶段，国内机遇丰富，但国际竞争与限制并存。建议立足国内市场需求，同时保持全球视野和技术敏感度。在“卡脖子”技术领域深化专业知识，将个人成长与国家战略需求相结合，将是这个时代最大的职业发展机遇。"
     },
     "intelligence": {
-        "common": {
-            "breakthrough": "突破预警",
-            "tool": "本月工具",
-            "researchHotspot": "研究热点",
-            "skillInDemand": "技能需求"
-        },
-        "ai": {
-            "title": "每月领域情报：人工智能与大数据",
-            "innovation": {
-                "breakthrough": "国产多模态大模型（如百度文心、阿里通义、智谱GLM）在中文理解和行业应用上取得重大突破。",
-                "tool": "PaddlePaddle（百度开源深度学习平台）和ModelScope（阿里模型即服务生态）成为国内开发者首选。",
-                "researchHotspot": "清华大学、北京大学、之江实验室在联邦学习和隐私计算方面成果显著。",
-                "skillInDemand": "大模型微调和提示工程，尤其面向垂直行业（金融、政务、医疗）。"
-            },
-            "market": {
-                "jobGrowth": "国内AI人才需求同比增长18%，尤其在自动驾驶、智慧城市和智能制造领域。",
-                "salaryTrends": "应届硕士：约25-40万人民币；3-5年经验算法工程师：50-80万；头部科技公司首席科学家岗位：超过150万。",
-                "hiringCompanies": "华为、阿里巴巴、腾讯、字节跳动、百度、商汤科技、科大讯飞、比亚迪（智能驾驶部门）",
-                "geoHotspots": "北京、上海、深圳、杭州、成都",
-                "international": "部分公司（如华为、TikTok、商汤）在新加坡、伦敦、硅谷设有研究中心，提供海外岗位。"
-            }
-        },
-        "energy": {
-            "title": "每月领域情报：新能源与可持续技术",
-            "innovation": {
-                "breakthrough": "钙钛矿太阳能电池效率突破26%；宁德时代发布新一代凝聚态电池。",
-                "tool": "ANSYS新能源仿真套件及国产CAE软件在电池管理和电机设计中应用增多。",
-                "researchHotspot": "中国科学院在固态电池和氢能储运技术方面领先。",
-                "skillInDemand": "电池管理系统（BMS）工程师和碳足迹分析师。"
-            },
-            "market": {
-                "jobGrowth": "在“双碳”目标驱动下，新能源行业招聘年增22%。",
-                "salaryTrends": "应届生：约15-25万；资深BMS/电控工程师：40-70万；海外项目岗位薪资溢价30%-50%。",
-                "hiringCompanies": "宁德时代、比亚迪、蔚来、理想汽车、隆基绿能、国家电网（研究院）、远景能源",
-                "geoHotspots": "深圳、上海、合肥、常州、西安",
-                "international": "中国新能源企业正在德国、匈牙利、墨西哥等地建立生产基地，产生技术和项目管理的本地化人才需求。"
-            }
-        },
-        "semiconductor": {
-            "title": "每月领域情报：集成电路与半导体",
-            "innovation": {
-                "breakthrough": "中芯国际实现14nm FinFET工艺量产；海思在国产EDA工具链开发上取得进展。",
-                "tool": "华大九天EDA工具和华为鲲鹏计算芯片生态正在加速国产替代。",
-                "researchHotspot": "南京大学、复旦大学在宽禁带半导体材料（如GaN、SiC）研究方面领先。",
-                "skillInDemand": "芯片架构师、FPGA开发工程师、半导体设备工艺工程师。"
-            },
-            "market": {
-                "jobGrowth": "国家集成电路产业投资基金二期持续投入，设计、制造、设备等环节人才缺口年扩增约20%。",
-                "salaryTrends": "硕士毕业生：30-45万；5年以上设计经验工程师：60万-100万；海归人才薪资溢价显著。",
-                "hiringCompanies": "海思、中芯国际、长鑫存储、韦尔股份、北方华创、上海微电子",
-                "geoHotspots": "上海、北京、深圳、合肥、武汉",
-                "international": "企业积极招聘有美、欧、韩半导体产业经验的人才，以突破技术壁垒。"
-            }
-        }
-    },
-    "marketPulse": {
-        "jobGrowth": "职位增长",
-        "salaryTrends": "薪资趋势",
-        "hiringCompanies": "招聘公司（国内）",
-        "geoHotspots": "地理热点（国内）",
-        "international": "国际业务与机会"
+      "cloud_cyber": {
+        "title": "领域情报：云与网络安全",
+        "innovation_title": "创新聚光灯",
+        "innovation_text": "- **云架构师:** 多云和混合云策略的兴起；对FinOps和云成本优化技能的需求日益增长。\n- **网络安全分析师:** 更加关注人工智能驱动的威胁检测、零信任框架和云安全状态管理。",
+        "market_title": "市场脉搏",
+        "market_text": "- **职位增长:** 云计算职位增长18%；网络安全职位增长15%。\n- **热门技能:** AWS/Azure/GCP认证、DevSecOps、事件响应、合规性（GDPR, CCPA）。\n- **招聘中心:** 远程友好，但在**达拉斯、华盛顿特区、班加罗尔和新加坡**有强大需求。"
+      },
+      "data_ai": {
+        "title": "领域情报：数据科学与人工智能",
+        "innovation_title": "创新聚光灯",
+        "innovation_text": "- **数据科学家:** 转向MLOps、自动化机器学习（AutoML）和可解释人工智能（XAI）。\n- **研究科学家:** 在生成式AI、生物医学信息学和气候建模领域有所增长。",
+        "market_title": "市场脉搏",
+        "market_text": "- **职位增长:** AI/ML职位增长20%。\n- **热门技能:** Python、SQL、TensorFlow/PyTorch、大数据工具（Spark, Hadoop）。\n- **招聘中心:** **旧金山湾区、纽约、伦敦、北京、班加卢鲁**。"
+      },
+      "education_health": {
+        "title": "领域情报：教育与医疗健康",
+        "innovation_title": "创新聚光灯",
+        "innovation_text": "- **高中教师:** 教育技术工具、个性化学习平台和虚拟教室的兴起。\n- **注册护士:** 远程医疗、健康信息学和AI辅助诊断的增长。",
+        "market_title": "市场脉搏",
+        "market_text": "- **职位增长:** 护理职位增长12%；教师职位在教育技术集成下保持稳定。\n- **热门技能:** 病人护理、课堂技术工具、同理心、沟通能力。\n- **招聘中心:** **纽约市、德克萨斯州、加利福尼亚州，以及城市和农村的医疗网络**。"
+      },
+      "software_design": {
+        "title": "领域情报：软件与设计",
+        "innovation_title": "创新聚光灯",
+        "innovation_text": "- **软件工程师:** 重点转向云原生开发、微服务和低代码平台。\n- **UX设计师:** 在语音/AR/VR界面、无障碍设计和设计系统方面有所增长。",
+        "market_title": "市场脉搏",
+        "market_text": "- **职位增长:** 软件职位增长15%；UX职位增长18%。\n- **热门技能:** JavaScript框架（React, Node.js）、Figma、敏捷/Scrum、用户研究。\n- **招聘中心:** **硅谷、奥斯汀、柏林、东京、深圳**。"
+      },
+      "marketing_creative": {
+        "title": "领域情报：市场营销与创意",
+        "innovation_title": "创新聚光灯",
+        "innovation_text": "- **市场经理:** 转向AI驱动的分析、超个性化和影响者营销自动化。\n- **音乐制作人:** AI音乐工具、空间音频和基于NFT的发行方式的兴起。",
+        "market_title": "市场脉搏",
+        "market_text": "- **职位增长:** 数字营销职位增长14%；创意技术职位稳定。\n- **热门技能:** SEO/SEM、内容策略、DAW、混音/母带处理、社交媒体分析。\n- **招聘中心:** **洛杉矶、纽约、伦敦、首尔、阿姆斯特丹**。"
+      }
     }
   }
 }

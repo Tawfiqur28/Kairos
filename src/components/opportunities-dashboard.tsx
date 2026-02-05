@@ -17,16 +17,25 @@ interface OpportunitiesDashboardProps {
   educationLevel: EducationLevel;
 }
 
-const getIntelligenceKey = (careerTitle: string): 'ai' | 'energy' | 'semiconductor' => {
+const getIntelligenceKey = (careerTitle: string): 'cloud_cyber' | 'data_ai' | 'education_health' | 'software_design' | 'marketing_creative' => {
   const lowerCaseTitle = careerTitle.toLowerCase();
-  if (lowerCaseTitle.includes('energy') || lowerCaseTitle.includes('sustainable')) {
-    return 'energy';
+  if (lowerCaseTitle.includes('cloud') || lowerCaseTitle.includes('cyber')) {
+    return 'cloud_cyber';
   }
-  if (lowerCaseTitle.includes('circuit') || lowerCaseTitle.includes('semiconductor') || lowerCaseTitle.includes('chip') || lowerCaseTitle.includes('fpga')) {
-    return 'semiconductor';
+  if (lowerCaseTitle.includes('data') || lowerCaseTitle.includes('research scientist')) {
+    return 'data_ai';
   }
-  // Default to AI & Big Data for most tech/data roles
-  return 'ai';
+  if (lowerCaseTitle.includes('teacher') || lowerCaseTitle.includes('nurse')) {
+    return 'education_health';
+  }
+  if (lowerCaseTitle.includes('software') || lowerCaseTitle.includes('ux designer')) {
+    return 'software_design';
+  }
+  if (lowerCaseTitle.includes('marketing') || lowerCaseTitle.includes('music')) {
+    return 'marketing_creative';
+  }
+  // A sensible default if no match.
+  return 'software_design';
 };
 
 const EducationSection = ({ title, points }: { title: string; points: { title: string; text: string }[] }) => (
@@ -108,29 +117,22 @@ export function OpportunitiesDashboard({ careerTitle, educationLevel }: Opportun
           <div>
             <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                 <Rocket className="h-4 w-4" />
-                {t('opportunities.innovationTitle')}
+                {t(`opportunities.intelligence.${intelligenceKey}.innovation_title`)}
             </h3>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <p><strong>{t('opportunities.intelligence.common.breakthrough')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.innovation.breakthrough`)}</p>
-                <p><strong>{t('opportunities.intelligence.common.tool')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.innovation.tool`)}</p>
-                <p><strong>{t('opportunities.intelligence.common.researchHotspot')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.innovation.researchHotspot`)}</p>
-                <p><strong>{t('opportunities.intelligence.common.skillInDemand')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.innovation.skillInDemand`)}</p>
-            </div>
+             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {t(`opportunities.intelligence.${intelligenceKey}.innovation_text`)}
+            </p>
           </div>
           
           {/* Market Pulse */}
           <div className="border-t pt-6">
             <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                {t('opportunities.marketPulseTitle')}
+                {t(`opportunities.intelligence.${intelligenceKey}.market_title`)}
             </h3>
-             <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <p><strong>{t('opportunities.marketPulse.jobGrowth')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.market.jobGrowth`)}</p>
-                <p><strong>{t('opportunities.marketPulse.salaryTrends')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.market.salaryTrends`)}</p>
-                <p><strong>{t('opportunities.marketPulse.hiringCompanies')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.market.hiringCompanies`)}</p>
-                <p><strong>{t('opportunities.marketPulse.geoHotspots')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.market.geoHotspots`)}</p>
-                <p className="md:col-span-2"><strong>{t('opportunities.marketPulse.international')}:</strong> {t(`opportunities.intelligence.${intelligenceKey}.market.international`)}</p>
-            </div>
+             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {t(`opportunities.intelligence.${intelligenceKey}.market_text`)}
+            </p>
           </div>
 
         </CardContent>
