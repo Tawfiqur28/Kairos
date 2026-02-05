@@ -17,9 +17,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry, Ikigai } from '@/lib/types';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/language-context';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 declare global {
     interface Window {
@@ -50,6 +73,11 @@ export default function JournalPage() {
 
   const [hasMounted, setHasMounted] = useState(false);
   const [journalPlaceholder, setJournalPlaceholder] = useState('');
+
+  const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
+  const [entryToEdit, setEntryToEdit] = useState<JournalEntry | null>(null);
+  const [editedContent, setEditedContent] = useState('');
+  const [editedFeeling, setEditedFeeling] = useState('');
 
   useEffect(() => {
     setHasMounted(true);
@@ -107,6 +135,13 @@ export default function JournalPage() {
     setJournalPlaceholder(getPlaceholder());
   }, [ikigai.educationLevel, t, hasMounted]);
 
+  useEffect(() => {
+    if (entryToEdit) {
+      setEditedContent(entryToEdit.content);
+      setEditedFeeling(entryToEdit.feeling);
+    }
+  }, [entryToEdit]);
+
   const handleToggleListening = () => {
     if (!isSpeechRecognitionSupported) {
       toast({
@@ -148,6 +183,28 @@ export default function JournalPage() {
       description: t('toasts.entrySavedDescription'),
     });
   };
+
+  const handleDeleteEntry = (id: string) => {
+    setEntries(entries.filter(entry => entry.id !== id));
+    setEntryToDelete(null);
+    toast({
+      title: t('journal.entryDeleted'),
+      description: t('journal.entryDeletedDesc'),
+    });
+  };
+
+  const handleUpdateEntry = () => {
+    if (!entryToEdit) return;
+    setEntries(entries.map(entry =>
+      entry.id === entryToEdit.id ? { ...entry, content: editedContent, feeling: editedFeeling } : entry
+    ));
+    setEntryToEdit(null);
+    toast({
+      title: t('journal.entryUpdated'),
+      description: t('journal.entryUpdatedDesc'),
+    });
+  };
+
 
   return (
     <>
@@ -206,8 +263,29 @@ export default function JournalPage() {
               {entries.map((entry) => (
                 <Card key={entry.id} className="mb-4">
                   <CardHeader>
-                    <CardTitle className="text-lg">{entry.date}</CardTitle>
-                    <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle className="text-lg">{entry.date}</CardTitle>
+                            <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setEntryToEdit(entry)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    <span>{t('journal.edit')}</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEntryToDelete(entry)} className="text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>{t('journal.delete')}</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground break-words">{entry.content}</p>
@@ -222,6 +300,52 @@ export default function JournalPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!entryToDelete} onOpenChange={(isOpen) => !isOpen && setEntryToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('journal.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('journal.deleteConfirmDescription')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('journal.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDeleteEntry(entryToDelete!.id)}>{t('journal.confirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!entryToEdit} onOpenChange={(isOpen) => !isOpen && setEntryToEdit(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{t('journal.editEntryTitle')}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="edit-feeling">{t('journal.feelingLabel')}</Label>
+                    <Input
+                        id="edit-feeling"
+                        value={editedFeeling}
+                        onChange={(e) => setEditedFeeling(e.target.value)}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="edit-content">{t('journal.thoughtsLabel')}</Label>
+                    <Textarea
+                        id="edit-content"
+                        className="min-h-32"
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setEntryToEdit(null)}>{t('journal.cancel')}</Button>
+                <Button onClick={handleUpdateEntry}>{t('journal.saveButton')}</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -147,7 +147,7 @@
     "title": "Ikigai Canvas",
     "description": "This is your space for self-discovery. What drives you?",
     "profileTitle": "Your Profile",
-    "profileDescription": "Fill in the four pillars of Ikigai. Be thoughtful and honest with yourself. This information will be used by our AI to find career matches for you.",
+    "profileDescription": "Answer honestly. Your profile helps our AI find you the perfect career match.",
     "passionsLabel": "What you LOVE (Passions)",
     "passionsPlaceholder": "e.g., Solving complex puzzles, creating music, helping others, storytelling...",
     "skillsLabel": "What you are GOOD AT (Skills)",
@@ -221,7 +221,18 @@
     "saveButton": "Save Entry",
     "pastEntriesTitle": "Past Entries",
     "feeling": "Feeling: ",
-    "noEntries": "No journal entries yet."
+    "noEntries": "No journal entries yet.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Are you sure?",
+    "deleteConfirmDescription": "This will permanently delete your journal entry. This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "editEntryTitle": "Edit Journal Entry",
+    "entryDeleted": "Entry deleted.",
+    "entryDeletedDesc": "Your journal entry has been removed.",
+    "entryUpdated": "Entry updated.",
+    "entryUpdatedDesc": "Your journal entry has been successfully updated."
   },
   "careers": {
     "title": "Career Explorer",
@@ -394,7 +405,7 @@
     "sectionJournal": "Journal",
     "activePlan": "Active Plan",
     "profileCompletion": "Profile Completion",
-    "activePlanFor": "Active plan: {careerTitle}",
+    "activePlanFor": "{careerTitle}",
     "completeProfilePrompt": "Complete profile for better matches",
     "menu": "Menu",
     "completeProfile": "Complete Profile",
@@ -402,7 +413,7 @@
     "profileStatus": "Profile Status",
     "statusIncomplete": "Incomplete",
     "statusProfileRequired": "Profile Required",
-    "progressPercent": "Progress: {progress}%",
+    "progressPercent": "Progress: {progress}",
     "footerTitle": "KAIROS Career Planner",
     "footerSubtitle1": "Dynamic Career Matching",
     "footerSubtitle2": "Personalized Action Plans",
@@ -415,28 +426,28 @@
     "competitions": {
       "title": "Competitions & Challenges",
       "description": "Participate in influential competitions to showcase your skills and gain recognition.",
-      "items": {
-        "0": {
+      "items": [
+        {
           "title": "China \"Internet+\" College Student Innovation and Entrepreneurship Competition",
           "description": "One of China's most significant platforms for student innovation, covering technology, business, and social impact projects. A premier event to gain venture capital attention."
         },
-        "1": {
+        {
           "title": "“Challenge Cup” National College Student Curricular Academic Science and Technology Contest",
           "description": "Known as the 'China Youth Science and Technology Innovation Olympics', it focuses on academic research and deep-tech projects across science and engineering."
         },
-        "2": {
+        {
           "title": "National College Electronic Design Contest",
           "description": "A top-tier competition for electronics and information technology students, focusing on practical hardware design and problem-solving abilities."
         },
-        "3": {
+        {
           "title": "Hult Prize (China Region)",
           "description": "The world's largest student competition for social good. Teams develop innovative business ideas to solve pressing global issues. Winners receive seed funding."
         },
-        "4": {
+        {
           "title": "National College Mathematical Contest in Modeling",
           "description": "A highly challenging competition that tests students' abilities to use mathematical modeling to solve real-world scientific and engineering problems."
         }
-      }
+      ]
     },
     "education": {
       "title": "Stage-Specific Opportunities & Guidance",
@@ -477,37 +488,37 @@
       "cloud_cyber": {
         "title": "Field Intelligence: Cloud & Cybersecurity",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "- **Cloud Architect:** Rise of **multi-cloud and hybrid strategies**; growing demand for **FinOps and cloud cost optimization** skills.\n- **Cyber Security Analyst:** Increased focus on **AI-driven threat detection**, **zero-trust frameworks**, and **cloud security posture management**.",
+        "innovation_text": "- Cloud Architect: Rise of multi-cloud and hybrid strategies; growing demand for FinOps and cloud cost optimization skills.\n- Cyber Security Analyst: Increased focus on AI-driven threat detection, zero-trust frameworks, and cloud security posture management.",
         "market_title": "Market Pulse",
-        "market_text": "- **Job Growth:** Cloud roles up 18%; cybersecurity roles up 15%.\n- **Hot Skills:** AWS/Azure/GCP certs, DevSecOps, incident response, compliance (GDPR, CCPA).\n- **Hiring Hubs:** Remote-friendly, but strong in **Dallas, D.C., Bangalore, and Singapore**."
+        "market_text": "- Job Growth: Cloud roles up 18%; cybersecurity roles up 15%.\n- Hot Skills: AWS/Azure/GCP certs, DevSecOps, incident response, compliance (GDPR, CCPA).\n- Hiring Hubs: Remote-friendly, but strong in Dallas, D.C., Bangalore, and Singapore."
       },
       "data_ai": {
         "title": "Field Intelligence: Data Science & AI",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "- **Data Scientist:** Shift toward **MLOps, automated ML (AutoML)**, and **explainable AI (XAI)**.\n- **Research Scientist:** Growth in **generative AI, biomedical informatics, and climate modeling**.",
+        "innovation_text": "- Data Scientist: Shift toward MLOps, automated ML (AutoML), and explainable AI (XAI).\n- Research Scientist: Growth in generative AI, biomedical informatics, and climate modeling.",
         "market_title": "Market Pulse",
-        "market_text": "- **Job Growth:** AI/ML roles up 20%.\n- **Hot Skills:** Python, SQL, TensorFlow/PyTorch, big data tools (Spark, Hadoop).\n- **Hiring Hubs:** **SF Bay Area, NYC, London, Beijing, Bengaluru**."
+        "market_text": "- Job Growth: AI/ML roles up 20%.\n- Hot Skills: Python, SQL, TensorFlow/PyTorch, big data tools (Spark, Hadoop).\n- Hiring Hubs: SF Bay Area, NYC, London, Beijing, Bengaluru."
       },
       "education_health": {
         "title": "Field Intelligence: Education & Healthcare",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "- **High School Teacher:** Rise of **edtech tools, personalized learning platforms, and virtual classrooms**.\n- **Registered Nurse:** Growth in **telehealth, health informatics, and AI-assisted diagnostics**.",
+        "innovation_text": "- High School Teacher: Rise of edtech tools, personalized learning platforms, and virtual classrooms.\n- Registered Nurse: Growth in telehealth, health informatics, and AI-assisted diagnostics.",
         "market_title": "Market Pulse",
-        "market_text": "- **Job Growth:** Nursing roles up 12%; teaching roles steady with edtech integration.\n- **Hot Skills:** Patient care, classroom tech tools, empathy, communication.\n- **Hiring Hubs:** **NYC, Texas, California, urban and rural healthcare networks**."
+        "market_text": "- Job Growth: Nursing roles up 12%; teaching roles steady with edtech integration.\n- Hot Skills: Patient care, classroom tech tools, empathy, communication.\n- Hiring Hubs: NYC, Texas, California, urban and rural healthcare networks."
       },
       "software_design": {
         "title": "Field Intelligence: Software & Design",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "- **Software Engineer:** Emphasis on **cloud-native development, microservices, and low-code platforms**.\n- **UX Designer:** Growth in **voice/AR/VR interfaces, accessibility design, and design systems**.",
+        "innovation_text": "- Software Engineer: Emphasis on cloud-native development, microservices, and low-code platforms.\n- UX Designer: Growth in voice/AR/VR interfaces, accessibility design, and design systems.",
         "market_title": "Market Pulse",
-        "market_text": "- **Job Growth:** Software roles up 15%; UX roles up 18%.\n- **Hot Skills:** JavaScript frameworks (React, Node.js), Figma, Agile/Scrum, user research.\n- **Hiring Hubs:** **Silicon Valley, Austin, Berlin, Tokyo, Shenzhen**."
+        "market_text": "- Job Growth: Software roles up 15%; UX roles up 18%.\n- Hot Skills: JavaScript frameworks (React, Node.js), Figma, Agile/Scrum, user research.\n- Hiring Hubs: Silicon Valley, Austin, Berlin, Tokyo, Shenzhen."
       },
       "marketing_creative": {
         "title": "Field Intelligence: Marketing & Creative",
         "innovation_title": "Innovation Spotlight",
-        "innovation_text": "- **Marketing Manager:** Shift toward **AI-driven analytics, hyper-personalization, and influencer marketing automation**.\n- **Music Producer:** Rise of **AI music tools, spatial audio, and NFT-based distribution**.",
+        "innovation_text": "- Marketing Manager: Shift toward AI-driven analytics, hyper-personalization, and influencer marketing automation.\n- Music Producer: Rise of AI music tools, spatial audio, and NFT-based distribution.",
         "market_title": "Market Pulse",
-        "market_text": "- **Job Growth:** Digital marketing roles up 14%; creative tech roles steady.\n- **Hot Skills:** SEO/SEM, content strategy, DAWs, mixing/mastering, social media analytics.\n- **Hiring Hubs:** **LA, NYC, London, Seoul, Amsterdam**."
+        "market_text": "- Job Growth: Digital marketing roles up 14%; creative tech roles steady.\n- Hot Skills: SEO/SEM, content strategy, DAWs, mixing/mastering, social media analytics.\n- Hiring Hubs: LA, NYC, London, Seoul, Amsterdam."
       }
     }
   }
