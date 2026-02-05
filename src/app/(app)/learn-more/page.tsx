@@ -29,6 +29,7 @@ import { useLanguage } from '@/context/language-context';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function LearnMorePage() {
   const { t } = useLanguage();
@@ -128,7 +129,9 @@ export default function LearnMorePage() {
       <PageHeader
         title={t('learnMore.title')}
         description={t('learnMore.description')}
-      />
+      >
+        <LanguageSwitcher />
+      </PageHeader>
 
       {/* Hero Explanation */}
       <div className="mb-8 p-6 bg-gradient-to-r from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-900/10 rounded-xl border">
