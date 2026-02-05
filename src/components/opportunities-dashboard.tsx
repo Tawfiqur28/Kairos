@@ -157,11 +157,6 @@ export function OpportunitiesDashboard({ careerTitle, educationLevel }: Opportun
             {getVisibleEducationLevels.includes('masters_phd') && (
                  <EducationSection title={educationSections.masters_phd.title} points={educationSections.masters_phd.points} />
             )}
-
-            <div className="mt-6 border-t pt-4">
-                <h3 className="font-semibold text-lg mb-2">{t('opportunities.coreAdvice.title')}</h3>
-                <p className="text-sm text-muted-foreground">{t('opportunities.coreAdvice.text')}</p>
-            </div>
         </CardContent>
       </Card>
 
