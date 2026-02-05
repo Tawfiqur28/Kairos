@@ -189,7 +189,7 @@
     "undergrad": "本科",
     "masters": "硕士",
     "phd": "博士",
-    "professional": "在职",
+    "professional": "在职人士",
     "educationLevelNotSpecified": "未指定",
     "footerWarning": "需要更多细节才能进行准确的职业匹配",
     "footerAlmostThere": "就快好了！添加更多细节以获得最佳结果",
@@ -219,13 +219,6 @@
     "thoughtsLabel": "你在想什么？",
     "thoughtsPlaceholder": "描述你的一天、你的任务、你喜欢和不喜欢什么。",
     "saveButton": "保存条目",
-    "aiInsightsTitle": "AI 职业见解",
-    "aiInsightsDescription": "根据你的日志，这里有一些你可能会觉得充实的职业道路。",
-    "aiLoading": "AI 正在分析你的日志...",
-    "analysisLabel": "分析：",
-    "suggestionsLabel": "建议：",
-    "generatePrompt": "点击按钮从你的条目中生成建议。",
-    "generateButton": "生成建议",
     "pastEntriesTitle": "过去的条目",
     "feeling": "感觉：",
     "noEntries": "还没有日志条目。"
@@ -307,10 +300,10 @@
     "feature2_text": "使用语音命令或文本与应用互动并填写你的日志条目。",
     "feature3_title": "AI 职业匹配",
     "feature3_text": "我们的 AI 会分析你的个人资料，为你匹配我们精选数据库中的职业。",
-    "feature4_title": "动态 3 年计划",
-    "feature4_text": "获取一个针对你所选职业目标的具体、可行的计划。",
-    "feature5_title": "智能自动化",
-    "feature5_text": "该应用会从你的输入（如日志条目）中学习，以随时间推移改进建议并预填信息以节省你的时间。",
+    "feature4_title": "日志与情绪追踪",
+    "feature4_text": "坚持写每日日志，反思你的想法和感受。我们的 AI 会分析你的条目，根据你的情绪和反复出现的主题提供职业见解。",
+    "feature5_title": "基于主题的匹配",
+    "feature5_text": "我们的 AI 从您的个人资料中提取关键主题（例如，“科技”、“艺术”、“科学”），以提供更细致、更准确的职业建议。这避免了笼统的匹配，并专注于真正驱动您的因素。",
     "feature6_title": "个性化行动计划",
     "feature6_text": "获取为您选择的职业道路量身定制的3阶段路线图，其中包含具体的任务、时间表和资源。",
     "feature6_highlight": "结构化的三阶段职业路线图",
@@ -371,6 +364,7 @@
     "logout": "登出"
   },
   "toasts": {
+    "langCode": "zh-CN",
     "profileSavedTitle": "个人资料已保存！",
     "profileSavedDescription": "你的 Ikigai 个人资料已更新。",
     "profileChangesSavedDescription": "你的个人资料已成功更新。",
@@ -386,7 +380,6 @@
     "notEnoughDataTitle": "数据不足",
     "notEnoughDataDescription": "请至少先写一篇日志条目。",
     "aiErrorTitle": "AI 错误",
-    "aiErrorJournal": "目前无法生成职业建议。",
     "aiErrorCareerMatch": "目前无法生成职业匹配。",
     "aiErrorActionPlan": "目前无法生成行动计划。",
     "profileIncompleteTitle": "个人资料不完整",
@@ -394,7 +387,7 @@
   },
   "layout": {
     "sectionDashboard": "仪表板",
-    "sectionIkigai": "Ikigai 画布",
+    "sectionIkigai": "Ikigai 个人资料",
     "sectionCareers": "职业探索者",
     "sectionPlan": "行动计划",
     "sectionLearnMore": "了解更多",
@@ -418,55 +411,110 @@
   },
   "opportunities": {
     "tabTitle": "领域情报",
-    "monthlyTitle": "每月领域情报：{careerName}",
     "monthlySubtitle": "更新于：{date}",
     "innovationTitle": "创新聚光灯",
-    "breakthrough": "突破警报",
-    "tool": "本月工具",
-    "researchHotspot": "研究热点",
-    "skillInDemand": "热门技能",
     "marketPulseTitle": "市场脉搏",
-    "jobGrowth": "职位增长",
-    "salaryTrends": "薪资趋势",
-    "hiringCompanies": "正在招聘的公司",
-    "geoHotspots": "地理热点",
-    "academicFrontierTitle": "学术前沿",
-    "journalImpact": "期刊影响",
-    "conferenceAlerts": "会议提醒",
-    "grantOpportunities": "拨款机会",
-    "collabCalls": "合作邀请",
-    "forYourLevel": "为您的教育水平：{level}",
-    "competitionsTitle": "为{level}举办的竞赛与挑战",
-    "highSchool": "高中生",
-    "undergrad": "本科生",
-    "masters": "硕士生",
-    "phd": "博士生",
-    "scienceResearch": "科学/研究竞赛",
-    "techCode": "技术/编程挑战",
-    "writingBusiness": "写作/商业",
-    "globalCompetitions": "全球竞赛",
-    "researchOpportunities": "研究机会",
-    "caseCompetitions": "案例竞赛",
-    "thesisAwards": "论文/学位论文奖",
-    "industryBridges": "产学研桥梁",
-    "internationalOpportunities": "国际机会",
-    "prestigiousAwards": "著名奖项",
-    "innovationCommercialization": "创新与商业化",
-    "networkingPlatforms": "社交平台",
-    "jobsTitle": "工作与研究机会",
-    "hsToUndergrad": "高中 → 本科过渡",
-    "summerPrograms": "暑期项目",
-    "scholarships": "奖学金与助学金",
-    "undergradToMasters": "本科 → 硕士之路",
-    "researchAssistant": "研究助理职位",
-    "internshipDeadlines": "实习截止日期",
-    "mastersToIndustry": "硕士 → 工业界/博士",
-    "entryLevel": "入门级职位",
-    "phdDeadlines": "博士项目截止日期",
-    "postMastersOptions": "硕士后选择",
-    "phdToCareer": "博士 → 职业启动",
-    "academicPositions": "学术职位",
-    "industryResearchRoles": "工业界研究职位",
-    "altAcademic": "替代学术职业"
+    "education": {
+        "title": "分阶段机遇与指南",
+        "description": "针对您当前学术或专业阶段的可行建议。",
+        "highSchool": {
+            "title": "针对高中生",
+            "fundamentals_title": "夯实基础",
+            "fundamentals_text": "在数学、物理和编程（Python）方面打下坚实基础。参加<strong>全国青少年信息学奥林匹克竞赛（NOI）</strong>或<strong>青少年科技创新大赛</strong>。",
+            "exploration_title": "早期探索",
+            "exploration_text": "关注顶尖大学（如清华、北大、中科大）的<strong>特殊计划</strong>，并参加在线科学营。",
+            "handsOn_title": "动手实践",
+            "handsOn_text": "通过<strong>B站、中国大学MOOC</strong>等平台学习，并尝试使用开源硬件（如Arduino）进行小型项目。"
+        },
+        "undergrad": {
+            "title": "针对本科生",
+            "specialize_title": "深度钻研",
+            "specialize_text": "争取加入<strong>国家重点实验室</strong>或参与<strong>教授的行业合作项目</strong>。",
+            "competitions_title": "证书与竞赛",
+            "competitions_text": "参加<strong>“互联网+”创新创业大赛</strong>或<strong>全国大学生电子设计竞赛</strong>等竞赛，并获得行业认可的证书（如华为HCIA、阿里云ACA）。",
+            "internship_title": "实习重点",
+            "internship_text": "假期重点关注<strong>大湾区、长三角</strong>地区头部公司的实习机会。",
+            "studies_title": "深造或就业",
+            "studies_text": "考虑<strong>保研、国内考研（985/211院校）</strong>或申请<strong>海外高校（新加坡、香港、欧洲）</strong>。同时关注<strong>国企提前批招聘</strong>。"
+        },
+        "masters_phd": {
+            "title": "针对硕士/博士生",
+            "research_title": "研究与应用结合",
+            "research_text": "选择与<strong>国家战略重点（如AI、芯片、新能源）</strong>相关的论文课题，争取发表高质量论文或专利。",
+            "collaboration_title": "产学研合作",
+            "collaboration_text": "申请<strong>联合培养项目</strong>（如华为“天才少年”、阿里星计划），参与核心研发工作。",
+            "global_title": "全球视野",
+            "global_text": "参加<strong>顶级会议（如NeurIPS、ISSCC）</strong>，了解<strong>CSC公派留学</strong>机会，建立国际人脉网络。",
+            "employment_title": "高水平就业",
+            "employment_text": "目标定位于<strong>国企研究院（如CETC、CASIC）、顶尖私企实验室或跨国科技公司的中国分部</strong>的研发岗位。"
+        }
+    },
+    "coreAdvice": {
+        "title": "核心建议：立足当下，放眼未来",
+        "text": "当前中国正处于技术自立自强的关键阶段，国内机遇丰富，但国际竞争与限制并存。建议立足国内市场需求，同时保持全球视野和技术敏感度。在“卡脖子”技术领域深化专业知识，将个人成长与国家战略需求相结合，将是这个时代最大的职业发展机遇。"
+    },
+    "intelligence": {
+        "common": {
+            "breakthrough": "突破预警",
+            "tool": "本月工具",
+            "researchHotspot": "研究热点",
+            "skillInDemand": "技能需求"
+        },
+        "ai": {
+            "title": "每月领域情报：人工智能与大数据",
+            "innovation": {
+                "breakthrough": "国产多模态大模型（如百度文心、阿里通义、智谱GLM）在中文理解和行业应用上取得重大突破。",
+                "tool": "PaddlePaddle（百度开源深度学习平台）和ModelScope（阿里模型即服务生态）成为国内开发者首选。",
+                "researchHotspot": "清华大学、北京大学、之江实验室在联邦学习和隐私计算方面成果显著。",
+                "skillInDemand": "大模型微调和提示工程，尤其面向垂直行业（金融、政务、医疗）。"
+            },
+            "market": {
+                "jobGrowth": "国内AI人才需求同比增长18%，尤其在自动驾驶、智慧城市和智能制造领域。",
+                "salaryTrends": "应届硕士：约25-40万人民币；3-5年经验算法工程师：50-80万；头部科技公司首席科学家岗位：超过150万。",
+                "hiringCompanies": "华为、阿里巴巴、腾讯、字节跳动、百度、商汤科技、科大讯飞、比亚迪（智能驾驶部门）",
+                "geoHotspots": "北京、上海、深圳、杭州、成都",
+                "international": "部分公司（如华为、TikTok、商汤）在新加坡、伦敦、硅谷设有研究中心，提供海外岗位。"
+            }
+        },
+        "energy": {
+            "title": "每月领域情报：新能源与可持续技术",
+            "innovation": {
+                "breakthrough": "钙钛矿太阳能电池效率突破26%；宁德时代发布新一代凝聚态电池。",
+                "tool": "ANSYS新能源仿真套件及国产CAE软件在电池管理和电机设计中应用增多。",
+                "researchHotspot": "中国科学院在固态电池和氢能储运技术方面领先。",
+                "skillInDemand": "电池管理系统（BMS）工程师和碳足迹分析师。"
+            },
+            "market": {
+                "jobGrowth": "在“双碳”目标驱动下，新能源行业招聘年增22%。",
+                "salaryTrends": "应届生：约15-25万；资深BMS/电控工程师：40-70万；海外项目岗位薪资溢价30%-50%。",
+                "hiringCompanies": "宁德时代、比亚迪、蔚来、理想汽车、隆基绿能、国家电网（研究院）、远景能源",
+                "geoHotspots": "深圳、上海、合肥、常州、西安",
+                "international": "中国新能源企业正在德国、匈牙利、墨西哥等地建立生产基地，产生技术和项目管理的本地化人才需求。"
+            }
+        },
+        "semiconductor": {
+            "title": "每月领域情报：集成电路与半导体",
+            "innovation": {
+                "breakthrough": "中芯国际实现14nm FinFET工艺量产；海思在国产EDA工具链开发上取得进展。",
+                "tool": "华大九天EDA工具和华为鲲鹏计算芯片生态正在加速国产替代。",
+                "researchHotspot": "南京大学、复旦大学在宽禁带半导体材料（如GaN、SiC）研究方面领先。",
+                "skillInDemand": "芯片架构师、FPGA开发工程师、半导体设备工艺工程师。"
+            },
+            "market": {
+                "jobGrowth": "国家集成电路产业投资基金二期持续投入，设计、制造、设备等环节人才缺口年扩增约20%。",
+                "salaryTrends": "硕士毕业生：30-45万；5年以上设计经验工程师：60万-100万；海归人才薪资溢价显著。",
+                "hiringCompanies": "海思、中芯国际、长鑫存储、韦尔股份、北方华创、上海微电子",
+                "geoHotspots": "上海、北京、深圳、合肥、武汉",
+                "international": "企业积极招聘有美、欧、韩半导体产业经验的人才，以突破技术壁垒。"
+            }
+        }
+    },
+    "marketPulse": {
+        "jobGrowth": "职位增长",
+        "salaryTrends": "薪资趋势",
+        "hiringCompanies": "招聘公司（国内）",
+        "geoHotspots": "地理热点（国内）",
+        "international": "国际业务与机会"
+    }
   }
 }

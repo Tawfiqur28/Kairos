@@ -219,13 +219,6 @@
     "thoughtsLabel": "What's on your mind?",
     "thoughtsPlaceholder": "Describe your day, your tasks, what you enjoyed, and what you didn't.",
     "saveButton": "Save Entry",
-    "aiInsightsTitle": "AI Career Insights",
-    "aiInsightsDescription": "Based on your journal, here are some career paths you might find fulfilling.",
-    "aiLoading": "AI is analyzing your journal...",
-    "analysisLabel": "Analysis:",
-    "suggestionsLabel": "Suggestions:",
-    "generatePrompt": "Click the button to generate suggestions from your entries.",
-    "generateButton": "Generate Suggestions",
     "pastEntriesTitle": "Past Entries",
     "feeling": "Feeling: ",
     "noEntries": "No journal entries yet."
@@ -307,10 +300,10 @@
     "feature2_text": "Use voice commands or text to interact with the app and fill out your journal entries.",
     "feature3_title": "AI Career Match",
     "feature3_text": "Our AI analyzes your profile to match you with careers from our curated database.",
-    "feature4_title": "Dynamic 3-Year Plan",
-    "feature4_text": "Get a specific, actionable plan tailored to your chosen career goal.",
-    "feature5_title": "Smart Automation",
-    "feature5_text": "The app learns from your inputs, like journal entries, to refine suggestions over time and prefills information to save you time.",
+    "feature4_title": "Journaling & Mood Tracking",
+    "feature4_text": "Keep a daily journal to reflect on your thoughts and feelings. Our AI analyzes your entries to provide career insights based on your mood and recurring themes.",
+    "feature5_title": "Theme-Based Matching",
+    "feature5_text": "Our AI extracts key themes (e.g., 'Tech', 'Arts', 'Science') from your profile to provide more nuanced and accurate career recommendations. This avoids generic matches and focuses on what truly drives you.",
     "feature6_title": "Personalized Action Plans",
     "feature6_text": "Get a customized 3-phase roadmap with specific tasks, timelines, and resources for your chosen career path.",
     "feature6_highlight": "Structured 3-phase career roadmaps",
@@ -371,6 +364,7 @@
     "logout": "Log out"
   },
   "toasts": {
+    "langCode": "en-US",
     "profileSavedTitle": "Profile Saved!",
     "profileSavedDescription": "Your Ikigai profile has been updated.",
     "profileChangesSavedDescription": "Your profile has been successfully updated.",
@@ -386,7 +380,6 @@
     "notEnoughDataTitle": "Not Enough Data",
     "notEnoughDataDescription": "Please write at least one journal entry first.",
     "aiErrorTitle": "AI Error",
-    "aiErrorJournal": "Could not generate career suggestions at this time.",
     "aiErrorCareerMatch": "Could not generate a career match at this time.",
     "aiErrorActionPlan": "Could not generate an action plan at this time.",
     "profileIncompleteTitle": "Profile Incomplete",
@@ -418,55 +411,110 @@
   },
   "opportunities": {
     "tabTitle": "Field Intelligence",
-    "monthlyTitle": "Monthly Field Intelligence: {careerName}",
     "monthlySubtitle": "Updated: {date}",
     "innovationTitle": "Innovation Spotlight",
-    "breakthrough": "Breakthrough Alert",
-    "tool": "Tool of the Month",
-    "researchHotspot": "Research Hotspot",
-    "skillInDemand": "Skill in Demand",
     "marketPulseTitle": "Market Pulse",
-    "jobGrowth": "Job Growth",
-    "salaryTrends": "Salary Trends",
-    "hiringCompanies": "Hiring Companies",
-    "geoHotspots": "Geographic Hotspots",
-    "academicFrontierTitle": "Academic Frontier",
-    "journalImpact": "Journal Impact",
-    "conferenceAlerts": "Conference Alerts",
-    "grantOpportunities": "Grant Opportunities",
-    "collabCalls": "Collaboration Calls",
-    "forYourLevel": "For Your Education Level: {level}",
-    "competitionsTitle": "Competitions & Challenges for {level}",
-    "highSchool": "High School Students",
-    "undergrad": "Undergraduate Students",
-    "masters": "Master's Students",
-    "phd": "PhD Students",
-    "scienceResearch": "Science/Research Competitions",
-    "techCode": "Tech/Code Challenges",
-    "writingBusiness": "Writing/Business",
-    "globalCompetitions": "Global Competitions",
-    "researchOpportunities": "Research Opportunities",
-    "caseCompetitions": "Case Competitions",
-    "thesisAwards": "Thesis/Dissertation Awards",
-    "industryBridges": "Industry-Academia Bridges",
-    "internationalOpportunities": "International Opportunities",
-    "prestigiousAwards": "Prestigious Awards",
-    "innovationCommercialization": "Innovation & Commercialization",
-    "networkingPlatforms": "Networking Platforms",
-    "jobsTitle": "Job & Research Opportunities",
-    "hsToUndergrad": "For High School → Undergrad Transition",
-    "summerPrograms": "Summer Programs",
-    "scholarships": "Scholarships & Financial Aid",
-    "undergradToMasters": "Undergrad → Master's Path",
-    "researchAssistant": "Research Assistant Positions",
-    "internshipDeadlines": "Internship Deadlines",
-    "mastersToIndustry": "Master's → Industry/PhD",
-    "entryLevel": "Entry-Level Positions",
-    "phdDeadlines": "PhD Program Deadlines",
-    "postMastersOptions": "Post-Master's Options",
-    "phdToCareer": "PhD → Career Launch",
-    "academicPositions": "Academic Positions",
-    "industryResearchRoles": "Industry Research Roles",
-    "altAcademic": "Alternative Academic Careers"
+    "education": {
+        "title": "Stage-Specific Opportunities & Guidance",
+        "description": "Actionable advice tailored to your current academic or professional stage.",
+        "highSchool": {
+            "title": "For High School Students",
+            "fundamentals_title": "Focus on Fundamentals",
+            "fundamentals_text": "Build a strong foundation in math, physics, and programming (Python). Participate in <strong>National Olympiad in Informatics (NOI)</strong> or <strong>Youth Science & Technology Innovation Competitions</strong>.",
+            "exploration_title": "Early Exploration",
+            "exploration_text": "Look into <strong>special programs</strong> at top universities (e.g., Tsinghua, Peking University, USTC) and attend online science camps.",
+            "handsOn_title": "Hands-on Start",
+            "handsOn_text": "Learn through <strong>Bilibili, Chinese University MOOC platforms</strong>, and try small projects with open-source hardware (e.g., Arduino)."
+        },
+        "undergrad": {
+            "title": "For Undergraduate Students",
+            "specialize_title": "Specialize Deeply",
+            "specialize_text": "Aim to join <strong>national key laboratories</strong> or participate in <strong>industry collaboration projects with professors</strong>.",
+            "competitions_title": "Certifications & Competitions",
+            "competitions_text": "Join competitions like the <strong>\"Internet+\" Innovation & Entrepreneurship Competition</strong> or <strong>National College Electronic Design Contest</strong>, and obtain industry-recognized certifications (e.g., Huawei HCIA, Alibaba Cloud ACA).",
+            "internship_title": "Internship Focus",
+            "internship_text": "Target internships at leading companies in <strong>Greater Bay Area, Yangtze River Delta</strong> during holidays.",
+            "studies_title": "Further Studies or Employment",
+            "studies_text": "Consider <strong>postgraduate recommendations, domestic Master's programs (985/211 universities)</strong>, or apply to <strong>overseas universities (Singapore, Hong Kong, Europe)</strong>. Also watch for <strong>early recruitment by state-owned enterprises</strong>."
+        },
+        "masters_phd": {
+            "title": "For Master's/PhD Students",
+            "research_title": "Combine Research & Application",
+            "research_text": "Choose thesis topics aligned with <strong>national strategic priorities (e.g., AI, chips, new energy)</strong>, aiming for high-quality publications or patents.",
+            "collaboration_title": "Industry-Academia Collaboration",
+            "collaboration_text": "Apply for <strong>joint training programs</strong> (e.g., Huawei \"Genius Youngster\", Alibaba Star Program) to work on core R&D.",
+            "global_title": "Global Perspective",
+            "global_text": "Attend <strong>top conferences (e.g., NeurIPS, ISSCC)</strong>, explore <strong>CSC scholarships</strong> for study abroad, and build an international network.",
+            "employment_title": "High-Level Employment",
+            "employment_text": "Target R&D roles in <strong>state-owned enterprise research institutes (e.g., CETC, CASIC), top private company labs, or Chinese branches of global tech firms</strong>."
+        }
+    },
+    "coreAdvice": {
+        "title": "Core Advice for Today's Landscape",
+        "text": "China is currently at a critical stage of technological self-reliance. Domestic opportunities are abundant, but international competition and restrictions exist. It is recommended to anchor in domestic market needs while maintaining a global perspective and technical sensitivity. Deepening expertise in \"bottleneck\" technologies and aligning personal growth with national strategic needs will offer the greatest career development opportunities in this era."
+    },
+    "intelligence": {
+        "common": {
+            "breakthrough": "Breakthrough Alert",
+            "tool": "Tool of the Month",
+            "researchHotspot": "Research Hotspot",
+            "skillInDemand": "Skill in Demand"
+        },
+        "ai": {
+            "title": "Monthly Field Intelligence: Artificial Intelligence & Big Data",
+            "innovation": {
+                "breakthrough": "China's self-developed multimodal large models (e.g., Baidu ERNIE, Alibaba Tongyi, Zhipu GLM) have made significant breakthroughs in Chinese language understanding and industrial application.",
+                "tool": "PaddlePaddle (Baidu's open-source deep learning platform) and ModelScope (Alibaba's model-as-a-service ecosystem) are becoming the top choices for domestic developers.",
+                "researchHotspot": "Tsinghua University, Peking University, and the Zhejiang Lab have achieved notable results in federated learning and privacy-preserving computation.",
+                "skillInDemand": "Large model fine-tuning and prompt engineering, especially for vertical industries (finance, government, healthcare)."
+            },
+            "market": {
+                "jobGrowth": "Domestic AI talent demand has increased by 18% year-over-year, particularly in autonomous driving, smart cities, and intelligent manufacturing.",
+                "salaryTrends": "Fresh Master's graduates: ~¥250K-400K RMB; Algorithm engineers with 3-5 years of experience: ¥500K-800K; Top tech firms' chief scientist roles: over ¥1.5 million.",
+                "hiringCompanies": "Huawei, Alibaba, Tencent, ByteDance, Baidu, SenseTime, iFLYTEK, BYD (Intelligent Driving Division)",
+                "geoHotspots": "Beijing, Shanghai, Shenzhen, Hangzhou, Chengdu",
+                "international": "Some companies (e.g., Huawei, TikTok, SenseTime) have research centers in Singapore, London, Silicon Valley, offering overseas positions."
+            }
+        },
+        "energy": {
+            "title": "Monthly Field Intelligence: New Energy & Sustainable Technology",
+            "innovation": {
+                "breakthrough": "Perovskite solar cell efficiency exceeds 26%; CATL releases next-generation condensed matter battery.",
+                "tool": "ANSYS New Energy Simulation Suite and domestic CAE software are increasingly used in battery management and motor design.",
+                "researchHotspot": "The Chinese Academy of Sciences leads in solid-state battery and hydrogen energy storage/transportation technologies.",
+                "skillInDemand": "Battery Management System (BMS) Engineers and Carbon Footprint Analysts."
+            },
+            "market": {
+                "jobGrowth": "Driven by the \"Dual Carbon\" goals, the new energy industry has seen a 22% annual increase in hiring.",
+                "salaryTrends": "Fresh graduates: ~¥150K-250K; Senior BMS/Electronic Control Engineers: ¥400K-700K; Overseas project roles offer 30%-50% salary premiums.",
+                "hiringCompanies": "CATL, BYD, NIO, Li Auto, LONGi Green Energy, State Grid (Research Institute), Envision Energy",
+                "geoHotspots": "Shenzhen, Shanghai, Hefei, Changzhou, Xi'an",
+                "international": "Chinese new energy companies are establishing production bases in Germany, Hungary, Mexico, creating demand for localization talent in tech and project management."
+            }
+        },
+        "semiconductor": {
+            "title": "Monthly Field Intelligence: Integrated Circuit & Semiconductor",
+            "innovation": {
+                "breakthrough": "SMIC achieves mass production of 14nm FinFET process; HiSilicon makes progress in domestic EDA toolchain development.",
+                "tool": "Huada Jiutian EDA tools and Huawei Kunpeng computing chip ecosystem are accelerating domestic substitution.",
+                "researchHotspot": "Nanjing University and Fudan University lead in wide-bandgap semiconductor materials (e.g., GaN, SiC) research.",
+                "skillInDemand": "Chip Architects, FPGA Development Engineers, and Semiconductor Equipment Process Engineers."
+            },
+            "market": {
+                "jobGrowth": "Continued investment from the National Integrated Circuit Industry Investment Fund Phase II has expanded talent gaps in design, manufacturing, and equipment sectors by ~20% annually.",
+                "salaryTrends": "Master's graduates: ¥300K-450K; Design engineers with 5+ years of experience: ¥600K-1M; Significant salary premiums for overseas-returned talent.",
+                "hiringCompanies": "HiSilicon, SMIC, ChangXin Memory, Will Semiconductor, Naura, Shanghai Micro Electronics",
+                "geoHotspots": "Shanghai, Beijing, Shenzhen, Hefei, Wuhan",
+                "international": "Companies actively recruit talent with experience in US, European, or Korean semiconductor industries to break through technological barriers."
+            }
+        }
+    },
+    "marketPulse": {
+        "jobGrowth": "Job Growth",
+        "salaryTrends": "Salary Trends",
+        "hiringCompanies": "Hiring Companies (Domestic)",
+        "geoHotspots": "Geographic Hotspots (Domestic)",
+        "international": "International Presence & Opportunities"
+    }
   }
 }
