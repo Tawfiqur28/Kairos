@@ -3,8 +3,9 @@
   "description": "AI Career Guide for Students - Next.js App",
   "version": "1.0.0",
   "framework": "custom",
+  "sdk_type": "custom",
   "command": "bash start.sh",
-  "resources": {
+  "resource_configuration": {
     "cpu": 2,
     "memory": 4096,
     "gpu": 0
