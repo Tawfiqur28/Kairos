@@ -1,5 +1,11 @@
 'use server';
 
+let modelUsageStats = {
+  'qwen-max': { calls: 0, avgTime: 0, errors: 0 },
+  'qwen-fast': { calls: 0, avgTime: 0, errors: 0 },
+  'qwen-audio': { calls: 0, avgTime: 0, errors: 0 }
+};
+
 // Lazily import dashscope to improve initial load time.
 let dashscopeGeneration: any;
 async function getDashscopeGeneration() {
@@ -14,6 +20,10 @@ async function getDashscopeGeneration() {
     }
   }
   return dashscopeGeneration;
+}
+
+export async function getModelStats() {
+  return modelUsageStats;
 }
 
 /**
