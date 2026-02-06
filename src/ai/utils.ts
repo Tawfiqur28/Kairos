@@ -1,6 +1,21 @@
 'use server';
 
-import { Generation } from 'dashscope';
+// Lazily import dashscope to improve initial load time and handle module resolution.
+let dashscopeGeneration: any;
+async function getDashscopeGeneration() {
+  if (!dashscopeGeneration) {
+    try {
+      // Use destructuring for a more robust import of the Generation class
+      const { Generation } = await import('dashscope');
+      dashscopeGeneration = Generation;
+    } catch (e) {
+      console.error('Failed to import or find Generation in dashscope', e);
+      return null; // Return null if import fails
+    }
+  }
+  return dashscopeGeneration;
+}
+
 
 /**
  * Calls the ModelScope API with a given prompt and model.
@@ -18,6 +33,11 @@ export async function callModelScopeAI(prompt: string, model: string): Promise<s
   }
 
   try {
+    const Generation = await getDashscopeGeneration();
+    if (!Generation) {
+        throw new Error('Dashscope Generation module could not be loaded.');
+    }
+
     const result = await Generation.call({
       model: model,
       prompt: prompt,
