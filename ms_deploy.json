@@ -3,13 +3,9 @@
   "description": "AI Career Guide for Students - Next.js App",
   "version": "1.0.0",
   "framework": "custom",
-  "sdk_type": "custom",
+  "sdk_type": "docker",
   "command": "bash start.sh",
-  "resource_configuration": {
-    "cpu": 2,
-    "memory": 4096,
-    "gpu": 0
-  },
+  "resource_configuration": "platform/2v-cpu-16g-mem",
   "environment": {
     "python": "3.9",
     "node": "18"
