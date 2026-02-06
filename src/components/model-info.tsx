@@ -9,13 +9,18 @@ export function ModelInfoPanel() {
   
   useEffect(() => {
     fetch('/api/model-stats')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`API responded with status ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
         setStats(data);
         setIsLoading(false);
       })
       .catch(err => {
-        console.error("Failed to fetch model stats", err);
+        console.error("Failed to fetch model stats:", err);
         setIsLoading(false);
       });
   }, []);

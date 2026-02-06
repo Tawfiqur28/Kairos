@@ -357,16 +357,36 @@ export async function generatePersonalizedActionPlan(
     
   } catch (error) {
     console.error('Error generating personalized action plan:', error);
-
-    // Re-throw the error to be handled by the client
-    if (error instanceof z.ZodError) {
-      throw new Error(`Input validation failed: ${error.errors.map(e => `${e.path}: ${e.message}`).join(', ')}`);
-    }
-
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error('Failed to generate action plan due to an unknown error.');
+    
+    // Emergency fallback - always returns a valid plan
+    const emergencyPlan: GeneratePersonalizedActionPlanOutput = {
+      careerTitle: input.careerGoal || 'Your Career Goal',
+      educationLevel: 'Not Specified',
+      timeline: 'Career Development Journey',
+      phases: [
+        {
+          title: 'Getting Started',
+          duration: 'Immediate',
+          tasks: [
+            { id: 'emergency-1', text: `Research ${input.careerGoal || 'your chosen career'} online`, completed: false },
+            { id: 'emergency-2', text: 'Identify one skill you can start learning today', completed: false },
+            { id: 'emergency-3', text: 'Connect with one professional in your target field', completed: false }
+          ]
+        },
+        {
+          title: 'Next Steps',
+          duration: 'Next 3-6 Months',
+          tasks: [
+            { id: 'emergency-4', text: 'Take an online course related to your career interest', completed: false },
+            { id: 'emergency-5', text: 'Build a simple project to practice your skills', completed: false },
+            { id: 'emergency-6', text: 'Update your resume and LinkedIn profile', completed: false }
+          ]
+        }
+      ],
+      generatedAt: new Date().toISOString(),
+      success: false
+    };
+    
+    return GeneratePersonalizedActionPlanOutputSchema.parse(emergencyPlan);
   }
 }
