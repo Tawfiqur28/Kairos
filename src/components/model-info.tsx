@@ -1,34 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Skeleton } from './ui/skeleton';
-
 export function ModelInfoPanel() {
-  const [stats, setStats] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    fetch('/api/model-stats')
-      .then(res => {
-        if (!res.ok) {
-          // Do not throw an error, just log it and continue
-          console.error(`API responded with status ${res.status}`);
-          return null;
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (data) {
-          setStats(data);
-        }
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch model stats:", err);
-        setIsLoading(false);
-      });
-  }, []);
-  
   return (
     <div className="p-3 bg-muted/30 rounded-lg border">
       <h4 className="font-semibold mb-2 text-xs">🤖 AI Architecture</h4>
