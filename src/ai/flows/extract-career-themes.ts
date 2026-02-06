@@ -95,7 +95,7 @@ Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business
 
 Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
 
-  const response = await callModelScopeAI(prompt, 'qwen-max');
+  const response = await callModelScopeAI(prompt, 'qwen-2.5-7b-instruct');
   
   if (response.startsWith('ERROR:')) {
     throw new Error(response);

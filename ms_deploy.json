@@ -2,10 +2,11 @@
   "sdk_type": "docker",
   "resource_configuration": "platform/2v-cpu-16g-mem",
   "name": "kairos-compass",
-  "description": "AI Career Guide for Students",
+  "description": "AI Career Guide for Students - Next.js App",
   "version": "1.0.0",
   "environment": {
+    "python": "3.9",
     "node": "18"
   },
-  "port": 3000
+  "port": 7860
 }
