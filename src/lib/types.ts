@@ -20,6 +20,11 @@ export interface Career {
   requiredSkills: string[];
   marketDemand: number;
   cluster: string;
+  embedding_keywords: string[];
+  education_paths: {
+    high_school: string[];
+    undergrad: string[];
+  };
 }
 
 export interface JournalEntry {

@@ -6,7 +6,12 @@
       "description": "Designs, develops, and maintains software applications. Involves coding, debugging, and collaborating with teams to build and improve software products.",
       "requiredSkills": ["Programming (Python, Java, C++)", "Data Structures & Algorithms", "Problem Solving", "Version Control (Git)"],
       "marketDemand": 9,
-      "cluster": "Tech"
+      "cluster": "Tech",
+      "embedding_keywords": ["code", "programming", "python", "algorithms", "development", "software", "engineering", "debugging", "git"],
+      "education_paths": {
+        "high_school": ["AP Computer Science A/Principles", "Join a coding club or robotics team", "Build personal projects (websites, simple games)"],
+        "undergrad": ["Pursue a Computer Science or Software Engineering degree", "Secure software development internships", "Contribute to open-source projects on GitHub"]
+      }
     },
     {
       "id": "ux-designer",
@@ -14,7 +19,12 @@
       "description": "Focuses on creating user-friendly and intuitive digital products. Involves user research, wireframing, prototyping, and usability testing to enhance user satisfaction.",
       "requiredSkills": ["User Research", "Wireframing", "Prototyping Tools (Figma, Sketch)", "Visual Design"],
       "marketDemand": 8,
-      "cluster": "Tech"
+      "cluster": "Tech",
+      "embedding_keywords": ["user experience", "ux", "ui", "design", "figma", "prototyping", "wireframing", "research", "usability"],
+      "education_paths": {
+        "high_school": ["Take art and design classes", "Learn design tools like Figma or Canva", "Practice redesigning your favorite apps"],
+        "undergrad": ["Study Human-Computer Interaction (HCI), Graphic Design, or Psychology", "Build a strong portfolio of design projects", "Complete a UX design internship"]
+      }
     },
     {
       "id": "data-scientist",
@@ -22,7 +32,12 @@
       "description": "Analyzes large, complex data sets to identify trends and make predictions. Uses statistical methods, machine learning, and data visualization to provide actionable insights.",
       "requiredSkills": ["Statistics", "Machine Learning", "Python/R", "Data Visualization"],
       "marketDemand": 10,
-      "cluster": "Tech"
+      "cluster": "Tech",
+      "embedding_keywords": ["data science", "statistics", "machine learning", "python", "R", "analysis", "prediction", "visualization", "algorithms"],
+      "education_paths": {
+        "high_school": ["AP Statistics and AP Computer Science", "Participate in math or data-focused competitions", "Learn Python and basic data analysis libraries"],
+        "undergrad": ["Major in Statistics, Computer Science, or a related field", "Participate in Kaggle competitions", "Gain experience with real datasets through projects or internships"]
+      }
     },
     {
       "id": "cyber-security-analyst",
@@ -30,7 +45,12 @@
       "description": "Protects an organization's computer networks and systems from cyber threats. Involves monitoring for security breaches, investigating violations, and implementing security measures.",
       "requiredSkills": ["Network Security", "Intrusion Detection", "Cryptography", "Risk Analysis"],
       "marketDemand": 9,
-      "cluster": "Tech"
+      "cluster": "Tech",
+      "embedding_keywords": ["cybersecurity", "security", "networking", "encryption", "firewall", "threat detection", "infosec", "penetration testing"],
+      "education_paths": {
+        "high_school": ["Join a cybersecurity or IT club", "Participate in Capture The Flag (CTF) competitions", "Learn basic networking concepts and Linux"],
+        "undergrad": ["Major in Cybersecurity, IT, or Computer Science", "Earn entry-level certifications like CompTIA Security+", "Seek internships in IT or security roles"]
+      }
     },
     {
       "id": "cloud-architect",
@@ -38,7 +58,12 @@
       "description": "Oversees a company’s cloud computing strategy. This includes cloud adoption plans, cloud application design, and cloud management and monitoring.",
       "requiredSkills": ["Cloud Computing (AWS, Azure, GCP)", "Networking", "Security", "DevOps"],
       "marketDemand": 10,
-      "cluster": "Tech"
+      "cluster": "Tech",
+      "embedding_keywords": ["cloud computing", "aws", "azure", "gcp", "devops", "networking", "architecture", "scalability", "virtualization"],
+      "education_paths": {
+        "high_school": ["Learn the basics of major cloud providers (AWS, Azure)", "Understand networking fundamentals", "Get familiar with Linux command line"],
+        "undergrad": ["Major in IT, Cloud Computing, or Computer Science", "Obtain cloud certifications (e.g., AWS Cloud Practitioner)", "Work on projects that deploy applications to the cloud"]
+      }
     },
     {
       "id": "music-producer",
@@ -46,7 +71,12 @@
       "description": "Oversees the creation of a song or album. They guide the artist, manage the recording process, and shape the final sound of the music.",
       "requiredSkills": ["DAW (Ableton, Logic)", "Music Theory", "Sound Engineering", "Project Management"],
       "marketDemand": 6,
-      "cluster": "Arts"
+      "cluster": "Arts",
+      "embedding_keywords": ["music production", "audio engineering", "daw", "ableton", "logic pro", "mixing", "mastering", "sound design", "beat making"],
+      "education_paths": {
+        "high_school": ["Join band or orchestra; take music theory classes", "Learn a Digital Audio Workstation (DAW) like GarageBand or FL Studio", "Start producing and sharing your own music"],
+        "undergrad": ["Study Music Production, Audio Engineering, or a related field", "Intern at a recording studio", "Collaborate with local artists to build a portfolio"]
+      }
     },
     {
       "id": "research-scientist",
@@ -54,7 +84,12 @@
       "description": "Conducts scientific experiments and analysis in a lab or academic setting to advance knowledge in a particular field like biology, chemistry, or physics.",
       "requiredSkills": ["Scientific Method", "Data Analysis", "Laboratory Techniques", "Academic Writing"],
       "marketDemand": 7,
-      "cluster": "Science"
+      "cluster": "Science",
+      "embedding_keywords": ["research", "science", "biology", "chemistry", "physics", "laboratory", "experiment", "analysis", "scientific method"],
+      "education_paths": {
+        "high_school": ["Excel in AP Science courses (Biology, Chemistry, Physics)", "Participate in science fairs or research competitions", "Seek opportunities to volunteer or assist in a university lab"],
+        "undergrad": ["Major in a specific science (e.g., Biology, Chemistry)", "Gain extensive undergraduate research experience in a professor's lab", "Co-author a research paper or present at a conference"]
+      }
     },
     {
       "id": "marketing-manager",
@@ -62,7 +97,12 @@
       "description": "Develops and executes marketing strategies to promote a product or service. They manage campaigns, analyze market trends, and oversee a marketing team.",
       "requiredSkills": ["Digital Marketing", "SEO/SEM", "Content Strategy", "Data Analysis"],
       "marketDemand": 8,
-      "cluster": "Business"
+      "cluster": "Business",
+      "embedding_keywords": ["marketing", "digital marketing", "seo", "sem", "social media", "content strategy", "analytics", "branding", "advertising"],
+      "education_paths": {
+        "high_school": ["Join a business or DECA club", "Start a blog or social media account on a topic you're passionate about", "Learn the basics of digital marketing online"],
+        "undergrad": ["Major in Marketing, Business, or Communications", "Get internships in marketing roles", "Build a portfolio of marketing campaigns you've worked on"]
+      }
     },
     {
       "id": "registered-nurse",
@@ -70,7 +110,12 @@
       "description": "Provides and coordinates patient care, educates patients and the public about various health conditions, and provides advice and emotional support.",
       "requiredSkills": ["Patient Care", "Medical Knowledge", "Empathy", "Critical Thinking"],
       "marketDemand": 9,
-      "cluster": "Healthcare"
+      "cluster": "Healthcare",
+      "embedding_keywords": ["nursing", "healthcare", "patient care", "medical", "hospital", "empathy", "treatment", "clinic"],
+      "education_paths": {
+        "high_school": ["Take anatomy, biology, and chemistry", "Volunteer at a hospital or clinic", "Get certified in CPR and First Aid"],
+        "undergrad": ["Complete a Bachelor of Science in Nursing (BSN) degree", "Pass the NCLEX-RN exam", "Gain clinical experience through required rotations"]
+      }
     },
     {
       "id": "high-school-teacher",
@@ -78,7 +123,12 @@
       "description": "Educates students in a specific subject area. Involves creating lesson plans, grading assignments, and mentoring students to prepare them for college and beyond.",
       "requiredSkills": ["Subject Matter Expertise", "Communication", "Patience", "Curriculum Development"],
       "marketDemand": 7,
-      "cluster": "Education"
+      "cluster": "Education",
+      "embedding_keywords": ["teaching", "education", "curriculum", "lesson planning", "mentoring", "classroom management", "pedagogy"],
+      "education_paths": {
+        "high_school": ["Excel in the subject you wish to teach", "Tutor or mentor younger students", "Volunteer in a classroom or with youth groups"],
+        "undergrad": ["Major in the subject you want to teach and complete a teacher education program", "Complete student teaching requirements", "Pass state licensing exams"]
+      }
     }
   ]
 }
