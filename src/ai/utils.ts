@@ -16,6 +16,15 @@ async function getDashscopeGeneration() {
   return dashscopeGeneration;
 }
 
+// ==================== USAGE TRACKING ====================
+let modelUsageStats = {
+  'qwen-max': { calls: 0, avgTime: 0, errors: 0 },
+  'qwen-fast': { calls: 0, avgTime: 0, errors: 0 },
+  'qwen-audio': { calls: 0, avgTime: 0, errors: 0 }
+};
+
+export const getModelStats = () => modelUsageStats;
+
 /**
  * Calls the ModelScope API with a given prompt and model.
  * @param prompt The prompt to send to the model.
@@ -24,10 +33,13 @@ async function getDashscopeGeneration() {
  */
 export async function callModelScopeAI(prompt: string, model: string): Promise<string> {
   const API_KEY = process.env.MODELSCOPE_API_KEY;
+  const startTime = Date.now();
+  modelUsageStats['qwen-max'].calls++;
 
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
     const errorMsg = 'ERROR: ModelScope API key not configured. Please add it to your .env file.';
     console.error(errorMsg);
+    modelUsageStats['qwen-max'].errors++;
     return errorMsg;
   }
 
@@ -42,6 +54,11 @@ export async function callModelScopeAI(prompt: string, model: string): Promise<s
       prompt: prompt,
       apiKey: API_KEY,
     });
+    
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+    modelUsageStats['qwen-max'].avgTime = 
+      (modelUsageStats['qwen-max'].avgTime * (modelUsageStats['qwen-max'].calls - 1) + duration) / modelUsageStats['qwen-max'].calls;
 
     if (result.statusCode === 200 && result.output && result.output.text) {
       const text = result.output.text;
@@ -56,12 +73,70 @@ export async function callModelScopeAI(prompt: string, model: string): Promise<s
     } else {
       const errorMsg = `ERROR: API call failed with status ${result.statusCode}. Message: ${result.message}`;
       console.error('ModelScope API Error:', result);
+      modelUsageStats['qwen-max'].errors++;
       return errorMsg;
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     const errorMsg = `ERROR: An unexpected error occurred while calling the AI model. Details: ${errorMessage}`;
     console.error('Error calling ModelScope API:', error);
+    modelUsageStats['qwen-max'].errors++;
     return errorMsg;
   }
 }
+
+// ==================== SECOND MODEL: FAST QWEN MODEL ====================
+/**
+ * FAST Model for quick tasks (theme extraction, simple matching)
+ * Uses qwen-2.5-7b-instruct - faster and cheaper than qwen-max
+ */
+export const callFastModelScopeAI = async (
+  prompt: string,
+  model: string = 'qwen/qwen-2.5-7b-instruct'
+): Promise<string> => {
+  const API_KEY = process.env.MODELSCOPE_API_KEY;
+  const startTime = Date.now();
+  modelUsageStats['qwen-fast'].calls++;
+
+  if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+    console.warn('⚠️ Using fallback for fast model');
+    modelUsageStats['qwen-fast'].errors++;
+    return ''; // Return empty for fallback handling
+  }
+
+  try {
+    const Generation = await getDashscopeGeneration();
+    const result = await Generation.call({
+      model: model,
+      prompt: prompt,
+      apiKey: API_KEY,
+      parameters: {
+        temperature: 0.3, // Lower temperature for more consistent results
+        top_p: 0.7,
+        max_tokens: 500
+      }
+    });
+
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+    modelUsageStats['qwen-fast'].avgTime = 
+      (modelUsageStats['qwen-fast'].avgTime * (modelUsageStats['qwen-fast'].calls - 1) + duration) / modelUsageStats['qwen-fast'].calls;
+
+    if (result.statusCode === 200 && result.output && result.output.text) {
+      const text = result.output.text;
+      // Quick cleanup
+      if (text.startsWith('```')) {
+        return text.replace(/```(json)?/g, '').trim();
+      }
+      return text;
+    } else {
+      console.warn('Fast model API error:', result.statusCode);
+      modelUsageStats['qwen-fast'].errors++;
+      return ''; // Return empty for fallback
+    }
+  } catch (error) {
+    console.warn('Fast model error (non-critical):', error);
+    modelUsageStats['qwen-fast'].errors++;
+    return ''; // Return empty for fallback
+  }
+};

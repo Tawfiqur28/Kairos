@@ -1,26 +1,24 @@
 # AI Architecture - Kairos Compass
 
-This document outlines the AI agents and system design that power the Kairos Compass application.
+## 🤖 Dual-Model AI Architecture
 
-## 🤖 Our AI Architecture
+We use **two ModelScope models** for optimal performance:
 
-### **Career Analyst Agent**
-*(Implemented via ModelScope Qwen-Max)*
-- Analyzes Ikigai profile themes
-- Calculates multi-dimensional fit scores
-- Identifies theme mismatches
+### **Primary Model: Qwen-Max**
+- Deep career analysis and matching
+- Complex reasoning and explanations
+- High accuracy, slightly slower
 
-### **Education Planner Agent**
-*(Implemented via custom prompt engineering)*
-- Generates education-level specific 3-year plans
-- Tailors milestones to HS/College/Masters/PhD
-- Provides stage-appropriate resources
+### **Secondary Model: Qwen-2.5-7B-Instruct** 
+- Quick theme extraction and filtering
+- Fast preliminary matching
+- Efficient resource usage
 
-### **Market Intelligence Agent**
-*(Implemented via monthly updates feature)*
-- Curates field-specific opportunities
-- Tracks competitions by education level
-- Provides localized job market insights
+### **Workflow:**
+1. **Fast Model**: Quick theme extraction & initial filtering
+2. **If poor match**: Return early (saves API costs)
+3. **If potential match**: Pass to Qwen-Max for deep analysis
+4. **Result**: Faster responses + better resource usage
 
 ## 🏗️ System Design
 ```

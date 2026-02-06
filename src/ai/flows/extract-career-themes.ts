@@ -4,10 +4,10 @@
  */
 
 import { z } from 'zod';
-import { callModelScopeAI } from '@/ai/utils';
+import { callFastModelScopeAI } from '@/ai/utils';
 
 // Local keyword detection function (fallback)
-const detectCareerThemesFromKeywords = (profile: string): string[] => {
+const detectScienceThemesFromKeywords = (profile: string): string[] => {
   const lowerProfile = profile.toLowerCase();
   const themes: string[] = [];
   
@@ -25,7 +25,6 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
   
   const themeCounts: Record<string, number> = {};
   
-  // Count keyword matches for each theme
   Object.entries(keywordMap).forEach(([theme, keywords]) => {
     const count = keywords.filter(keyword => lowerProfile.includes(keyword)).length;
     if (count > 0) {
@@ -33,12 +32,10 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
     }
   });
   
-  // Add themes with significant keyword presence (at least 2 matches or strong single match)
   Object.entries(themeCounts).forEach(([theme, count]) => {
     if (count >= 2) {
       themes.push(theme);
     } else if (count === 1 && themeCounts[theme] > 0) {
-      // For single matches, check if it's a strong indicator
       const strongIndicators = ['doctor', 'engineer', 'programming', 'physics', 'chemistry', 'artist', 'musician'];
       const hasStrongIndicator = keywordMap[theme].some(keyword => 
         strongIndicators.includes(keyword) && lowerProfile.includes(keyword)
@@ -49,28 +46,71 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
     }
   });
   
-  // Filter incompatible themes (science vs arts)
   const hasHardScience = themes.some(theme => ['Physics', 'Chemistry', 'Science'].includes(theme));
   const hasArts = themes.some(theme => ['Music', 'Arts'].includes(theme));
   
   if (hasHardScience && hasArts) {
-    // Keep the strongest themes based on keyword count
     const filtered = themes.filter(theme => {
       if (['Music', 'Arts'].includes(theme)) {
-        return themeCounts[theme] >= 3; // Only keep arts if very strong
+        return themeCounts[theme] >= 3;
       }
       return true;
     });
     return filtered.length > 0 ? filtered : themes;
   }
   
-  return themes.length > 0 ? themes : ['General']; // Default theme if none detected
+  return themes.length > 0 ? themes : ['General'];
 };
 
+// ==================== ENHANCED THEME EXTRACTION WITH FAST MODEL ====================
+export const extractCareerThemesEnhanced = async (
+  userProfile: string,
+  educationLevel?: string
+): Promise<{ themes: string[], confidence: number, method: 'ai' | 'keyword' }> => {
+  
+  // Try FAST AI model first
+  const prompt = `Extract career themes from: "${userProfile}"
+  
+Education Level: ${educationLevel || 'Not specified'}
+
+Respond with ONLY a JSON array of themes from this list:
+["Tech", "Physics", "Chemistry", "Science", "Music", "Business", "Arts", "Healthcare", "Education"]
+
+Example: ["Tech", "Business"] or ["Physics"]`;
+
+  const aiResponse = await callFastModelScopeAI(prompt);
+  
+  if (aiResponse && !aiResponse.startsWith('ERROR')) {
+    try {
+      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const themes = JSON.parse(jsonMatch[0]);
+        if (Array.isArray(themes) && themes.length > 0) {
+          console.log(`✅ AI themes extracted: ${themes.join(', ')}`);
+          return {
+            themes,
+            confidence: 0.9,
+            method: 'ai'
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('AI theme parse failed, falling back to keywords');
+    }
+  }
+  
+  // Fallback to keyword detection
+  const keywordThemes = detectScienceThemesFromKeywords(userProfile);
+  return {
+    themes: keywordThemes,
+    confidence: 0.6,
+    method: 'keyword'
+  };
+};
 
 const ExtractCareerThemesInputSchema = z.object({
   profile: z.string().min(10, 'Profile must be at least 10 characters').describe('The user\'s Ikigai profile text'),
-  useFastMethod: z.boolean().optional().default(true).describe('Use fast keyword detection instead of AI model')
+  educationLevel: z.string().optional()
 }).or(z.string().min(10, 'Profile must be at least 10 characters')).describe('Either a string profile or an object with profile and options');
 
 export type ExtractCareerThemesInput = z.infer<typeof ExtractCareerThemesInputSchema>;
@@ -79,100 +119,31 @@ const ExtractCareerThemesOutputSchema = z.array(z.string()).describe('An array o
 export type ExtractCareerThemesOutput = z.infer<typeof ExtractCareerThemesOutputSchema>;
 
 
-const extractCareerThemesFromModel = async (userProfile: string, educationLevel?: string): Promise<string[]> => {
-  const educationContext = educationLevel ? `Education Level: ${educationLevel}. ` : '';
-  
-  const prompt = `Analyze this user's profile for career themes.
-${educationContext}User Profile: "${userProfile}"
-
-Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business", "Arts", "Healthcare", "Education"]
-
-**EDUCATION LEVEL GUIDANCE:**
-- High School: Focus on interests and basic skills
-- Undergraduate: Consider major and coursework
-- Master's: Focus on specialization areas
-- PhD: Consider research focus and expertise
-
-Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
-
-  const response = await callModelScopeAI(prompt, 'qwen-2.5-7b-instruct');
-  
-  if (response.startsWith('ERROR:')) {
-    throw new Error(response);
-  }
-  
-  try {
-    const jsonMatch = response.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      if(Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.warn('Theme extraction JSON parse failed:', e);
-    // Fallback to keyword detection below
-  }
-  
-  return detectCareerThemesFromKeywords(userProfile);
-};
-
-
 export async function extractCareerThemes(
   input: ExtractCareerThemesInput
 ): Promise<ExtractCareerThemesOutput> {
   try {
-    // Parse and validate input
     const parsedInput = ExtractCareerThemesInputSchema.parse(input);
     
     let profileText: string;
-    let useFastMethod: boolean;
+    let educationLevel: string | undefined;
     
     if (typeof parsedInput === 'string') {
       profileText = parsedInput;
-      useFastMethod = true; // Default to fast method for string input
     } else {
       profileText = parsedInput.profile;
-      useFastMethod = parsedInput.useFastMethod ?? true;
+      educationLevel = parsedInput.educationLevel;
     }
     
     if (!profileText || profileText.trim().length < 10) {
       throw new Error('Profile text is too short or empty');
     }
     
-    let result: string[];
+    const { themes } = await extractCareerThemesEnhanced(profileText, educationLevel);
     
-    if (useFastMethod) {
-      // Use local keyword detection (fast)
-      result = detectCareerThemesFromKeywords(profileText);
-    } else {
-      try {
-        // Try AI model extraction
-        result = await extractCareerThemesFromModel(profileText);
-        
-        // Validate AI output
-        if (!Array.isArray(result) || result.length === 0) {
-          result = detectCareerThemesFromKeywords(profileText);
-        }
-      } catch (aiError) {
-        console.warn('AI theme extraction failed, falling back to keyword detection:', aiError);
-        result = detectCareerThemesFromKeywords(profileText);
-      }
-    }
-    
-    // Ensure we always have at least one theme
-    if (!result || result.length === 0) {
-      result = ['General'];
-    }
-    
-    // Remove duplicates and validate
-    const uniqueThemes = [...new Set(result)];
-    
-    // Validate against expected themes
     const validThemes = ['Tech', 'Physics', 'Chemistry', 'Science', 'Music', 'Business', 'Arts', 'Education', 'Healthcare', 'General'];
-    const filteredThemes = uniqueThemes.filter(theme => validThemes.includes(theme));
+    const filteredThemes = themes.filter(theme => validThemes.includes(theme));
     
-    // Return validated output
     return ExtractCareerThemesOutputSchema.parse(filteredThemes.length > 0 ? filteredThemes : ['General']);
     
   } catch (error) {
@@ -189,6 +160,3 @@ export async function extractCareerThemes(
     throw new Error('Failed to extract career themes due to an unknown error');
   }
 }
-
-// Optional: Export the fast detection function for direct use
-export { detectCareerThemesFromKeywords };
