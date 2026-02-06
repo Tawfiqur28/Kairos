@@ -103,7 +103,7 @@ ${getEducationLevelPrompt(extractedLevel)}
   ]
 }`;
 
-  const response = await callModelScopeAI(prompt, 'qwen-max');
+  const response = await callModelScopeAI(prompt, process.env.MODELSCOPE_MODEL_1 || 'qwen-max');
 
   if (response.startsWith('ERROR:')) {
     throw new Error(response);
@@ -357,36 +357,9 @@ export async function generatePersonalizedActionPlan(
     
   } catch (error) {
     console.error('Error generating personalized action plan:', error);
-    
-    // Emergency fallback - always returns a valid plan
-    const emergencyPlan: GeneratePersonalizedActionPlanOutput = {
-      careerTitle: input.careerGoal || 'Your Career Goal',
-      educationLevel: 'Not Specified',
-      timeline: 'Career Development Journey',
-      phases: [
-        {
-          title: 'Getting Started',
-          duration: 'Immediate',
-          tasks: [
-            { id: 'emergency-1', text: `Research ${input.careerGoal || 'your chosen career'} online`, completed: false },
-            { id: 'emergency-2', text: 'Identify one skill you can start learning today', completed: false },
-            { id: 'emergency-3', text: 'Connect with one professional in your target field', completed: false }
-          ]
-        },
-        {
-          title: 'Next Steps',
-          duration: 'Next 3-6 Months',
-          tasks: [
-            { id: 'emergency-4', text: 'Take an online course related to your career interest', completed: false },
-            { id: 'emergency-5', text: 'Build a simple project to practice your skills', completed: false },
-            { id: 'emergency-6', text: 'Update your resume and LinkedIn profile', completed: false }
-          ]
-        }
-      ],
-      generatedAt: new Date().toISOString(),
-      success: false
-    };
-    
-    return GeneratePersonalizedActionPlanOutputSchema.parse(emergencyPlan);
+    if (error instanceof Error) {
+        throw error;
+    }
+    throw new Error('An unknown error occurred during plan generation.');
   }
 }

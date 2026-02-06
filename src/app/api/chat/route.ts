@@ -112,7 +112,7 @@ ${searchResultsContext}
     }
 
     const result = await Generation.call({
-      model: 'qwen-max',
+      model: process.env.MODELSCOPE_MODEL_1 || 'qwen-max',
       messages: modelMessages,
       apiKey: API_KEY,
       stream: true,

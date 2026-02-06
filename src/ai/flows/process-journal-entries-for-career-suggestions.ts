@@ -52,7 +52,7 @@ Respond with a JSON object in this exact format:
   "careerSuggestions": "1. Career 1\\n2. Career 2\\n3. Career 3"
 }`;
 
-    const response = await callModelScopeAI(prompt, 'qwen-max');
+    const response = await callModelScopeAI(prompt, process.env.MODELSCOPE_MODEL_1 || 'qwen-max');
 
     if (response.startsWith('ERROR:')) {
         throw new Error(response);
