@@ -181,17 +181,10 @@ Format: {"fit": true/false, "confidence": number, "reason": "one sentence"}`;
     
   } catch (error) {
     console.error('Error in generateCareerMatchExplanations:', error);
-    
-    const fallbackScore = 65;
-    
-    return GenerateCareerMatchExplanationsOutputSchema.parse({
-      explanation: `Based on your profile, "${input.career}" shows moderate alignment. Consider exploring this field further to determine if it matches your goals.`,
-      skillMatch: fallbackScore,
-      interestMatch: fallbackScore - 10,
-      valueAlignment: fallbackScore + 5,
-      overallScore: fallbackScore,
-      themeMismatch: false,
-      confidence: 'medium'
-    });
+    // Re-throw the error to be handled by the client
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unknown error occurred during career match generation.');
   }
 }
