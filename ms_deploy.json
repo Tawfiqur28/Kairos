@@ -1,0 +1,22 @@
+{
+  "name": "kairos-compass",
+  "description": "AI Career Guide for Students - Next.js App",
+  "version": "1.0.0",
+  "framework": "custom",
+  "command": "bash start.sh",
+  "resources": {
+    "cpu": 2,
+    "memory": 4096,
+    "gpu": 0
+  },
+  "environment": {
+    "python": "3.9",
+    "node": "18"
+  },
+  "ports": [
+    {
+      "port": 3000,
+      "protocol": "http"
+    }
+  ]
+}
