@@ -23,7 +23,7 @@ let modelUsageStats = {
   'qwen-audio': { calls: 0, avgTime: 0, errors: 0 }
 };
 
-export const getModelStats = () => modelUsageStats;
+export const getModelStats = async () => modelUsageStats;
 
 /**
  * Calls the ModelScope API with a given prompt and model.

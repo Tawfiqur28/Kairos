@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const stats = getModelStats();
+    const stats = await getModelStats();
     return NextResponse.json(stats);
   } catch (error) {
     console.error('Error fetching model stats:', error);
