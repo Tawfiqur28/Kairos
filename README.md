@@ -76,7 +76,7 @@ text
 
 📁 额外资源
 观看我们的演示视频：
-📹 Google Drive 演示
+📹 [Google Drive 演示](https://drive.google.com/file/d/1JrH_NSiCcwiwXj9NqdUghUSfJLMFKBfS/view?usp=sharing)
 
 
 
@@ -160,4 +160,4 @@ Monthly "field pulse" updates in chosen career paths
 
 📁 Additional Resources
 Watch Our Demo Video:
-📹 Google Drive Demo
+📹 [Google Drive Demo](https://drive.google.com/file/d/1JrH_NSiCcwiwXj9NqdUghUSfJLMFKBfS/view?usp=sharing)
