@@ -63,7 +63,7 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-4 flex flex-col gap-4 sm:flex-row">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="animate-button-glow">
                 <Link href="/dashboard">
                   {t('hero.cta1')} <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
