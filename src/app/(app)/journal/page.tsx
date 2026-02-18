@@ -43,6 +43,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { motion, AnimatePresence } from 'framer-motion';
 
 declare global {
     interface Window {
@@ -78,6 +79,35 @@ export default function JournalPage() {
   const [entryToEdit, setEntryToEdit] = useState<JournalEntry | null>(null);
   const [editedContent, setEditedContent] = useState('');
   const [editedFeeling, setEditedFeeling] = useState('');
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
+    exit: {
+      opacity: 0,
+      x: -50,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
 
   useEffect(() => {
     setHasMounted(true);
@@ -212,94 +242,129 @@ export default function JournalPage() {
         title={t('journal.title')}
         description={t('journal.description')}
       />
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('journal.newEntryTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
-              <Input
-                id="feeling"
-                placeholder={t('journal.feelingPlaceholder')}
-                value={currentFeeling}
-                onChange={(e) => setCurrentFeeling(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="content">{t('journal.thoughtsLabel')}</Label>
-                {isSpeechRecognitionSupported && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleToggleListening}
-                    className={isListening ? 'text-destructive animate-pulse' : 'text-muted-foreground'}
-                  >
-                    {isListening ? <MicOff /> : <Mic />}
-                    <span className="sr-only">{isListening ? 'Stop listening' : 'Start listening'}</span>
-                  </Button>
-                )}
+      <motion.div
+        className="grid gap-6 md:grid-cols-2"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('journal.newEntryTitle')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
+                <Input
+                  id="feeling"
+                  placeholder={t('journal.feelingPlaceholder')}
+                  value={currentFeeling}
+                  onChange={(e) => setCurrentFeeling(e.target.value)}
+                />
               </div>
-              <Textarea
-                id="content"
-                placeholder={journalPlaceholder}
-                className="min-h-32"
-                value={currentContent}
-                onChange={(e) => setCurrentContent(e.target.value)}
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleSaveEntry}>{t('journal.saveButton')}</Button>
-          </CardFooter>
-        </Card>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="content">{t('journal.thoughtsLabel')}</Label>
+                  {isSpeechRecognitionSupported && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleToggleListening}
+                      className={isListening ? 'text-destructive animate-pulse' : 'text-muted-foreground'}
+                    >
+                      {isListening ? <MicOff /> : <Mic />}
+                      <span className="sr-only">{isListening ? 'Stop listening' : 'Start listening'}</span>
+                    </Button>
+                  )}
+                </div>
+                <Textarea
+                  id="content"
+                  placeholder={journalPlaceholder}
+                  className="min-h-32"
+                  value={currentContent}
+                  onChange={(e) => setCurrentContent(e.target.value)}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleSaveEntry}>{t('journal.saveButton')}</Button>
+            </CardFooter>
+          </Card>
+        </motion.div>
 
-        <div className="space-y-4">
+        <motion.div variants={itemVariants} className="flex flex-col space-y-4">
           <h3 className="text-xl font-bold font-headline">{t('journal.pastEntriesTitle')}</h3>
           {entries.length > 0 ? (
             <ScrollArea className="h-[600px] pr-4">
-              {entries.map((entry) => (
-                <Card key={entry.id} className="mb-4">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle className="text-lg">{entry.date}</CardTitle>
-                            <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
+              <AnimatePresence initial={false}>
+                {entries.map((entry) => (
+                  <motion.div
+                    key={entry.id}
+                    layout
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="mb-4"
+                  >
+                    <Card>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle className="text-lg">{entry.date}</CardTitle>
+                                <CardDescription>{t('journal.feeling')}{entry.feeling}</CardDescription>
+                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setEntryToEdit(entry)}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        <span>{t('journal.edit')}</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setEntryToDelete(entry)} className="text-destructive">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        <span>{t('journal.delete')}</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setEntryToEdit(entry)}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    <span>{t('journal.edit')}</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setEntryToDelete(entry)} className="text-destructive">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>{t('journal.delete')}</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground break-words">{entry.content}</p>
-                  </CardContent>
-                </Card>
-              ))}
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground break-words">{entry.content}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </ScrollArea>
           ) : (
-            <div className="flex h-full items-center justify-center rounded-lg border-2 border-dashed p-8 text-center text-muted-foreground">
-              <p>{t('journal.noEntries')}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex-grow flex items-center justify-center rounded-lg border-2 border-dashed p-8 text-center text-muted-foreground"
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.02, 1],
+                  opacity: [0.7, 1, 0.7],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                <p>{t('journal.noEntries')}</p>
+              </motion.div>
+            </motion.div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!entryToDelete} onOpenChange={(isOpen) => !isOpen && setEntryToDelete(null)}>
