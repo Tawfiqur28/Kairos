@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
 const initialIkigai: Ikigai = {
   passions: '',
@@ -117,6 +118,28 @@ export default function IkigaiPage() {
     }
   };
 
+  const tipsContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const tipItemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
+  };
+
   const tips = [
     {
       icon: <Target className="h-4 w-4" />,
@@ -151,7 +174,7 @@ export default function IkigaiPage() {
         {/* Banner Skeleton */}
         <div className="mb-6 p-4 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
           <div className="flex items-start gap-3">
-            <Skeleton className="h-5 w-5 rounded-full" />
+            <Skeleton className="h-5 w-5 rounded-full mt-1" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-5 w-1/2" />
               <Skeleton className="h-4 w-full" />
@@ -276,18 +299,28 @@ export default function IkigaiPage() {
       />
 
       {hasMounted && (
-        <div className={`mb-6 p-4 rounded-lg border ${
-          isProfileComplete 
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-        }`}>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className={`mb-6 p-4 rounded-lg border ${
+            isProfileComplete 
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+          }`}
+        >
           <div className="flex items-start gap-3">
             {isProfileComplete ? (
-              <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.5 }}
+                className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center mt-1"
+              >
                 <span className="text-white text-xs">✓</span>
-              </div>
+              </motion.div>
             ) : (
-              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-1" />
             )}
             <div className="flex-1">
               <h3 className={`font-semibold ${
@@ -327,7 +360,7 @@ export default function IkigaiPage() {
               </Badge>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -521,24 +554,29 @@ export default function IkigaiPage() {
                 {t('ikigai.tipsDesc')}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <motion.div
+              className="space-y-4 p-6 pt-0"
+              variants={tipsContainerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {tips.map((tip, index) => (
-                <div key={index} className="p-3 bg-muted/30 rounded-lg">
+                <motion.div key={index} className="p-3 bg-muted/30 rounded-lg" variants={tipItemVariants}>
                   <div className="flex items-start gap-2 mb-1">
                     <div className="mt-0.5">{tip.icon}</div>
                     <h4 className="font-medium text-sm">{tip.title}</h4>
                   </div>
                   <p className="text-xs text-muted-foreground">{tip.description}</p>
-                </div>
+                </motion.div>
               ))}
               
-              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <motion.div className="p-3 bg-primary/5 border border-primary/20 rounded-lg" variants={tipItemVariants}>
                 <h4 className="font-medium text-sm mb-1">{t('ikigai.whyItMatters')}</h4>
                 <p className="text-xs text-muted-foreground">
                   {t('ikigai.whyItMattersDesc')}
                 </p>
-              </div>
-            </CardContent>
+              </motion.div>
+            </motion.div>
           </Card>
 
           <Card>
@@ -592,5 +630,3 @@ export default function IkigaiPage() {
     </>
   );
 }
-
-    
