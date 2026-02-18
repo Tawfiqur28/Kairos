@@ -95,7 +95,7 @@ Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business
 
 Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
 
-  const response = await callModelScopeAI(prompt, process.env.MODELSCOPE_MODEL_1 || 'qwen-max');
+  const response = await callModelScopeAI(prompt, 'qwen-max');
   
   if (response.startsWith('ERROR:')) {
     throw new Error(response);
@@ -183,7 +183,7 @@ export async function extractCareerThemes(
     }
     
     if (error instanceof Error) {
-      throw error;
+      throw new Error(`Failed to extract career themes: ${error.message}`);
     }
     
     throw new Error('Failed to extract career themes due to an unknown error');

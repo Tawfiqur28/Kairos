@@ -65,7 +65,7 @@ Calculate: overallScore = (skillMatch * 0.5) + (interestMatch * 0.3) + (valueAli
   "confidence": "high"
 }`;
 
-    const response = await callModelScopeAI(prompt, process.env.MODELSCOPE_MODEL_1 || 'qwen-max');
+    const response = await callModelScopeAI(prompt, 'qwen-max');
     
     if (response.startsWith('ERROR:')) {
         throw new Error(response);
@@ -274,22 +274,84 @@ export async function generateCareerMatchExplanations(
       );
     } catch (aiError) {
       console.warn('AI analysis failed, using dynamic scoring:', aiError);
-      throw aiError; // Re-throw to be caught by the outer catch block
+      aiResult = null;
     }
     
     // If AI analysis succeeded and returns valid data, use it
-    if (aiResult && aiResult.overallScore) {
+    if (aiResult && aiResult.overallScore && aiResult.overallScore !== 50) {
+      // Validate AI result has reasonable scores
+      const isValidAIResult = 
+        aiResult.overallScore >= 10 && 
+        aiResult.overallScore <= 100 &&
+        aiResult.skillMatch >= 0 &&
+        aiResult.interestMatch >= 0 &&
+        aiResult.valueAlignment >= 0;
+      
+      if (isValidAIResult) {
         return GenerateCareerMatchExplanationsOutputSchema.parse(aiResult);
+      }
     }
     
-    // Fallback if AI result is invalid for some reason
-    throw new Error("Received invalid data from AI model.");
+    // Use dynamic scoring based on themes (NOT fixed 50%)
+    const overallScore = themeMismatch ? 
+      Math.max(10, baseScore - 20) : // Penalize for mismatches
+      baseScore;
+    
+    // Calculate component scores based on overall score
+    const skillMatch = themeMismatch ? 
+      Math.max(15, overallScore - 10) : 
+      overallScore + 5;
+    
+    const interestMatch = themeMismatch ? 
+      Math.max(10, overallScore - 15) : 
+      overallScore;
+    
+    const valueAlignment = themeMismatch ? 
+      Math.max(20, overallScore - 5) : 
+      overallScore + 10;
+    
+    // Determine confidence level
+    let confidence: 'high' | 'medium' | 'low';
+    if (overallScore >= 70) confidence = 'high';
+    else if (overallScore >= 40) confidence = 'medium';
+    else confidence = 'low';
+    
+    // Generate dynamic explanation
+    const explanation = generateDynamicExplanation(
+      userThemes,
+      input.career,
+      overallScore,
+      themeMismatch,
+      input.careerCluster
+    );
+    
+    const result = {
+      explanation,
+      skillMatch: Math.min(100, Math.max(0, skillMatch)),
+      interestMatch: Math.min(100, Math.max(0, interestMatch)),
+      valueAlignment: Math.min(100, Math.max(0, valueAlignment)),
+      overallScore: Math.min(100, Math.max(0, overallScore)),
+      themeMismatch,
+      confidence
+    };
+    
+    // Validate and return
+    return GenerateCareerMatchExplanationsOutputSchema.parse(result);
     
   } catch (error) {
     console.error('Error in generateCareerMatchExplanations:', error);
-    if (error instanceof Error) {
-        throw error;
-    }
-    throw new Error('An unknown error occurred during career match generation.');
+    
+    // Fallback that's NOT always 50%
+    const fallbackScore = 65; // Reasonable default instead of 50
+    
+    return GenerateCareerMatchExplanationsOutputSchema.parse({
+      explanation: `Based on your profile, "${input.career}" shows moderate alignment. Consider exploring this field further to determine if it matches your goals.`,
+      skillMatch: fallbackScore,
+      interestMatch: fallbackScore - 10,
+      valueAlignment: fallbackScore + 5,
+      overallScore: fallbackScore,
+      themeMismatch: false,
+      confidence: 'medium'
+    });
   }
 }

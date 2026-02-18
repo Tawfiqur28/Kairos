@@ -19,7 +19,6 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, ActionPlan } from '@/lib/types';
 import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/context/language-context';
-import { ModelInfoPanel } from '@/components/model-info';
 
 export default function AppLayout({
   children,
@@ -90,7 +89,7 @@ export default function AppLayout({
           </div>
           
           {/* Profile Status Sidebar Footer */}
-          <div className="border-t p-4 space-y-4">
+          <div className="border-t p-4">
             <div className="space-y-3">
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
@@ -121,7 +120,6 @@ export default function AppLayout({
                 </div>
               )}
             </div>
-            <ModelInfoPanel />
           </div>
         </div>
       </div>
