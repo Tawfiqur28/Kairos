@@ -31,6 +31,7 @@ import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized
 import { useLanguage } from '@/context/language-context';
 import { useRouter } from 'next/navigation';
 import CareerCard from '@/components/career-card';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type MatchResult = {
   explanation: string;
@@ -49,7 +50,7 @@ export default function CareersPage() {
     skills: '',
     values: '',
     interests: '',
-    educationLevel: ''
+    educationLevel: undefined
   });
   
   const { t } = useLanguage();
@@ -62,6 +63,30 @@ export default function CareersPage() {
   const [_, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
   const [hasMounted, setHasMounted] = useState(false);
   const [userThemes, setUserThemes] = useState<string[]>([]);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 15
+      },
+    },
+  };
 
   const isProfileComplete = useMemo(() => 
     ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests,
@@ -227,61 +252,87 @@ export default function CareersPage() {
         description={t('careers.description')}
       />
 
-      {!hasMounted ? (
-        <Card className="mb-6">
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2 mb-2" />
-            <Skeleton className="h-4 w-full" />
-          </CardHeader>
-          <CardFooter>
-            <Skeleton className="h-10 w-40" />
-          </CardFooter>
-        </Card>
-      ) : !isProfileComplete && (
-        <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-          <CardHeader>
-            <CardTitle className="text-yellow-900 dark:text-yellow-300 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              {t('careers.completeProfileTitle')}
-            </CardTitle>
-            <CardDescription className="text-yellow-800 dark:text-yellow-400">
-              {t('careers.completeProfileDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button variant="secondary" asChild>
-              <Link href="/ikigai">{t('careers.goToIkigai')}</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
+      <AnimatePresence mode="wait">
+        {!hasMounted ? (
+          <motion.div
+            key="skeleton"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <Card className="mb-6">
+              <CardHeader>
+                <Skeleton className="h-6 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-full" />
+              </CardHeader>
+              <CardFooter>
+                <Skeleton className="h-10 w-40" />
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ) : !isProfileComplete ? (
+          <motion.div
+            key="incomplete-profile"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+          >
+            <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+              <CardHeader>
+                <CardTitle className="text-yellow-900 dark:text-yellow-300 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  {t('careers.completeProfileTitle')}
+                </CardTitle>
+                <CardDescription className="text-yellow-800 dark:text-yellow-400">
+                  {t('careers.completeProfileDescription')}
+                </CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button variant="secondary" asChild>
+                  <Link href="/ikigai">{t('careers.goToIkigai')}</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {hasMounted && isProfileComplete && userThemes.length > 0 && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg overflow-hidden"
+        >
           <p className="text-sm text-blue-800 dark:text-blue-300">
             <span className="font-semibold">{t('careers.yourProfileThemes')}</span> {userThemes.join(', ')}
           </p>
           <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
             {t('careers.themesDescription')}
           </p>
-        </div>
+        </motion.div>
       )}
 
       {hasMounted && (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div 
+          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {sortedCareers.map((career) => {
             const matchesTheme = userThemes.includes(career.cluster);
             return (
-              <CareerCard
-                key={career.id}
-                career={career}
-                matchesTheme={matchesTheme}
-                onCheckFit={handleCheckFit}
-                isProfileComplete={!!isProfileComplete}
-              />
+              <motion.div key={career.id} variants={itemVariants}>
+                <CareerCard
+                  career={career}
+                  matchesTheme={matchesTheme}
+                  onCheckFit={handleCheckFit}
+                  isProfileComplete={!!isProfileComplete}
+                />
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       )}
 
       <Dialog open={!!selectedCareer} onOpenChange={(isOpen) => !isOpen && setSelectedCareer(null)}>
@@ -300,25 +351,33 @@ export default function CareersPage() {
             {isLoading && (
               <div className="flex flex-col items-center justify-center space-y-4 py-8">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <p className="text-muted-foreground">{t('careers.analyzingFit', { careerTitle: selectedCareer?.title })}</p>
+                <p className="text-muted-foreground">{t('careers.analyzingFit', { careerTitle: selectedCareer?.title ?? '' })}</p>
                 <p className="text-xs text-muted-foreground">{t('careers.generatingScore')}</p>
               </div>
             )}
             
             {matchResult && !isLoading && (
-              <>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
                 {/* Score Display */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="font-semibold text-lg">{t('careers.fitScore')}</h4>
                     <div className="text-right">
-                      <div className={`text-2xl font-bold ${
-                        matchResult.fitScore >= 70 ? 'text-green-600' : 
-                        matchResult.fitScore >= 40 ? 'text-yellow-600' : 
-                        'text-red-600'
-                      }`}>
+                      <motion.div 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`text-2xl font-bold ${
+                          matchResult.fitScore >= 70 ? 'text-green-600' : 
+                          matchResult.fitScore >= 40 ? 'text-yellow-600' : 
+                          'text-red-600'
+                        }`}
+                      >
                         {matchResult.fitScore}%
-                      </div>
+                      </motion.div>
                       <div className={`text-xs ${getConfidenceColor(matchResult.confidence)}`}>
                         {getConfidenceText(matchResult.confidence)} {t('careers.confidence')}
                       </div>
@@ -345,7 +404,11 @@ export default function CareersPage() {
 
                 {/* Theme Mismatch Warning */}
                 {matchResult.themeMismatch && (
-                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
+                  >
                     <div className="flex items-start gap-2">
                       <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                       <div>
@@ -355,7 +418,7 @@ export default function CareersPage() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Explanation */}
@@ -372,7 +435,10 @@ export default function CareersPage() {
                 {/* Action Buttons */}
                 <div className="space-y-3 pt-4">
                   {matchResult.fitScore > 50 ? (
-                    <div className="p-4 bg-primary/10 dark:bg-primary/5 rounded-lg border border-primary/20 space-y-3">
+                    <motion.div 
+                      whileHover={{ scale: 1.02 }}
+                      className="p-4 bg-primary/10 dark:bg-primary/5 rounded-lg border border-primary/20 space-y-3"
+                    >
                       <h4 className="font-semibold text-primary flex items-center gap-2">
                         <GanttChartSquare className="h-5 w-5" />
                         {t('careers.generatePlanTitle')}
@@ -393,7 +459,7 @@ export default function CareersPage() {
                           {t('careers.includes')}
                         </p>
                       </div>
-                    </div>
+                    </motion.div>
                   ) : (
                     <div className="p-4 bg-muted/50 rounded-lg border space-y-3 text-center">
                       <p className="font-semibold">{t('careers.keepExploring')}</p>
@@ -427,7 +493,7 @@ export default function CareersPage() {
                     {t('careers.backToCareers')}
                   </Button>
                 </div>
-              </>
+              </motion.div>
             )}
 
             {!matchResult && !isLoading && (
