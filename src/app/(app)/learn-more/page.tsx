@@ -20,9 +20,7 @@ import {
   AlertCircle,
   Zap,
   BarChart,
-  Code,
   BookOpen,
-  Users,
   Rocket,
   Languages,
 } from 'lucide-react';
@@ -30,10 +28,32 @@ import { useLanguage } from '@/context/language-context';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { LanguageSwitcher } from '@/components/language-switcher';
+import { motion } from 'framer-motion';
 
 export default function LearnMorePage() {
   const { t } = useLanguage();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
 
   const features = [
     {
@@ -133,14 +153,19 @@ export default function LearnMorePage() {
   ];
 
   return (
-    <>
+    <div className="space-y-8 pb-12">
       <PageHeader
         title={t('learnMore.title')}
         description={t('learnMore.description')}
       />
 
       {/* Hero Explanation */}
-      <div className="mb-8 p-6 bg-gradient-to-r from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-900/10 rounded-xl border">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="p-6 bg-gradient-to-r from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-900/10 rounded-xl border"
+      >
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-3">{t('learnMore.heroTitle')}</h2>
@@ -154,168 +179,208 @@ export default function LearnMorePage() {
               <Badge className="bg-orange-500/10 text-orange-600">{t('learnMore.heroBadge4')}</Badge>
             </div>
           </div>
-          <Button asChild size="lg">
-            <Link href="/ikigai">
-              <Sparkles className="mr-2 h-4 w-4" />
-              {t('learnMore.heroCta')}
-            </Link>
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button asChild size="lg">
+              <Link href="/ikigai">
+                <Sparkles className="mr-2 h-4 w-4" />
+                {t('learnMore.heroCta')}
+              </Link>
+            </Button>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Problem/Solution Section */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-yellow-500" />
-            {t('learnMore.problemSolutionTitle')}
-          </CardTitle>
-          <CardDescription>
-            {t('learnMore.problemSolutionDesc')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {problemSolution.map((item, index) => (
-            <div key={index} className={`p-4 rounded-lg border ${
-              index === 0 ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' :
-              index === 1 ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' :
-              'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800'
-            }`}>
-              <div className="flex items-start gap-4">
-                <div className="mt-1">{item.icon}</div>
-                <div className="flex-1">
-                  <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-red-600 dark:text-red-400 line-through">{t('Problem')}:</span>
-                      <span className="font-semibold">{item.problem}</span>
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={containerVariants}
+      >
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-500" />
+              {t('learnMore.problemSolutionTitle')}
+            </CardTitle>
+            <CardDescription>
+              {t('learnMore.problemSolutionDesc')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {problemSolution.map((item, index) => (
+              <motion.div 
+                key={index} 
+                variants={itemVariants}
+                className={`p-4 rounded-lg border ${
+                  index === 0 ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' :
+                  index === 1 ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' :
+                  'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800'
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="mt-1">{item.icon}</div>
+                  <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-red-600 dark:text-red-400 line-through">Problem:</span>
+                        <span className="font-semibold">{item.problem}</span>
+                      </div>
+                      <span className="hidden md:block text-muted-foreground">→</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-green-600 dark:text-green-400">Solution:</span>
+                        <span className="font-semibold text-primary">{item.solution}</span>
+                      </div>
                     </div>
-                    <span className="hidden md:block text-muted-foreground">→</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-green-600 dark:text-green-400">{t('Solution')}:</span>
-                      <span className="font-semibold text-primary">{item.solution}</span>
-                    </div>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+              </motion.div>
+            ))}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* How It Works Section */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>{t('learnMore.flowTitle')}</CardTitle>
-          <CardDescription>{t('learnMore.flowDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {howItWorks.map((step) => (
-            <div key={step.step} className="flex flex-col md:flex-row items-start gap-6 p-4 hover:bg-muted/50 rounded-lg transition-colors">
-              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground font-bold text-lg shrink-0">
-                {step.step}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  {step.icon}
-                  <h3 className="font-semibold text-lg">{step.title}</h3>
-                  <Badge variant="outline" className="ml-auto">
-                    {step.keyPoint}
-                  </Badge>
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={containerVariants}
+      >
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>{t('learnMore.flowTitle')}</CardTitle>
+            <CardDescription>{t('learnMore.flowDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {howItWorks.map((step) => (
+              <motion.div 
+                key={step.step} 
+                variants={itemVariants}
+                className="flex flex-col md:flex-row items-start gap-6 p-4 hover:bg-muted/50 rounded-lg transition-colors"
+              >
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground font-bold text-lg shrink-0">
+                  {step.step}
                 </div>
-                <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: step.description }} />
-                
-                {step.step === 1 && (
-                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <p className="text-sm text-blue-800 dark:text-blue-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip1') }} />
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    {step.icon}
+                    <h3 className="font-semibold text-lg">{step.title}</h3>
+                    <Badge variant="outline" className="ml-auto">
+                      {step.keyPoint}
+                    </Badge>
                   </div>
-                )}
-                
-                {step.step === 2 && (
-                  <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <p className="text-sm text-green-800 dark:text-green-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip2') }} />
-                  </div>
-                )}
-                
-                {step.step === 3 && (
-                  <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <p className="text-sm text-purple-800 dark:text-purple-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip3') }} />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-        <CardFooter>
-          <Button asChild className="w-full" size="lg">
-            <Link href="/ikigai">
-              <Sparkles className="mr-2 h-4 w-4" />
-              {t('learnMore.startWithStep1')}
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
+                  <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: step.description }} />
+                  
+                  {step.step === 1 && (
+                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm text-blue-800 dark:text-blue-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip1') }} />
+                    </div>
+                  )}
+                  
+                  {step.step === 2 && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <p className="text-sm text-green-800 dark:text-green-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip2') }} />
+                    </div>
+                  )}
+                  
+                  {step.step === 3 && (
+                    <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <p className="text-sm text-purple-800 dark:text-purple-300" dangerouslySetInnerHTML={{ __html: t('learnMore.howItWorksTip3') }} />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full" size="lg">
+              <Link href="/ikigai">
+                <Sparkles className="mr-2 h-4 w-4" />
+                {t('learnMore.startWithStep1')}
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </motion.div>
 
       {/* Features Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('learnMore.featuresTitle')}</CardTitle>
-          <CardDescription>{t('learnMore.featuresDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className={`flex flex-col p-5 rounded-xl border ${feature.color} transition-all hover:shadow-md`}
-              >
-                <div className="mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground mb-3 flex-1">{feature.description}</p>
-                <div className="mt-auto pt-3 border-t">
-                  <p className="text-xs font-medium text-primary">{feature.highlight}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={containerVariants}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('learnMore.featuresTitle')}</CardTitle>
+            <CardDescription>{t('learnMore.featuresDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature, index) => (
+                <motion.div 
+                  key={index} 
+                  variants={itemVariants}
+                  whileHover={{ y: -5 }}
+                  className={`flex flex-col p-5 rounded-xl border ${feature.color} transition-all hover:shadow-md`}
+                >
+                  <div className="mb-4">
+                    {feature.icon}
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-3 flex-1">{feature.description}</p>
+                  <div className="mt-auto pt-3 border-t">
+                    <p className="text-xs font-medium text-primary">{feature.highlight}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* FAQ Section */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>{t('learnMore.readyToStart')}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center gap-4 w-full">
-            <div className="flex-1 border-t" />
-            <span className="text-sm text-muted-foreground">{t('learnMore.readyToStart')}</span>
-            <div className="flex-1 border-t" />
-          </div>
-          <div className="flex gap-3 w-full">
-            <Button asChild variant="outline" className="flex-1">
-              <Link href="/ikigai">
-                <Target className="mr-2 h-4 w-4" />
-                {t('learnMore.ctaCreateProfile')}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="flex-1">
-              <Link href="/careers">
-                <Users className="mr-2 h-4 w-4" />
-                {t('learnMore.ctaExploreCareers')}
-              </Link>
-            </Button>
-            <Button asChild className="flex-1">
-              <Link href="/dashboard">
-                <Rocket className="mr-2 h-4 w-4" />
-                {t('learnMore.ctaViewDashboard')}
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-8"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('learnMore.readyToStart')}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex items-center gap-4 w-full">
+              <div className="flex-1 border-t" />
+              <span className="text-sm text-muted-foreground">{t('learnMore.readyToStart')}</span>
+              <div className="flex-1 border-t" />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/ikigai">
+                  <Target className="mr-2 h-4 w-4" />
+                  {t('learnMore.ctaCreateProfile')}
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/careers">
+                  <Rocket className="mr-2 h-4 w-4" />
+                  {t('learnMore.ctaExploreCareers')}
+                </Link>
+              </Button>
+              <Button asChild className="flex-1">
+                <Link href="/dashboard">
+                  <BarChart className="mr-2 h-4 w-4" />
+                  {t('learnMore.ctaViewDashboard')}
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 }
