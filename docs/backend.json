@@ -1,0 +1,258 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores user-specific information, application settings, and authentication-related details for the MathMaster AI application. This entity manages user preferences and daily usage limits.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address, typically obtained through Google Sign-In or other authentication methods.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name, typically provided by the authentication system."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user profile was created.",
+          "format": "date-time"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "Timestamp indicating the user's last login.",
+          "format": "date-time"
+        },
+        "dailyProblemCount": {
+          "type": "number",
+          "description": "Counter for the number of math problems a user has solved within the current day, used to enforce usage limits for free tiers."
+        },
+        "lastProblemSolveDate": {
+          "type": "string",
+          "description": "The date when the user last solved a problem, used to reset the daily problem count at the beginning of a new day.",
+          "format": "date"
+        },
+        "preferredVideoQuality": {
+          "type": "string",
+          "description": "User's preference for the quality of generated videos (e.g., 'fast' for quicker generation, 'high' for better visual fidelity)."
+        },
+        "preferredNotationStyle": {
+          "type": "string",
+          "description": "User's preferred style for mathematical notation rendering (e.g., 'LaTeX', 'AsciiMath')."
+        },
+        "enableDailyReminders": {
+          "type": "boolean",
+          "description": "Boolean flag indicating whether the user wants to receive daily practice reminders."
+        },
+        "darkModeEnabled": {
+          "type": "boolean",
+          "description": "Boolean flag indicating whether the user has enabled dark mode for the application interface."
+        }
+      },
+      "required": [
+        "id",
+        "createdAt",
+        "lastLoginAt",
+        "dailyProblemCount",
+        "lastProblemSolveDate",
+        "preferredVideoQuality",
+        "preferredNotationStyle",
+        "enableDailyReminders",
+        "darkModeEnabled"
+      ]
+    },
+    "ConversationTurn": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ConversationTurn",
+      "type": "object",
+      "description": "Represents a single message or action within a conversational exchange between a user and the AI in the MathMaster AI application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ConversationTurn entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who is participating in this conversation turn. (Relationship: UserProfile 1:N ConversationTurn)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp indicating when this conversation turn occurred.",
+          "format": "date-time"
+        },
+        "speaker": {
+          "type": "string",
+          "description": "Indicates who generated this message: 'user' for user input, 'ai' for AI response, or 'system' for automated system messages (e.g., 'Analyzing your problem...')."
+        },
+        "messageText": {
+          "type": "string",
+          "description": "The text content of the message for this conversation turn, which can be a user's question, an AI's response, or a system notification."
+        },
+        "problemImageUrl": {
+          "type": "string",
+          "description": "Optional URL to an image if the user's message included a photo of a math problem or a screenshot. (Format: uri)",
+          "format": "uri"
+        },
+        "associatedMathProblemSolutionId": {
+          "type": "string",
+          "description": "Optional reference to a MathProblemSolution entity if this conversation turn is directly related to a specific solved problem (e.g., an AI response providing a solution, or a user asking a follow-up question about an existing solution). (Relationship: MathProblemSolution 1:N ConversationTurn)"
+        },
+        "isInitialProblemQuery": {
+          "type": "boolean",
+          "description": "Boolean flag indicating if this user message is the initial query for a new math problem to be solved by the AI."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "timestamp",
+        "speaker",
+        "messageText"
+      ]
+    },
+    "MathProblemSolution": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MathProblemSolution",
+      "type": "object",
+      "description": "Represents a single math problem submitted by a user that has been successfully solved by the AI, including the original question, the AI-generated written solution, and a reference to the animated video explanation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MathProblemSolution entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who owns this solved math problem. (Relationship: UserProfile 1:N MathProblemSolution)"
+        },
+        "initialQuestionConversationTurnId": {
+          "type": "string",
+          "description": "Reference to the ConversationTurn entity representing the user's initial question that led to the generation of this solution. (Relationship: ConversationTurn 1:1 MathProblemSolution)"
+        },
+        "questionText": {
+          "type": "string",
+          "description": "The original mathematical problem as provided by the user, copied from the initial conversation turn for easy access and context."
+        },
+        "questionImageUrl": {
+          "type": "string",
+          "description": "Optional URL to an image of the problem, copied from the initial conversation turn if an image was provided. (Format: uri)",
+          "format": "uri"
+        },
+        "problemType": {
+          "type": "string",
+          "description": "The identified category or domain of the math problem (e.g., 'Algebra', 'Calculus', 'Geometry', 'Trigonometry')."
+        },
+        "submissionTime": {
+          "type": "string",
+          "description": "Timestamp when the initial problem was submitted and processing began, typically derived from the initial question's conversation turn timestamp.",
+          "format": "date-time"
+        },
+        "solutionText": {
+          "type": "string",
+          "description": "The complete step-by-step written solution generated by the AI, typically formatted with LaTeX for beautiful mathematical notation."
+        },
+        "videoUrl": {
+          "type": "string",
+          "description": "URL to the AI-generated animated video explanation, hosted in Firebase Storage, demonstrating the solution process. (Format: uri)",
+          "format": "uri"
+        },
+        "videoDurationSeconds": {
+          "type": "number",
+          "description": "The duration of the generated video explanation in seconds."
+        },
+        "isFavorite": {
+          "type": "boolean",
+          "description": "Boolean flag indicating if the user has marked this specific solution as a favorite for quick access within their library."
+        },
+        "isSaved": {
+          "type": "boolean",
+          "description": "Boolean flag indicating if the user has explicitly saved this solution to their personal library for future reference."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "initialQuestionConversationTurnId",
+        "questionText",
+        "problemType",
+        "submissionTime",
+        "solutionText",
+        "videoUrl",
+        "isFavorite",
+        "isSaved"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/userProfiles/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user-specific settings, preferences, and authentication-related metadata. Authorization is based on 'request.auth.uid' matching '{userId}'. The 'id' field within the document implicitly functions as a denormalized 'ownerId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching 'request.auth.uid'."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/mathProblemSolutions/{solutionId}",
+        "definition": {
+          "entityName": "MathProblemSolution",
+          "schema": {
+            "$ref": "#/backend/entities/MathProblemSolution"
+          },
+          "description": "Contains detailed records of math problems solved by a specific user, including questions, solutions, and video metadata. Includes denormalized 'userId' for authorization independence, ensuring 'request.auth.uid' matches both the path's '{userId}' and the document's 'userId' field.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this solution, matching 'request.auth.uid'."
+            },
+            {
+              "name": "solutionId",
+              "description": "The unique identifier for a specific solved math problem."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/conversationTurns/{turnId}",
+        "definition": {
+          "entityName": "ConversationTurn",
+          "schema": {
+            "$ref": "#/backend/entities/ConversationTurn"
+          },
+          "description": "Stores individual messages and system events within a user's chat history. Includes denormalized 'userId' for authorization independence, ensuring 'request.auth.uid' matches both the path's '{userId}' and the document's 'userId' field. Can optionally reference a 'MathProblemSolution'.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who participated in this conversation turn, matching 'request.auth.uid'."
+            },
+            {
+              "name": "turnId",
+              "description": "The unique identifier for a specific conversation message or event."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure for MathMaster AI prioritizes security, scalability, and debuggability by adhering to the core design principles and mandates. The design leverages path-based authorization and denormalization to achieve Authorization Independence (CRITICAL), ensuring robust and easily auditable security rules. The primary organizational unit is the user's profile, under which all user-specific data is nested.\n\n1.  **Authorization Independence (Denormalization Strategy):**\n    *   `UserProfile`: Each user's profile document is stored at `/userProfiles/{userId}`. The document's `id` field intrinsically matches the `{userId}` wildcard in the path, which in turn matches `request.auth.uid`. This design inherently ensures authorization independence as the necessary `uid` for verification is directly available from the path, eliminating the need for expensive and rule-complicating `get()` calls to verify ownership.\n    *   `MathProblemSolution`: These are stored in a subcollection at `/userProfiles/{userId}/mathProblemSolutions/{solutionId}`. Each `MathProblemSolution` document includes a `userId` field that explicitly stores the owner's ID. This `userId` field is denormalized, allowing security rules to directly compare `request.auth.uid` with the document's `userId` field and the path's `{userId}` wildcard. This again removes the need for `get()` calls to a parent `UserProfile` document.\n    *   `ConversationTurn`: Similar to `MathProblemSolution`, these are stored at `/userProfiles/{userId}/conversationTurns/{turnId}`. Each `ConversationTurn` document contains a `userId` field. This denormalized `userId` enables direct authorization checks against `request.auth.uid` and the path's `{userId}` wildcard, maintaining authorization independence.\n\n2.  **QAPs (Secure List Operations):**\n    *   **Structural Segregation:** All documents within a given subcollection (e.g., all `MathProblemSolution` documents under a specific user, or all `ConversationTurn` documents under a specific user) share the same security posture – they are owned by the `userId` specified in their path. This homogeneity simplifies rules significantly.\n    *   **Path-Based Ownership:** By nesting `mathProblemSolutions` and `conversationTurns` directly under `/userProfiles/{userId}`, listing operations become naturally secure. A user can only `list` documents within their own `/userProfiles/{uid}/mathProblemSolutions` or `/userProfiles/{uid}/conversationTurns` subcollections. Firestore security rules can easily enforce that `request.auth.uid` must match `{userId}` for any read or write operation on these subcollections. This design effectively makes rules act as Query Authorization Predicates (QAPs) by ensuring that any list query initiated by `db.collection('userProfiles').doc(request.auth.uid).collection('mathProblemSolutions').get()` will automatically be scoped and secured to only return data owned by the authenticated user, without requiring additional filtering logic in the rules.\n\nThis structure strongly adheres to Authorization Independence, enables efficient and secure `list` operations, and simplifies the security rule logic by moving access control from complex lookups to predictable path and denormalized field comparisons."
+  }
+}

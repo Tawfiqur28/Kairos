@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * MathMaster AI Security Rules
+     *
+     * Core Philosophy: 
+     * This ruleset implements a strict User-Ownership model. All user data, including
+     * profile settings, conversation history, and solved math problems, is organized 
+     * hierarchically under a user's unique profile.
+     *
+     * Data Structure:
+     * - /userProfiles/{userId}: Root document for each user.
+     * - /userProfiles/{userId}/conversationTurns/{turnId}: Subcollection of chat messages.
+     * - /userProfiles/{userId}/mathProblemSolutions/{solutionId}: Subcollection of solved problems.
+     *
+     * Key Security Decisions:
+     * 1. Authorization Independence: Ownership is verified directly via path parameters 
+     *    and denormalized 'userId' fields, eliminating the need for expensive 'get()' lookups.
+     * 2. Strict Ownership: Users can only read, list, and write their own data. 
+     *    Anonymous users are treated as unique identities via Firebase Auth.
+     * 3. Relational Integrity: On creation and update, the rules enforce that internal 
+     *    'userId' fields remain consistent with the document path and the user's auth state.
+     * 4. Prototyping Flexibility: Data shapes and types (e.g., solution text, image URLs) 
+     *    are not strictly validated to allow for rapid frontend/AI development.
+     */
+
+    // --- Global Helper Functions ---
+
+    /** Checks if the request is coming from a signed-in user (authenticated or anonymous). */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Combines ownership check with a check for document existence for updates and deletes. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for the UserProfile collection. Governs user settings and usage limits.
+     * @path /userProfiles/{userId}
+     * @allow (get, create) Authenticated user with UID 'abc' acting on '/userProfiles/abc'.
+     * @deny (list, write) Any user attempting to access a document ID that does not match their own UID.
+     * @principle Enforces strict self-creation and ownership. Validates document ID matches user UID.
+     */
+    match /userProfiles/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for MathProblemSolution. Stores AI-generated solutions and video metadata.
+     * @path /userProfiles/{userId}/mathProblemSolutions/{solutionId}
+     * @allow (list) User 'abc' listing solutions in their own subcollection.
+     * @deny (create) User 'abc' attempting to create a solution for user 'xyz'.
+     * @principle Uses path-based scoping to ensure users can only access their own educational history.
+     */
+    match /userProfiles/{userId}/mathProblemSolutions/{solutionId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for ConversationTurn. Stores individual chat messages and system status events.
+     * @path /userProfiles/{userId}/conversationTurns/{turnId}
+     * @allow (create) User 'abc' sending a message that correctly sets 'userId' to 'abc'.
+     * @deny (update) Any request attempting to change the 'userId' of an existing message.
+     * @principle Enforces immutable ownership of conversation logs and path-consistency.
+     */
+    match /userProfiles/{userId}/conversationTurns/{turnId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
