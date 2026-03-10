@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -10,159 +9,89 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-import type { JournalEntry, Ikigai } from '@/lib/types';
-import { Bot, Mic, MicOff, MoreVertical, Edit, Trash2, Send, Sparkles, Image as ImageIcon, Camera, Loader2, BookText, BrainCircuit } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import type { JournalEntry } from '@/lib/types';
+import { ArrowUp, ArrowDown, Edit, Trash2, Save, X, BookText, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/language-context';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
-declare global {
-    interface Window {
-      SpeechRecognition: any;
-      webkitSpeechRecognition: any;
-    }
-}
-
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-  imageDataUri?: string;
-}
-
-export default function AcademicAssistantPage() {
+export default function JournalPage() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const [hasMounted, setHasMounted] = useState(false);
 
-  // Journal State
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>('journal-entries', []);
   const [currentContent, setCurrentContent] = useState('');
   const [currentFeeling, setCurrentFeeling] = useState('');
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
   const [entryToEdit, setEntryToEdit] = useState<JournalEntry | null>(null);
-  
-  // Chat State
-  const [chatHistory, setChatHistory] = useLocalStorage<ChatMessage[]>('academic-chat-history', []);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Voice State
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     setHasMounted(true);
-    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.onresult = (event: any) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) transcript += event.results[i][0].transcript;
-        }
-        if (transcript) setCurrentContent(prev => prev + (prev ? ' ' : '') + transcript);
-      };
-      recognitionRef.current.onend = () => setIsListening(false);
-    }
   }, []);
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [chatHistory, isTyping]);
-
-  const handleToggleListening = () => {
-    if (!recognitionRef.current) {
-      toast({ title: t('toasts.voiceNotSupportedTitle'), variant: 'destructive' });
-      return;
-    }
-    if (isListening) recognitionRef.current.stop();
-    else recognitionRef.current.start();
-    setIsListening(!isListening);
-  };
 
   const handleSaveEntry = () => {
     if (!currentContent.trim() || !currentFeeling.trim()) {
       toast({ title: t('toasts.incompleteEntryTitle'), variant: 'destructive' });
       return;
     }
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      date: new Date().toLocaleDateString(),
-      content: currentContent,
-      feeling: currentFeeling,
-    };
-    setEntries([newEntry, ...entries]);
+
+    if (entryToEdit) {
+      const updatedEntries = entries.map(e => 
+        e.id === entryToEdit.id 
+          ? { ...e, content: currentContent, feeling: currentFeeling } 
+          : e
+      );
+      setEntries(updatedEntries);
+      setEntryToEdit(null);
+      toast({ title: t('journal.entryUpdated') });
+    } else {
+      const newEntry: JournalEntry = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleDateString(),
+        content: currentContent,
+        feeling: currentFeeling,
+      };
+      setEntries([newEntry, ...entries]);
+      toast({ title: t('toasts.entrySavedTitle') });
+    }
+
     setCurrentContent('');
     setCurrentFeeling('');
-    toast({ title: t('toasts.entrySavedTitle') });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setUploadedImage(reader.result as string);
-      reader.readAsDataURL(file);
+  const startEdit = (entry: JournalEntry) => {
+    setEntryToEdit(entry);
+    setCurrentContent(entry.content);
+    setCurrentFeeling(entry.feeling);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEntryToEdit(null);
+    setCurrentContent('');
+    setCurrentFeeling('');
+  };
+
+  const confirmDelete = () => {
+    if (entryToDelete) {
+      setEntries(entries.filter(e => e.id !== entryToDelete.id));
+      setEntryToDelete(null);
+      toast({ title: t('journal.entryDeleted') });
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim() && !uploadedImage) return;
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage,
-      timestamp: new Date().toLocaleTimeString(),
-      imageDataUri: uploadedImage || undefined,
-    };
-
-    setChatHistory([...chatHistory, userMessage]);
-    setInputMessage('');
-    setUploadedImage(null);
-    setIsTyping(true);
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: chatHistory.concat(userMessage).map(m => ({ role: m.role, content: m.content })),
-          imageDataUri: userMessage.imageDataUri,
-        }),
-      });
-
-      const data = await response.text();
-      
-      if (data.startsWith('ERROR:')) throw new Error(data);
-
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data,
-        timestamp: new Date().toLocaleTimeString(),
-      };
-
-      setChatHistory(prev => [...prev, aiMessage]);
-    } catch (error: any) {
-      toast({
-        title: "Academic Assistant Error",
-        description: "I'm having trouble connecting to my academic brain. Please try again.",
-        variant: 'destructive',
-      });
-    } finally {
-      setIsTyping(false);
+  const moveEntry = (index: number, direction: 'up' | 'down') => {
+    const newEntries = [...entries];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < newEntries.length) {
+      const temp = newEntries[index];
+      newEntries[index] = newEntries[targetIndex];
+      newEntries[targetIndex] = temp;
+      setEntries(newEntries);
     }
   };
 
@@ -171,151 +100,155 @@ export default function AcademicAssistantPage() {
   return (
     <>
       <PageHeader
-        title="Academic Assistant"
-        description="Your multi-modal companion for rigorous math solving and reflective journaling."
+        title={t('journal.title')}
+        description={t('journal.description')}
       />
 
-      <Tabs defaultValue="chat" className="w-full mt-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="chat" className="flex items-center gap-2">
-            <BrainCircuit className="h-4 w-4" /> AI Companion
-          </TabsTrigger>
-          <TabsTrigger value="journal" className="flex items-center gap-2">
-            <BookText className="h-4 w-4" /> Daily Journal
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="chat" className="mt-6">
-          <Card className="flex flex-col h-[70vh]">
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-primary" />
-                    Thetawise Brain
-                  </CardTitle>
-                  <CardDescription>Upload a photo of your math problem or ask an academic question.</CardDescription>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => setChatHistory([])}>Clear History</Button>
-              </div>
+      <div className="grid gap-6 md:grid-cols-[1fr_1.5fr] mt-6">
+        {/* Editor Part */}
+        <div className="space-y-6">
+          <Card className={entryToEdit ? 'border-primary ring-1 ring-primary/20 shadow-md' : ''}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {entryToEdit ? <Edit className="h-5 w-5 text-primary" /> : <BookText className="h-5 w-5 text-primary" />}
+                {entryToEdit ? t('journal.editEntryTitle') : t('journal.newEntryTitle')}
+              </CardTitle>
+              <CardDescription>
+                {entryToEdit ? t('journal.editDescription') : t('journal.newEntryDescription')}
+              </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 overflow-hidden p-0">
-              <ScrollArea className="h-full p-4" ref={scrollRef}>
-                <div className="space-y-4">
-                  {chatHistory.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-64 text-center text-muted-foreground opacity-50">
-                      <Sparkles className="h-12 w-12 mb-2" />
-                      <p>Start a conversation. I can solve calculus, algebra, physics, and more.</p>
-                    </div>
-                  )}
-                  {chatHistory.map((msg) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                        msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                      }`}>
-                        {msg.imageDataUri && (
-                          <img src={msg.imageDataUri} alt="Problem" className="rounded-md mb-2 max-h-48" />
-                        )}
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                        <span className="text-[10px] opacity-50 block mt-1">{msg.timestamp}</span>
-                      </div>
-                    </motion.div>
-                  ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm">Analyzing problem...</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-            <CardFooter className="p-4 border-t gap-2 flex-col">
-              {uploadedImage && (
-                <div className="w-full flex items-center gap-2 mb-2 bg-muted p-2 rounded-md">
-                  <ImageIcon className="h-4 w-4 text-primary" />
-                  <span className="text-xs truncate flex-1">Image attached</span>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setUploadedImage(null)}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-              <div className="w-full flex gap-2">
-                <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleImageUpload} />
-                <Button variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}>
-                  <ImageIcon className="h-4 w-4" />
-                </Button>
-                <Input
-                  placeholder="Ask a math problem or upload a screenshot..."
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>{t('journal.feelingLabel')}</Label>
+                <Input 
+                  value={currentFeeling} 
+                  onChange={(e) => setCurrentFeeling(e.target.value)} 
+                  placeholder={t('journal.feelingPlaceholder')} 
                 />
-                <Button onClick={handleSendMessage} disabled={isTyping}>
-                  <Send className="h-4 w-4" />
-                </Button>
               </div>
+              <div className="space-y-2">
+                <Label>{t('journal.thoughtsLabel')}</Label>
+                <Textarea 
+                  value={currentContent} 
+                  onChange={(e) => setCurrentContent(e.target.value)} 
+                  placeholder={t('journal.thoughtsPlaceholder')} 
+                  className="min-h-48" 
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="gap-2">
+              <Button onClick={handleSaveEntry} className="flex-1">
+                {entryToEdit ? <Save className="mr-2 h-4 w-4" /> : null}
+                {entryToEdit ? t('journal.updateButton') : t('journal.saveButton')}
+              </Button>
+              {entryToEdit && (
+                <Button variant="ghost" onClick={cancelEdit}>
+                  <X className="mr-2 h-4 w-4" /> {t('journal.cancel')}
+                </Button>
+              )}
             </CardFooter>
           </Card>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="journal" className="mt-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reflective Journal</CardTitle>
-                <CardDescription>Track your emotional and academic growth.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Feeling</Label>
-                  <Input value={currentFeeling} onChange={(e) => setCurrentFeeling(e.target.value)} placeholder="Curious, challenged, confident..." />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label>Reflection</Label>
-                    <Button variant="ghost" size="icon" onClick={handleToggleListening} className={isListening ? 'text-destructive animate-pulse' : ''}>
-                      {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <Textarea value={currentContent} onChange={(e) => setCurrentContent(e.target.value)} placeholder="What did you learn today?" className="min-h-32" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveEntry} className="w-full">Save Entry</Button>
-              </CardFooter>
-            </Card>
+        {/* History Part */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-xl">{t('journal.pastEntriesTitle')}</h3>
+            <Badge variant="secondary">{entries.length} {t('journal.entries')}</Badge>
+          </div>
+          
+          {entries.length === 0 && (
+            <div className="flex flex-col items-center justify-center p-12 text-center bg-muted/20 rounded-xl border border-dashed">
+              <AlertCircle className="h-12 w-12 text-muted-foreground opacity-20 mb-4" />
+              <p className="text-muted-foreground">{t('journal.noEntries')}</p>
+            </div>
+          )}
 
-            <div className="space-y-4">
-              <h3 className="font-bold">Past Reflections</h3>
-              <ScrollArea className="h-[500px]">
-                <AnimatePresence>
-                  {entries.map((entry) => (
-                    <Card key={entry.id} className="mb-4">
+          <ScrollArea className="h-[calc(100vh-250px)]">
+            <div className="space-y-4 pr-4 pb-12">
+              <AnimatePresence mode="popLayout">
+                {entries.map((entry, index) => (
+                  <motion.div
+                    key={entry.id}
+                    layout
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  >
+                    <Card className="hover:shadow-md transition-shadow group">
                       <CardHeader className="pb-2">
-                        <div className="flex justify-between">
-                          <CardTitle className="text-sm">{entry.date}</CardTitle>
-                          <Badge variant="outline">{entry.feeling}</Badge>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-sm font-semibold">{entry.date}</CardTitle>
+                            <Badge variant="outline" className="mt-1 bg-primary/5 border-primary/20">{entry.feeling}</Badge>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={index === 0}
+                              onClick={() => moveEntry(index, 'up')}
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={index === entries.length - 1}
+                              onClick={() => moveEntry(index, 'down')}
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:text-primary"
+                              onClick={() => startEdit(entry)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:text-destructive"
+                              onClick={() => setEntryToDelete(entry)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">{entry.content}</p>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
                       </CardContent>
                     </Card>
-                  ))}
-                </AnimatePresence>
-              </ScrollArea>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          </ScrollArea>
+        </div>
+      </div>
+
+      <AlertDialog open={!!entryToDelete} onOpenChange={() => setEntryToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('journal.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('journal.deleteConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('journal.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t('journal.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

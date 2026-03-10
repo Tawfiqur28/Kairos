@@ -60,7 +60,6 @@ export default function AppLayout({
     return !!(actionPlan && actionPlan.phases && actionPlan.phases.length > 0);
   }, [actionPlan, hasMounted]);
 
-  // Get current section for breadcrumb/context
   const getCurrentSection = () => {
     if (pathname === '/dashboard') return t('layout.sectionDashboard');
     if (pathname === '/ikigai') return t('layout.sectionIkigai');
@@ -72,7 +71,6 @@ export default function AppLayout({
     return '';
   };
 
-  // Animation variants
   const sidebarVariants = {
     hidden: { x: -20, opacity: 0 },
     visible: {
@@ -86,101 +84,92 @@ export default function AppLayout({
     },
   };
 
-  const progressBarVariants = {
-    initial: { width: 0 },
-    animate: { width: `${profileCompletion}%` },
-  };
-
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      {/* Desktop Sidebar */}
+    <div className="flex min-h-screen w-full">
+      {/* Fixed Sidebar */}
       <AnimatePresence>
         {hasMounted && (
-          <motion.div
+          <motion.aside
             variants={sidebarVariants}
             initial="hidden"
             animate="visible"
-            className="hidden border-r bg-gradient-to-b from-background to-muted/20 md:block"
+            className="hidden md:flex flex-col sticky top-0 h-screen w-[220px] lg:w-[280px] border-r bg-gradient-to-b from-background to-muted/20 z-50 shrink-0"
           >
-            <div className="flex h-full max-h-screen flex-col gap-2">
-              <div className="flex h-14 items-center justify-between border-b px-4 lg:h-[60px] lg:px-6">
-                <AppLogo />
+            <div className="flex h-14 items-center justify-between border-b px-4 lg:h-[60px] lg:px-6 shrink-0">
+              <AppLogo />
+              {hasActionPlan && (
+                <Badge variant="secondary" className="hidden lg:flex">
+                  {t('layout.activePlan')}
+                </Badge>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto py-2">
+              <MainNav />
+            </div>
+            
+            <motion.div 
+              className="border-t p-4 shrink-0"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium">{t('layout.profileCompletion')}</span>
+                    <motion.span 
+                      className="font-bold text-primary"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    >
+                      {profileCompletion}%
+                    </motion.span>
+                  </div>
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${profileCompletion}%` }}
+                      transition={{ duration: 1, ease: 'easeOut' }}
+                    />
+                  </div>
+                </div>
+                
+                {!isProfileComplete && (
+                  <motion.div 
+                    className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p className="text-xs text-yellow-800 dark:text-yellow-300 font-medium">
+                      {t('layout.completeProfilePrompt')}
+                    </p>
+                  </motion.div>
+                )}
+                
                 {hasActionPlan && (
-                  <Badge variant="secondary" className="hidden lg:flex">
-                    {t('layout.activePlan')}
-                  </Badge>
+                  <motion.div 
+                    className="p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p className="text-xs text-green-800 dark:text-green-300 font-medium">
+                      {t('layout.activePlanFor', { careerTitle: actionPlan!.careerTitle })}
+                    </p>
+                  </motion.div>
                 )}
               </div>
-              <div className="flex-1">
-                <MainNav />
-              </div>
-              
-              {/* Profile Status Sidebar Footer */}
-              <motion.div 
-                className="border-t p-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium">{t('layout.profileCompletion')}</span>
-                      <motion.span 
-                        className="font-bold text-primary"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 300 }}
-                      >
-                        {profileCompletion}%
-                      </motion.span>
-                    </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-primary"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${profileCompletion}%` }}
-                        transition={{ duration: 1, ease: 'easeOut' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {hasMounted && !isProfileComplete && (
-                    <motion.div 
-                      className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <p className="text-xs text-yellow-800 dark:text-yellow-300 font-medium">
-                        {t('layout.completeProfilePrompt')}
-                      </p>
-                    </motion.div>
-                  )}
-                  
-                  {hasActionPlan && (
-                    <motion.div 
-                      className="p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <p className="text-xs text-green-800 dark:text-green-300 font-medium">
-                        {t('layout.activePlanFor', { careerTitle: actionPlan!.careerTitle })}
-                      </p>
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </motion.aside>
         )}
       </AnimatePresence>
       
-      {/* Main Content Area */}
-      <div className="flex flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6">
-          {/* Mobile Menu Button */}
+      {/* Scrollable Main Content */}
+      <div className="flex flex-col flex-1 min-w-0">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 shrink-0">
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -200,7 +189,6 @@ export default function AppLayout({
               <div className="flex-1 overflow-y-auto">
                 <MainNav />
               </div>
-              {/* Mobile Footer Status */}
               <motion.div 
                 className="border-t p-4 mt-auto"
                 initial={{ opacity: 0 }}
@@ -252,7 +240,6 @@ export default function AppLayout({
             </SheetContent>
           </Sheet>
 
-          {/* Breadcrumb/Context Area */}
           <div className="w-full flex-1 flex items-center gap-4 overflow-hidden">
             {pathname !== '/dashboard' && (
               <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
@@ -275,7 +262,6 @@ export default function AppLayout({
                     {getCurrentSection()}
                   </motion.span>
                   
-                  {/* Contextual Badges */}
                   {hasMounted && pathname === '/ikigai' && !isProfileComplete && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -322,9 +308,7 @@ export default function AppLayout({
             </div>
           </div>
 
-          {/* Header Actions */}
           <div className="flex items-center gap-2">
-            {/* Quick Action Button for Profile Completion */}
             {hasMounted && pathname !== '/ikigai' && !isProfileComplete && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -340,7 +324,6 @@ export default function AppLayout({
               </motion.div>
             )}
             
-            {/* Quick Action Button for Action Plan */}
             {hasMounted && pathname !== '/plan' && hasActionPlan && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -361,21 +344,21 @@ export default function AppLayout({
           </div>
         </header>
         
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="h-full"
-          >
-            {children}
-          </motion.div>
+        <main className="flex-1 overflow-y-auto scroll-smooth">
+          <div className="max-w-7xl mx-auto p-4 lg:p-6">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              {children}
+            </motion.div>
+          </div>
         </main>
         
-        {/* Footer Status Bar (Desktop only) */}
-        <footer className="hidden md:flex items-center justify-between border-t px-6 py-3 text-xs text-muted-foreground bg-muted/20">
+        <footer className="hidden md:flex items-center justify-between border-t px-6 py-3 text-xs text-muted-foreground bg-muted/20 shrink-0">
           <div className="flex items-center gap-4">
             <span className="font-medium">{t('layout.footerTitle')}</span>
             <span className="text-xs">•</span>
