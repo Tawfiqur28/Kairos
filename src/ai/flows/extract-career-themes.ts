@@ -20,7 +20,11 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
     Business: ['business', 'market', 'finance', 'management', 'entrepreneur', 'startup', 'sales', 'investment', 'marketing', 'strategy', 'consulting'],
     Arts: ['art', 'design', 'creative', 'drawing', 'painting', 'visual', 'graphic', 'ui/ux', 'illustration', 'photography', 'animation'],
     Education: ['teach', 'teacher', 'education', 'learn', 'student', 'professor', 'tutor', 'instruction', 'curriculum'],
-    Healthcare: ['health', 'medical', 'doctor', 'nurse', 'patient', 'therapy', 'medicine', 'hospital', 'clinic', 'wellness']
+    Healthcare: ['health', 'medical', 'doctor', 'nurse', 'patient', 'therapy', 'medicine', 'hospital', 'clinic', 'wellness'],
+    // FIX 1: Add missing themes from your 21 careers
+    Law: ['law', 'lawyer', 'attorney', 'legal', 'court', 'case', 'litigation', 'contract'],
+    Sports: ['esports', 'gaming', 'coach', 'athlete', 'sports', 'tournament', 'competitive'],
+    Engineering: ['civil', 'mechanical', 'electrical', 'structural', 'autocad', 'revit', 'architecture']
   };
   
   const themeCounts: Record<string, number> = {};
@@ -39,7 +43,7 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
       themes.push(theme);
     } else if (count === 1 && themeCounts[theme] > 0) {
       // For single matches, check if it's a strong indicator
-      const strongIndicators = ['doctor', 'engineer', 'programming', 'physics', 'chemistry', 'artist', 'musician'];
+      const strongIndicators = ['doctor', 'engineer', 'programming', 'physics', 'chemistry', 'artist', 'musician', 'lawyer', 'teacher', 'nurse', 'architect'];
       const hasStrongIndicator = keywordMap[theme].some(keyword => 
         strongIndicators.includes(keyword) && lowerProfile.includes(keyword)
       );
@@ -52,6 +56,8 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
   // Filter incompatible themes (science vs arts)
   const hasHardScience = themes.some(theme => ['Physics', 'Chemistry', 'Science'].includes(theme));
   const hasArts = themes.some(theme => ['Music', 'Arts'].includes(theme));
+  const hasBusiness = themes.some(theme => ['Business'].includes(theme));
+  const hasHealthcare = themes.some(theme => ['Healthcare'].includes(theme));
   
   if (hasHardScience && hasArts) {
     // Keep the strongest themes based on keyword count
@@ -67,9 +73,12 @@ const detectCareerThemesFromKeywords = (profile: string): string[] => {
   return themes.length > 0 ? themes : ['General']; // Default theme if none detected
 };
 
+// FIX 2: Update valid themes to match your 21 careers
+const VALID_THEMES = ['Tech', 'Physics', 'Chemistry', 'Science', 'Music', 'Business', 'Arts', 'Education', 'Healthcare', 'Law', 'Sports', 'Engineering', 'General'];
 
 const ExtractCareerThemesInputSchema = z.object({
   profile: z.string().min(10, 'Profile must be at least 10 characters').describe('The user\'s Ikigai profile text'),
+  educationLevel: z.enum(['highSchool', 'undergraduate', 'masters', 'phd', 'professional']).optional().describe('User\'s education level for contextual analysis'),
   useFastMethod: z.boolean().optional().default(true).describe('Use fast keyword detection instead of AI model')
 }).or(z.string().min(10, 'Profile must be at least 10 characters')).describe('Either a string profile or an object with profile and options');
 
@@ -78,22 +87,39 @@ export type ExtractCareerThemesInput = z.infer<typeof ExtractCareerThemesInputSc
 const ExtractCareerThemesOutputSchema = z.array(z.string()).describe('An array of career theme strings, e.g., ["Tech", "Arts"]');
 export type ExtractCareerThemesOutput = z.infer<typeof ExtractCareerThemesOutputSchema>;
 
-
+// FIX 3: Improved AI prompt with better context
 const extractCareerThemesFromModel = async (userProfile: string, educationLevel?: string): Promise<string[]> => {
   const educationContext = educationLevel ? `Education Level: ${educationLevel}. ` : '';
   
-  const prompt = `Analyze this user's profile for career themes.
-${educationContext}User Profile: "${userProfile}"
+  // Map education level to descriptive text
+  const educationLevelMap: Record<string, string> = {
+    highSchool: 'High School Student - focusing on exploration and foundation',
+    undergraduate: 'Undergraduate Student - building core skills and knowledge',
+    masters: 'Master\'s Student - specializing and deepening expertise',
+    phd: 'PhD/Doctoral Candidate - conducting original research',
+    professional: 'Working Professional - advancing career or considering transition'
+  };
+  
+  const educationDescription = educationLevel && educationLevelMap[educationLevel] 
+    ? `Context: ${educationLevelMap[educationLevel]}. ` 
+    : '';
+  
+  const prompt = `Analyze this user's profile to identify their dominant career themes.
 
-Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business", "Arts", "Healthcare", "Education"]
+${educationContext}${educationDescription}User Profile: "${userProfile}"
 
-**EDUCATION LEVEL GUIDANCE:**
-- High School: Focus on interests and basic skills
-- Undergraduate: Consider major and coursework
-- Master's: Focus on specialization areas
-- PhD: Consider research focus and expertise
+Available themes: ["Tech", "Physics", "Chemistry", "Science", "Music", "Business", "Arts", "Education", "Healthcare", "Law", "Sports", "Engineering"]
 
-Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
+**IMPORTANT GUIDELINES:**
+- Return ONLY the themes that are STRONGLY represented in their profile
+- Consider their education level for context (e.g., PhD student likely has research focus)
+- Look for keywords and interests that align with each theme
+- Return 1-3 themes maximum, not all possible themes
+
+Respond ONLY with a JSON array. Examples:
+- For someone interested in coding and building apps: ["Tech"]
+- For someone interested in both science and music: ["Science", "Music"]
+- For someone with healthcare and education interests: ["Healthcare", "Education"]`;
 
   const response = await callModelScopeAI(prompt, 'qwen-max');
   
@@ -102,11 +128,14 @@ Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
   }
   
   try {
+    // Try to extract JSON array from response
     const jsonMatch = response.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
       if(Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
-        return parsed;
+        // Validate themes against valid list
+        const validThemes = parsed.filter(theme => VALID_THEMES.includes(theme));
+        return validThemes.length > 0 ? validThemes : [];
       }
     }
   } catch (e) {
@@ -117,7 +146,6 @@ Respond ONLY with JSON array. Example: ["Physics", "Tech"] or ["Chemistry"]`;
   return detectCareerThemesFromKeywords(userProfile);
 };
 
-
 export async function extractCareerThemes(
   input: ExtractCareerThemesInput
 ): Promise<ExtractCareerThemesOutput> {
@@ -126,13 +154,16 @@ export async function extractCareerThemes(
     const parsedInput = ExtractCareerThemesInputSchema.parse(input);
     
     let profileText: string;
+    let educationLevel: string | undefined;
     let useFastMethod: boolean;
     
     if (typeof parsedInput === 'string') {
       profileText = parsedInput;
+      educationLevel = undefined;
       useFastMethod = true; // Default to fast method for string input
     } else {
       profileText = parsedInput.profile;
+      educationLevel = parsedInput.educationLevel;
       useFastMethod = parsedInput.useFastMethod ?? true;
     }
     
@@ -147,8 +178,8 @@ export async function extractCareerThemes(
       result = detectCareerThemesFromKeywords(profileText);
     } else {
       try {
-        // Try AI model extraction
-        result = await extractCareerThemesFromModel(profileText);
+        // Try AI model extraction with education context
+        result = await extractCareerThemesFromModel(profileText, educationLevel);
         
         // Validate AI output
         if (!Array.isArray(result) || result.length === 0) {
@@ -165,12 +196,14 @@ export async function extractCareerThemes(
       result = ['General'];
     }
     
-    // Remove duplicates and validate
+    // Remove duplicates
     const uniqueThemes = [...new Set(result)];
     
     // Validate against expected themes
-    const validThemes = ['Tech', 'Physics', 'Chemistry', 'Science', 'Music', 'Business', 'Arts', 'Education', 'Healthcare', 'General'];
-    const filteredThemes = uniqueThemes.filter(theme => validThemes.includes(theme));
+    const filteredThemes = uniqueThemes.filter(theme => VALID_THEMES.includes(theme));
+    
+    // FIX 4: Log for debugging
+    console.log(`Extracted themes for profile: ${filteredThemes.length > 0 ? filteredThemes.join(', ') : 'General'}`);
     
     // Return validated output
     return ExtractCareerThemesOutputSchema.parse(filteredThemes.length > 0 ? filteredThemes : ['General']);
@@ -190,5 +223,5 @@ export async function extractCareerThemes(
   }
 }
 
-// Optional: Export the fast detection function for direct use
+// Export the fast detection function for direct use
 export { detectCareerThemesFromKeywords };

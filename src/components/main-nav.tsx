@@ -1,7 +1,8 @@
+
 'use client';
 
 import {
-  BookText,
+  BookOpenCheck,
   Briefcase,
   Info,
   LayoutDashboard,
@@ -17,7 +18,7 @@ import { useLanguage } from '@/context/language-context';
 const navItemsConfig = [
   { href: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
   { href: '/ikigai', icon: Target, labelKey: 'nav.ikigai' },
-  { href: '/journal', icon: BookText, labelKey: 'nav.journal' },
+  { href: '/journal', icon: BookOpenCheck, labelKey: 'Academic Assistant' },
   { href: '/careers', icon: Briefcase, labelKey: 'nav.careers' },
   { href: '/plan', icon: ClipboardList, labelKey: 'nav.actionPlan' },
   { href: '/learn-more', icon: Info, labelKey: 'nav.learnMore' },
@@ -27,7 +28,7 @@ export function MainNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
 
-  const navItems = navItemsConfig.map(item => ({...item, label: t(item.labelKey)}));
+  const navItems = navItemsConfig.map(item => ({...item, label: item.labelKey.includes('nav') ? t(item.labelKey) : item.labelKey}));
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">

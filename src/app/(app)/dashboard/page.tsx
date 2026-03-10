@@ -191,7 +191,7 @@ export default function DashboardPage() {
                     <div className="text-xs text-yellow-600 dark:text-yellow-400">
                       {profileCompletion === 0 ? 
                         t('dashboard.startHere') : 
-                        `${5 - Math.floor(profileCompletion/20)} sections remaining.`}
+                        `${5 - Math.floor(profileCompletion/20)} ${t('dashboard.sectionsRemaining')}`}
                     </div>
                   )}
                 </div>
@@ -364,7 +364,7 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs">{t('dashboard.actionPlan')}</span>
                         <Badge variant={hasActionPlan ? "default" : "outline"} size="sm">
-                          {hasActionPlan ? t('dashboard.activePlan') : '—'}
+                          {hasActionPlan ? t('dashboard.active') : '—'}
                         </Badge>
                       </div>
                     </div>

@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import careerData from '@/lib/careers.json';
 import type { Career, Ikigai, ActionPlan } from '@/lib/types';
-import { Bot, Loader2, Sparkles, GanttChartSquare, AlertTriangle } from 'lucide-react';
+import { Bot, Loader2, Sparkles, GanttChartSquare, AlertTriangle, Filter, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { generatePersonalizedActionPlan } from '@/ai/flows/generate-personalized-action-plan';
@@ -32,6 +32,8 @@ import { useLanguage } from '@/context/language-context';
 import { useRouter } from 'next/navigation';
 import CareerCard from '@/components/career-card';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type MatchResult = {
   explanation: string;
@@ -42,6 +44,20 @@ type MatchResult = {
   themeMismatch: boolean;
   confidence: 'high' | 'medium' | 'low';
 };
+
+// Career clusters for filtering
+const CAREER_CLUSTERS = [
+  'All',
+  'Tech',
+  'Science',
+  'Arts',
+  'Business',
+  'Healthcare',
+  'Education',
+  'Law',
+  'Sports',
+  'Engineering'
+];
 
 export default function CareersPage() {
   const allCareers: Career[] = careerData.careers;
@@ -63,6 +79,8 @@ export default function CareersPage() {
   const [_, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
   const [hasMounted, setHasMounted] = useState(false);
   const [userThemes, setUserThemes] = useState<string[]>([]);
+  const [selectedCluster, setSelectedCluster] = useState<string>('All');
+  const [isRefreshingThemes, setIsRefreshingThemes] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -108,33 +126,50 @@ export default function CareersPage() {
   }, [ikigai]);
 
   // Extract user themes and sort careers
+  const refreshThemes = useCallback(async () => {
+    if (!isProfileComplete) return;
+    
+    setIsRefreshingThemes(true);
+    try {
+      const themes = await extractCareerThemes(userProfileString);
+      setUserThemes(themes);
+    } catch (error) {
+      console.error('Error extracting themes:', error);
+    } finally {
+      setIsRefreshingThemes(false);
+    }
+  }, [isProfileComplete, userProfileString]);
+
   useEffect(() => {
     setHasMounted(true);
-    if (isProfileComplete) {
-      extractCareerThemes(userProfileString).then(themes => {
-        setUserThemes(themes);
-        if (themes.length > 0) {
-          // Reorder careers based on theme matches
-          const reorderedCareers = [...allCareers].sort((a, b) => {
-            const aMatchesTheme = themes.includes(a.cluster);
-            const bMatchesTheme = themes.includes(b.cluster);
-            
-            // First sort by theme match
-            if (aMatchesTheme && !bMatchesTheme) return -1;
-            if (!aMatchesTheme && bMatchesTheme) return 1;
-            
-            // Then by title alphabetical
-            return a.title.localeCompare(b.title);
-          });
-          setSortedCareers(reorderedCareers);
-        }
-      }).catch(error => {
-        console.error('Error extracting themes:', error);
-      });
-    } else {
-      setSortedCareers(allCareers);
+    refreshThemes();
+  }, [refreshThemes]);
+
+  // Filter and sort careers based on themes and selected cluster
+  const displayedCareers = useMemo(() => {
+    let filtered = sortedCareers;
+    
+    // Filter by cluster
+    if (selectedCluster !== 'All') {
+      filtered = filtered.filter(career => career.cluster === selectedCluster);
     }
-  }, [isProfileComplete, userProfileString, allCareers]);
+    
+    // Sort by theme match if themes exist
+    if (userThemes.length > 0) {
+      return [...filtered].sort((a, b) => {
+        const aMatchesTheme = userThemes.includes(a.cluster);
+        const bMatchesTheme = userThemes.includes(b.cluster);
+        
+        if (aMatchesTheme && !bMatchesTheme) return -1;
+        if (!aMatchesTheme && bMatchesTheme) return 1;
+        
+        // Then by title alphabetical
+        return a.title.localeCompare(b.title);
+      });
+    }
+    
+    return filtered;
+  }, [sortedCareers, selectedCluster, userThemes]);
 
   const handleCheckFit = useCallback(async (career: Career) => {
     if (!isProfileComplete) {
@@ -185,7 +220,7 @@ export default function CareersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isProfileComplete, userProfileString, t, toast, userThemes, setMatchResult, setSelectedCareer, setIsLoading]);
+  }, [isProfileComplete, userProfileString, t, toast, userThemes]);
 
   const handleGeneratePlan = useCallback(async (career: Career) => {
     if (!career) return;
@@ -245,6 +280,12 @@ export default function CareersPage() {
     }
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 70) return 'text-green-600';
+    if (score >= 40) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
   return (
     <>
       <PageHeader
@@ -297,18 +338,64 @@ export default function CareersPage() {
         ) : null}
       </AnimatePresence>
 
-      {hasMounted && isProfileComplete && userThemes.length > 0 && (
+      {hasMounted && isProfileComplete && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg overflow-hidden"
+          className="mb-6 space-y-4"
         >
-          <p className="text-sm text-blue-800 dark:text-blue-300">
-            <span className="font-semibold">{t('careers.yourProfileThemes')}</span> {userThemes.join(', ')}
-          </p>
-          <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-            {t('careers.themesDescription')}
-          </p>
+          {/* Theme Banner */}
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-2">
+                <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <div>
+                  <p className="text-sm text-blue-800 dark:text-blue-300">
+                    <span className="font-semibold">{t('careers.yourProfileThemes')}</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {userThemes.length > 0 ? (
+                      userThemes.map(theme => (
+                        <Badge key={theme} variant="secondary" className="bg-blue-100 dark:bg-blue-800">
+                          {theme}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-sm text-blue-600 dark:text-blue-400">No strong themes detected</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={refreshThemes}
+                  disabled={isRefreshingThemes}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingThemes ? 'animate-spin' : ''}`} />
+                  {isRefreshingThemes ? t('careers.refreshing') : t('careers.refreshThemes')}
+                </Button>
+                
+                {/* Cluster Filter */}
+                <Select value={selectedCluster} onValueChange={setSelectedCluster}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={t('careers.filterByCluster')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CAREER_CLUSTERS.map(cluster => (
+                      <SelectItem key={cluster} value={cluster}>
+                        {cluster === 'All' ? t('careers.allClusters') : cluster}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-xs text-blue-700 dark:text-blue-400 mt-3">
+              {t('careers.themesDescription')} • {displayedCareers.length} {t('careers.careersFound')}
+            </p>
+          </div>
         </motion.div>
       )}
 
@@ -319,7 +406,7 @@ export default function CareersPage() {
           initial="hidden"
           animate="visible"
         >
-          {sortedCareers.map((career) => {
+          {displayedCareers.map((career) => {
             const matchesTheme = userThemes.includes(career.cluster);
             return (
               <motion.div key={career.id} variants={itemVariants}>
@@ -332,6 +419,17 @@ export default function CareersPage() {
               </motion.div>
             );
           })}
+          
+          {displayedCareers.length === 0 && (
+            <motion.div variants={itemVariants} className="col-span-full">
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">{t('careers.noCareersFound')}</p>
+                <Button variant="link" onClick={() => setSelectedCluster('All')}>
+                  {t('careers.clearFilter')}
+                </Button>
+              </Card>
+            </motion.div>
+          )}
         </motion.div>
       )}
 
@@ -370,11 +468,7 @@ export default function CareersPage() {
                       <motion.div 
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className={`text-2xl font-bold ${
-                          matchResult.fitScore >= 70 ? 'text-green-600' : 
-                          matchResult.fitScore >= 40 ? 'text-yellow-600' : 
-                          'text-red-600'
-                        }`}
+                        className={`text-2xl font-bold ${getScoreColor(matchResult.fitScore)}`}
                       >
                         {matchResult.fitScore}%
                       </motion.div>

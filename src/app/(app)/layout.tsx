@@ -19,6 +19,7 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, ActionPlan } from '@/lib/types';
 import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/context/language-context';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AppLayout({
   children,
@@ -59,7 +60,6 @@ export default function AppLayout({
     return !!(actionPlan && actionPlan.phases && actionPlan.phases.length > 0);
   }, [actionPlan, hasMounted]);
 
-
   // Get current section for breadcrumb/context
   const getCurrentSection = () => {
     if (pathname === '/dashboard') return t('layout.sectionDashboard');
@@ -68,61 +68,114 @@ export default function AppLayout({
     if (pathname === '/plan') return t('layout.sectionPlan');
     if (pathname === '/learn-more') return t('layout.sectionLearnMore');
     if (pathname === '/journal') return t('layout.sectionJournal');
+    if (pathname === '/profile') return t('layout.sectionProfile');
     return '';
+  };
+
+  // Animation variants
+  const sidebarVariants = {
+    hidden: { x: -20, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+  };
+
+  const progressBarVariants = {
+    initial: { width: 0 },
+    animate: { width: `${profileCompletion}%` },
   };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       {/* Desktop Sidebar */}
-      <div className="hidden border-r bg-gradient-to-b from-background to-muted/20 md:block">
-        <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-14 items-center justify-between border-b px-4 lg:h-[60px] lg:px-6">
-            <AppLogo />
-            {hasActionPlan && (
-              <Badge variant="secondary" className="hidden lg:flex">
-                {t('layout.activePlan')}
-              </Badge>
-            )}
-          </div>
-          <div className="flex-1">
-            <MainNav />
-          </div>
-          
-          {/* Profile Status Sidebar Footer */}
-          <div className="border-t p-4">
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium">{t('layout.profileCompletion')}</span>
-                  <span className="font-bold text-primary">{profileCompletion}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{ width: `${profileCompletion}%` }}
-                  />
-                </div>
+      <AnimatePresence>
+        {hasMounted && (
+          <motion.div
+            variants={sidebarVariants}
+            initial="hidden"
+            animate="visible"
+            className="hidden border-r bg-gradient-to-b from-background to-muted/20 md:block"
+          >
+            <div className="flex h-full max-h-screen flex-col gap-2">
+              <div className="flex h-14 items-center justify-between border-b px-4 lg:h-[60px] lg:px-6">
+                <AppLogo />
+                {hasActionPlan && (
+                  <Badge variant="secondary" className="hidden lg:flex">
+                    {t('layout.activePlan')}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex-1">
+                <MainNav />
               </div>
               
-              {hasMounted && !isProfileComplete && (
-                <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
-                  <p className="text-xs text-yellow-800 dark:text-yellow-300 font-medium">
-                    {t('layout.completeProfilePrompt')}
-                  </p>
+              {/* Profile Status Sidebar Footer */}
+              <motion.div 
+                className="border-t p-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium">{t('layout.profileCompletion')}</span>
+                      <motion.span 
+                        className="font-bold text-primary"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
+                      >
+                        {profileCompletion}%
+                      </motion.span>
+                    </div>
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-primary"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${profileCompletion}%` }}
+                        transition={{ duration: 1, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {hasMounted && !isProfileComplete && (
+                    <motion.div 
+                      className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <p className="text-xs text-yellow-800 dark:text-yellow-300 font-medium">
+                        {t('layout.completeProfilePrompt')}
+                      </p>
+                    </motion.div>
+                  )}
+                  
+                  {hasActionPlan && (
+                    <motion.div 
+                      className="p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <p className="text-xs text-green-800 dark:text-green-300 font-medium">
+                        {t('layout.activePlanFor', { careerTitle: actionPlan!.careerTitle })}
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
-              )}
-              
-              {hasActionPlan && (
-                <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
-                  <p className="text-xs text-green-800 dark:text-green-300 font-medium">
-                    {t('layout.activePlanFor', { careerTitle: actionPlan!.careerTitle })}
-                  </p>
-                </div>
-              )}
+              </motion.div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Main Content Area */}
       <div className="flex flex-col">
@@ -148,7 +201,12 @@ export default function AppLayout({
                 <MainNav />
               </div>
               {/* Mobile Footer Status */}
-              <div className="border-t p-4 mt-auto">
+              <motion.div 
+                className="border-t p-4 mt-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
                 <div className="space-y-4">
                   <div className="sm:hidden space-y-2">
                     {hasMounted && pathname !== '/ikigai' && !isProfileComplete && (
@@ -175,9 +233,11 @@ export default function AppLayout({
                         <span className="font-bold text-primary">{profileCompletion}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary transition-all duration-300"
-                          style={{ width: `${profileCompletion}%` }}
+                        <motion.div 
+                          className="h-full bg-primary"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${profileCompletion}%` }}
+                          transition={{ duration: 1, ease: 'easeOut' }}
                         />
                       </div>
                     </div>
@@ -188,7 +248,7 @@ export default function AppLayout({
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </SheetContent>
           </Sheet>
 
@@ -206,33 +266,56 @@ export default function AppLayout({
             <div className="flex items-center gap-2 overflow-hidden">
               {getCurrentSection() && (
                 <>
-                  <span className="font-medium text-sm sm:text-base truncate">
+                  <motion.span 
+                    key={pathname}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="font-medium text-sm sm:text-base truncate"
+                  >
                     {getCurrentSection()}
-                  </span>
+                  </motion.span>
                   
                   {/* Contextual Badges */}
                   {hasMounted && pathname === '/ikigai' && !isProfileComplete && (
-                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
-                      {profileCompletion < 50 ? t('layout.statusIncomplete') : `${profileCompletion}%`}
-                    </Badge>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    >
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
+                        {profileCompletion < 50 ? t('layout.statusIncomplete') : `${profileCompletion}%`}
+                      </Badge>
+                    </motion.div>
                   )}
                   
                   {hasMounted && pathname === '/careers' && !isProfileComplete && (
-                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
-                      {t('layout.statusProfileRequired')}
-                    </Badge>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    >
+                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
+                        {t('layout.statusProfileRequired')}
+                      </Badge>
+                    </motion.div>
                   )}
                   
                   {hasMounted && pathname === '/plan' && hasActionPlan && (
-                    <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-300">
-                      {t('layout.progressPercent', {
-                        progress: Math.round(
-                          (actionPlan!.phases.reduce((acc, phase) => 
-                            acc + phase.tasks.filter(t => t.completed).length, 0) / 
-                          actionPlan!.phases.reduce((acc, phase) => acc + phase.tasks.length, 1)) * 100
-                        )
-                      })}
-                    </Badge>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    >
+                      <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-300">
+                        {t('layout.progressPercent', {
+                          progress: Math.round(
+                            (actionPlan!.phases.reduce((acc, phase) => 
+                              acc + phase.tasks.filter(t => t.completed).length, 0) / 
+                            actionPlan!.phases.reduce((acc, phase) => acc + phase.tasks.length, 1)) * 100
+                          )
+                        })}
+                      </Badge>
+                    </motion.div>
                   )}
                 </>
               )}
@@ -243,22 +326,34 @@ export default function AppLayout({
           <div className="flex items-center gap-2">
             {/* Quick Action Button for Profile Completion */}
             {hasMounted && pathname !== '/ikigai' && !isProfileComplete && (
-              <Button asChild variant="outline" size="sm" className="hidden sm:flex">
-                <Link href="/ikigai" className="flex items-center gap-1">
-                  <Target className="h-3 w-3" />
-                  <span className="text-xs">{t('layout.completeProfile')}</span>
-                </Link>
-              </Button>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+              >
+                <Button asChild variant="outline" size="sm" className="hidden sm:flex">
+                  <Link href="/ikigai" className="flex items-center gap-1">
+                    <Target className="h-3 w-3" />
+                    <span className="text-xs">{t('layout.completeProfile')}</span>
+                  </Link>
+                </Button>
+              </motion.div>
             )}
             
             {/* Quick Action Button for Action Plan */}
             {hasMounted && pathname !== '/plan' && hasActionPlan && (
-              <Button asChild variant="outline" size="sm" className="hidden sm:flex">
-                <Link href="/plan" className="flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  <span className="text-xs">{t('layout.viewPlan')}</span>
-                </Link>
-              </Button>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+              >
+                <Button asChild variant="outline" size="sm" className="hidden sm:flex">
+                  <Link href="/plan" className="flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    <span className="text-xs">{t('layout.viewPlan')}</span>
+                  </Link>
+                </Button>
+              </motion.div>
             )}
             
             <LanguageSwitcher />
@@ -267,7 +362,16 @@ export default function AppLayout({
         </header>
         
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="h-full"
+          >
+            {children}
+          </motion.div>
         </main>
         
         {/* Footer Status Bar (Desktop only) */}
@@ -281,17 +385,33 @@ export default function AppLayout({
           </div>
           <div className="flex items-center gap-4">
             {hasMounted && isProfileComplete ? (
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <motion.div 
+                  className="h-2 w-2 rounded-full bg-green-500"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
                 <span>{t('layout.footerProfileComplete')}</span>
-              </div>
+              </motion.div>
             ) : hasMounted && (
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></div>
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <motion.div 
+                  className="h-2 w-2 rounded-full bg-yellow-500"
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
                 <Link href="/ikigai" className="text-primary hover:underline">
                   {t('layout.footerCompleteProfilePrompt', { completion: profileCompletion })}
                 </Link>
-              </div>
+              </motion.div>
             )}
           </div>
         </footer>

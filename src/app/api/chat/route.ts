@@ -1,163 +1,66 @@
+
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { academicChat } from '@/ai/flows/academic-chat-flow';
 
-// Helper to provide context based on education level
-const getEducationLevelChatContext = (educationLevel?: string): string => {
-  const contexts = {
-    highSchool: `HIGH SCHOOL focus: Foundational concepts, exam prep, college applications, study skills, time management.`,
-    undergrad: `UNDERGRAD focus: Coursework, assignments, projects, internships, networking, grad school prep.`,
-    masters: `MASTER'S focus: Research methodology, thesis writing, specialization, professional networking.`,
-    phd: `PhD focus: Dissertation, publications, academic networking, grant writing, career positioning.`,
-    professional: `PROFESSIONAL focus: Upskilling, career change, leadership, work-life balance, and industry trends.`
-  };
-  return (contexts as any)[educationLevel as any] || 'Provide general student and career guidance.';
-};
+export const runtime = 'nodejs';
 
-// Simulated web search function
-async function searchWeb(query: string): Promise<string> {
-    console.log(`Simulating web search for: "${query}"`);
-    // In a real application, you would call a search API like SerpAPI, Google Search API, etc.
-    // For this simulation, we return a static, helpful response.
-    if (query.toLowerCase().includes('next.js 15')) {
-        return `Web Search Results for "Next.js 15 features":\n- React 19 and the new React Compiler.\n- Partial Prerendering (experimental).\n- Improved caching and performance optimizations.\n- More intuitive fetching and data handling.`;
-    }
-    if (query.toLowerCase().includes('ikigai')) {
-        return `Web Search Results for "ikigai":\n- Ikigai is a Japanese concept that means "a reason for being."\n- It's the intersection of what you love, what you're good at, what the world needs, and what you can be paid for.\n- Finding your Ikigai is believed to lead to a more fulfilling and happy life.`;
-    }
-    return `No specific web search results found for "${query}". Try a different query.`;
-}
-
-// Schema for validating the incoming request body
 const ChatRequestSchema = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
   })),
-  ikigai: z.object({
-    passions: z.string().optional(),
-    skills: z.string().optional(),
-    values: z.string().optional(),
-    interests: z.string().optional(),
-    educationLevel: z.enum(['highSchool', 'undergrad', 'masters', 'phd', 'professional']).optional(),
-  }).optional(),
+  imageDataUri: z.string().optional(),
 });
-
-
-// Lazily import dashscope to improve initial load time.
-let dashscopeGeneration: any;
-async function getDashscopeGeneration() {
-  if (!dashscopeGeneration) {
-    try {
-      // Use destructuring for a more robust import of the Generation class
-      const { Generation } = await import('dashscope');
-      dashscopeGeneration = Generation;
-    } catch (e) {
-      console.error('Failed to import or find Generation in dashscope', e);
-      return null; // Return null if import fails
-    }
-  }
-  return dashscopeGeneration;
-}
-
-export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { messages, ikigai } = ChatRequestSchema.parse(body);
+    const { messages, imageDataUri } = ChatRequestSchema.parse(body);
 
-    const educationLevel = ikigai?.educationLevel;
-    const userProfileString = `Passions: ${ikigai?.passions || 'N/A'}. Skills: ${ikigai?.skills || 'N/A'}. Values: ${ikigai?.values || 'N/A'}. Interests: ${ikigai?.interests || 'N/A'}. Current Education Level: ${educationLevel || 'N/A'}.`;
-
-    let lastUserMessageContent = messages[messages.length - 1]?.content || '';
-    
-    let searchResultsContext = '';
-    // Check if the user's message implies a search query
-    if (lastUserMessageContent.toLowerCase().startsWith('search for:') || lastUserMessageContent.toLowerCase().startsWith('what is ')) {
-        const searchQuery = lastUserMessageContent.replace(/^(search for:|what is)\s*/i, '');
-        const searchResults = await searchWeb(searchQuery);
-        searchResultsContext = `\n\n**Web Search Results:**\n${searchResults}`;
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage || lastMessage.role !== 'user') {
+      return new Response('ERROR: Last message must be from user.', { status: 400 });
     }
 
-    const systemPrompt = `You are KAIROS, a specialized, empathetic, and highly knowledgeable AI assistant for academic and career guidance. Provide detailed, actionable, and structured answers. Use markdown for formatting like lists, bold text, and code snippets where appropriate.
+    // Prepare history for Genkit flow (excluding the last message)
+    const history = messages.slice(0, -1).map(msg => ({
+      role: msg.role === 'assistant' ? 'assistant' : 'user' as any,
+      content: msg.content
+    }));
 
-**USER'S EDUCATION LEVEL: ${educationLevel?.toUpperCase() || 'NOT SPECIFIED'}**
-${getEducationLevelChatContext(educationLevel)}
+    // Implement retry logic with exponential backoff
+    let attempts = 0;
+    const maxAttempts = 3;
+    let lastError = null;
 
-**USER'S PROFILE:** ${userProfileString}
+    while (attempts < maxAttempts) {
+      try {
+        const result = await academicChat({
+          message: lastMessage.content,
+          history,
+          imageDataUri
+        });
 
-**CONTEXT:** If web search results are provided below, use them to inform your answer.
-${searchResultsContext}
-
-**RESPONSE FORMAT:** Always provide comprehensive, well-structured, and helpful responses. Be proactive and encouraging.`;
-
-    const modelMessages = [
-      { role: 'system', content: systemPrompt },
-      // include all messages
-      ...messages
-    ];
-
-    const API_KEY = process.env.MODELSCOPE_API_KEY;
-
-    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-      return new Response(
-        'ERROR: ModelScope API key not configured. Please add it to your .env file.',
-        { status: 500 }
-      );
-    }
-    
-    const Generation = await getDashscopeGeneration();
-    if (!Generation) {
-      return new Response('ERROR: Dashscope module could not be loaded.', { status: 500 });
-    }
-
-    const result = await Generation.call({
-      model: process.env.MODELSCOPE_MODEL_1 || 'qwen-max',
-      messages: modelMessages,
-      apiKey: API_KEY,
-      stream: true,
-    });
-
-    const encoder = new TextEncoder();
-    
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          let fullContent = '';
-          for await (const chunk of result) {
-            const newContent = chunk.output?.choices?.[0]?.message?.content || '';
-            if (newContent && newContent !== fullContent) {
-              const diff = newContent.substring(fullContent.length);
-              if (diff) {
-                controller.enqueue(encoder.encode(diff));
-              }
-              fullContent = newContent;
-            }
-          }
-          controller.close();
-        } catch (error) {
-          console.error('Stream error:', error);
-          controller.error(error);
+        return new Response(result.response, {
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      } catch (error: any) {
+        attempts++;
+        lastError = error;
+        console.warn(`AI attempt ${attempts} failed:`, error.message);
+        
+        if (attempts < maxAttempts) {
+          const delay = Math.pow(2, attempts) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
-      },
-    });
+      }
+    }
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache',
-      },
-    });
+    return new Response(`ERROR: AI processing failed after ${maxAttempts} attempts. ${lastError?.message || ''}`, { status: 500 });
 
   } catch (error) {
-    let errorMessage = 'An unexpected error occurred.';
-    if (error instanceof z.ZodError) {
-      errorMessage = 'Invalid request body.';
-      console.error('[Chat API ZodError]', error.errors);
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
-    }
     console.error('[Chat API Error]', error);
-    return new Response(`ERROR: ${errorMessage}`, { status: 500 });
+    return new Response(`ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`, { status: 500 });
   }
 }
