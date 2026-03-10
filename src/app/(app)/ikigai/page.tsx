@@ -529,14 +529,16 @@ export default function IkigaiPage() {
                 )}
               </div>
               <div className="flex gap-2">
-                <Button asChild variant="outline">
-                  <Link href="/careers" className={!isProfileComplete ? "pointer-events-none opacity-50" : ""}>
-                       {t('ikigai.skipToCareers')}
-                  </Link>
-                </Button>
-                <Button onClick={handleSave} disabled={!hasMounted || completionPercentage < 30}>
+                <Button onClick={handleSave} variant="secondary" disabled={!hasMounted || completionPercentage < 30}>
                   <Save className="mr-2 h-4 w-4" /> {t('ikigai.saveButton')}
                 </Button>
+                {isProfileComplete && (
+                  <Button asChild className="animate-button-glow">
+                    <Link href="/careers">
+                      <Sparkles className="mr-2 h-4 w-4" /> {t('ikigai.exploreCareersNow')}
+                    </Link>
+                  </Button>
+                )}
               </div>
             </CardFooter>
           </Card>
@@ -550,7 +552,7 @@ export default function IkigaiPage() {
                 {t('ikigai.tipsTitle')}
               </CardTitle>
               <CardDescription>
-                {t('ikigai.tipsDesc')}
+                {t('tipsDesc')}
               </CardDescription>
             </CardHeader>
             <motion.div
