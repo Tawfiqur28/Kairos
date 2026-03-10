@@ -170,7 +170,6 @@ export default function IkigaiPage() {
           description={t('ikigai.description')}
         />
         
-        {/* Banner Skeleton */}
         <div className="mb-6 p-4 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
           <div className="flex items-start gap-3">
             <Skeleton className="h-5 w-5 rounded-full mt-1" />
@@ -261,28 +260,6 @@ export default function IkigaiPage() {
                   </div>
                 ))}
               </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('ikigai.nextSteps')}</CardTitle>
-                <CardDescription>
-                  {t('ikigai.nextStepsDesc')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[...Array(3)].map((_, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-5 w-32" />
-                      <Skeleton className="h-4 w-full" />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-10 w-full" />
-              </CardFooter>
             </Card>
           </div>
         </div>
@@ -578,53 +555,6 @@ export default function IkigaiPage() {
                 </p>
               </motion.div>
             </motion.div>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('ikigai.nextSteps')}</CardTitle>
-              <CardDescription>
-                {t('ikigai.nextStepsDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-bold">1</span>
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{t('ikigai.step1')}</p>
-                  <p className="text-xs text-muted-foreground">{t('ikigai.step1_desc')}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-bold">2</span>
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{t('ikigai.step2')}</p>
-                  <p className="text-xs text-muted-foreground">{t('ikigai.step2_desc')}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-bold">3</span>
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{t('ikigai.step3')}</p>
-                  <p className="text-xs text-muted-foreground">{t('ikigai.step3_desc')}</p>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-               <Button asChild variant="outline" className="w-full" disabled={!isProfileComplete}>
-                <Link href="/careers">
-                  {isProfileComplete ? t('ikigai.exploreCareersNow') : t('ikigai.completeProfileFirst')}
-                </Link>
-              </Button>
-            </CardFooter>
           </Card>
         </div>
       </div>
