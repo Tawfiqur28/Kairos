@@ -1,48 +1,58 @@
-// useLocalStorage.ts
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-// This function checks if it's running in a browser environment
-const isBrowser = typeof window !== 'undefined';
+/**
+ * A hydration-safe hook for using localStorage in Next.js.
+ * It initializes with the default value and updates after mounting to avoid mismatches.
+ */
+export function useLocalStorage<T>(key: string, defaultValue: T): [T, (value: T | ((val: T) => T)) => void] {
+  const [value, setValue] = useState<T>(defaultValue);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-function getStorageValue<T>(key: string, defaultValue: T): T {
-  if (!isBrowser) {
-    return defaultValue;
-  }
-  const saved = localStorage.getItem(key);
-  try {
-    return saved ? JSON.parse(saved) : defaultValue;
-  } catch (error) {
-    console.error(`Error parsing localStorage key “${key}”:`, error);
-    return defaultValue;
-  }
-}
-
-export function useLocalStorage<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [value, setValue] = useState<T>(() => {
-    return getStorageValue(key, defaultValue);
-  });
-
+  // On mount, load the value from localStorage
   useEffect(() => {
-    if (isBrowser) {
-      localStorage.setItem(key, JSON.stringify(value));
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved !== null) {
+        setValue(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error(`Error reading localStorage key “${key}”:`, error);
     }
-  }, [key, value]);
-  
+    setIsInitialized(true);
+  }, [key]);
+
+  // Update localStorage when value changes
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error(`Error setting localStorage key “${key}”:`, error);
+    }
+  }, [key, value, isInitialized]);
+
+  // Listen for changes from other tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue) {
+      if (e.key === key && e.newValue !== null) {
         try {
-            setValue(JSON.parse(e.newValue));
+          setValue(JSON.parse(e.newValue));
         } catch (error) {
-            console.error(`Error parsing storage change for key “${key}”:`, error);
+          console.error(`Error parsing storage change for key “${key}”:`, error);
         }
       }
     };
+
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [key]);
 
-  return [value, setValue];
+  const setLocalStorageValue = useCallback((newValue: T | ((val: T) => T)) => {
+    setValue(newValue);
+  }, []);
+
+  return [value, setLocalStorageValue];
 }

@@ -2,7 +2,7 @@
 
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import { Moon, Sun } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,12 +19,26 @@ export function ThemeSwitcher() {
     'dark'
   );
   const { t } = useLanguage();
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-  }, [theme]);
+  }, [theme, hasMounted]);
+
+  if (!hasMounted) {
+    return (
+      <Button variant="ghost" size="icon" disabled>
+        <Sun className="h-5 w-5 opacity-50" />
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>

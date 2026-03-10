@@ -38,10 +38,14 @@ export function UserNav() {
 
   useEffect(() => {
     setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-  }, [theme]);
+  }, [theme, hasMounted]);
 
   const handleLogout = () => {
     toast({
@@ -60,12 +64,16 @@ export function UserNav() {
       .slice(0, 2);
   };
 
+  if (!hasMounted) {
+    return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8 border border-primary/10">
-            {hasMounted && profile.image ? (
+            {profile.image ? (
               <AvatarImage src={profile.image} alt={profile.name} className="object-cover" />
             ) : (
               <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${profile.name}`} alt={profile.name} />
@@ -90,14 +98,14 @@ export function UserNav() {
         <DropdownMenuSeparator />
         
         <DropdownMenuGroup>
-          <Link href="/profile" passHref>
+          <Link href="/profile" passHref legacyBehavior>
             <DropdownMenuItem className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               <span>{t('userNav.profile')}</span>
             </DropdownMenuItem>
           </Link>
           
-          <Link href="/settings" passHref>
+          <Link href="/settings" passHref legacyBehavior>
             <DropdownMenuItem className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               <span>{t('userNav.settings')}</span>
