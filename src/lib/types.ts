@@ -10,6 +10,11 @@ export interface Ikigai {
 
 export interface UserProfile {
   name: string;
+  email?: string;
+  location?: string;
+  website?: string;
+  bio?: string;
+  image?: string;
   ikigai: Ikigai;
 }
 

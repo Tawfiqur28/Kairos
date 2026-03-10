@@ -1,4 +1,3 @@
-
 {
   "header": {
     "logo": "KAIROS"
@@ -199,7 +198,7 @@
     "tipsTitle": "获得更好结果的提示",
     "tipsDesc": "提高职业匹配的准确性",
     "whyItMatters": "为什么这很重要",
-    "whyItMattersDesc": "详细的个人资料可以防止通用的 50% 分数。AI 会分析您的热情、技能、价值观和兴趣的独特组合，以提供准确的职业匹配和个性化的行动计划。",
+    "whyItMattersDesc": "详细的个人资料可以防止通用的 50% 分数。AI 会分析您的热情、技能、价值观和兴趣的独特组合，以提供准确的职业匹配 and 个性化的行动计划。",
     "nextSteps": "后续步骤",
     "nextStepsDesc": "保存后会发生什么？",
     "step1": "主题提取",
@@ -360,9 +359,28 @@
     "cardTitle": "@{name}",
     "cardDescription": "在下方更新你的个人详细信息和 Ikigai。",
     "nameLabel": "姓名",
+    "namePlaceholder": "输入您的姓名",
+    "emailLabel": "电子邮件",
+    "emailPlaceholder": "your@email.com",
+    "locationLabel": "位置",
+    "locationPlaceholder": "城市, 国家",
+    "websiteLabel": "网站",
+    "websitePlaceholder": "https://yourwebsite.com",
+    "bioLabel": "简介",
+    "bioPlaceholder": "向我们介绍一下您自己",
     "passionsLabel": "热情",
+    "passionsPlaceholder": "您喜欢做什么？",
     "skillsLabel": "技能",
-    "saveButton": "保存更改"
+    "skillsPlaceholder": "您擅长什么？",
+    "valuesLabel": "价值观",
+    "valuesPlaceholder": "世界需要什么？",
+    "interestsLabel": "兴趣",
+    "interestsPlaceholder": "您可以获得什么报酬？",
+    "saveButton": "保存更改",
+    "personalInfo": "个人信息",
+    "ikigaiProfile": "Ikigai 个人资料",
+    "accountStats": "个人资料进度",
+    "verified": "已验证帐户"
   },
   "userNav": {
     "email": "user@email.com",
@@ -430,7 +448,7 @@
       "items": [
         {
           "title": "中国“互联网+”大学生创新创业大赛",
-          "description": "中国最重要的学生创新平台之一，涵盖技术、商业和社会影响项目。是获得风险投资关注的顶级赛事。"
+          "description": "中国最重要的学生创新平台之一，涵盖技术、商业和社会影响项目。是获得投资关注的顶级赛事。"
         },
         {
           "title": "“挑战杯”全国大学生课外学术科技作品竞赛",

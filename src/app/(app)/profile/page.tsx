@@ -16,10 +16,10 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { UserProfile } from '@/lib/types';
-import { Save, Camera, Mail, Calendar, MapPin, Link as LinkIcon } from 'lucide-react';
+import { Save, Camera, Mail, MapPin } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/context/language-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -45,18 +45,46 @@ export default function ProfilePage() {
   const [hasMounted, setHasMounted] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
   const handleSave = () => {
-    // The useLocalStorage hook already saves on change, but this provides explicit user feedback.
     setProfile({ ...profile, ikigai: ikigai });
     toast({
       title: t('toasts.profileSavedTitle'),
       description: t('toasts.profileChangesSavedDescription'),
     });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 2MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile({ ...profile, image: reader.result as string });
+        toast({
+          title: "Profile photo updated",
+          description: "Your profile picture has been changed.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   const getInitials = (name: string) => {
@@ -108,33 +136,50 @@ export default function ProfilePage() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 300 }}
-                className="relative"
+                className="relative cursor-pointer group"
+                onClick={triggerFileInput}
               >
-                <Avatar className="h-20 w-20 border-2 border-primary/20">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${profile.name}`} />
+                <Avatar className="h-20 w-20 border-2 border-primary/20 overflow-hidden">
+                  <AvatarImage src={profile.image || `https://api.dicebear.com/7.x/initials/svg?seed=${profile.name}`} className="object-cover" />
                   <AvatarFallback className="bg-primary/10 text-primary text-lg">
                     {hasMounted ? getInitials(profile.name) : 'U'}
                   </AvatarFallback>
                 </Avatar>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                  <Camera className="h-6 w-6 text-white" />
+                </div>
                 <Button
                   size="icon"
                   variant="outline"
-                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background"
+                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerFileInput();
+                  }}
                 >
                   <Camera className="h-4 w-4" />
                 </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
               </motion.div>
               
               <div className="flex-1">
                 <CardTitle className="text-2xl">{t('profile.cardTitle', { name: profile.name })}</CardTitle>
                 <CardDescription>{t('profile.cardDescription')}</CardDescription>
                 
-                {hasMounted && profile.email && (
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      <span>{profile.email}</span>
-                    </div>
+                {hasMounted && (profile.email || profile.location) && (
+                  <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    {profile.email && (
+                      <div className="flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        <span>{profile.email}</span>
+                      </div>
+                    )}
                     {profile.location && (
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
