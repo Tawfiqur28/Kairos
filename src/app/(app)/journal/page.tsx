@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -5,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
@@ -104,9 +104,9 @@ export default function JournalPage() {
         description={t('journal.description')}
       />
 
-      <div className="grid gap-6 md:grid-cols-[1fr_1.5fr] mt-6">
-        {/* Editor Part */}
-        <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-[1fr_1.5fr] mt-6 items-start">
+        {/* Editor Part - Pinned to left on desktop */}
+        <div className="md:sticky md:top-20">
           <Card className={entryToEdit ? 'border-primary ring-1 ring-primary/20 shadow-md' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -114,25 +114,27 @@ export default function JournalPage() {
                 {entryToEdit ? t('journal.editEntryTitle') : t('journal.newEntryTitle')}
               </CardTitle>
               <CardDescription>
-                {entryToEdit ? t('journal.editDescription') : t('journal.newEntryDescription')}
+                {t('journal.newEntryDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>{t('journal.feelingLabel')}</Label>
+                <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
                 <Input 
+                  id="feeling"
                   value={currentFeeling} 
                   onChange={(e) => setCurrentFeeling(e.target.value)} 
                   placeholder={t('journal.feelingPlaceholder')} 
                 />
               </div>
               <div className="space-y-2">
-                <Label>{t('journal.thoughtsLabel')}</Label>
+                <Label htmlFor="thoughts">{t('journal.thoughtsLabel')}</Label>
                 <Textarea 
+                  id="thoughts"
                   value={currentContent} 
                   onChange={(e) => setCurrentContent(e.target.value)} 
                   placeholder={t('journal.thoughtsPlaceholder')} 
-                  className="min-h-48" 
+                  className="min-h-[250px] resize-none" 
                 />
               </div>
             </CardContent>
@@ -150,7 +152,7 @@ export default function JournalPage() {
           </Card>
         </div>
 
-        {/* History Part */}
+        {/* History Part - Scrollable */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-xl">{t('journal.pastEntriesTitle')}</h3>
@@ -164,72 +166,74 @@ export default function JournalPage() {
             </div>
           )}
 
-          <ScrollArea className="h-[calc(100vh-250px)]">
-            <div className="space-y-4 pr-4 pb-12">
-              <AnimatePresence mode="popLayout">
-                {entries.map((entry, index) => (
-                  <motion.div
-                    key={entry.id}
-                    layout
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  >
-                    <Card className="hover:shadow-md transition-shadow group">
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-sm font-semibold">{entry.date}</CardTitle>
-                            <Badge variant="outline" className="mt-1 bg-primary/5 border-primary/20">{entry.feeling}</Badge>
-                          </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              disabled={index === 0}
-                              onClick={() => moveEntry(index, 'up')}
-                            >
-                              <ArrowUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              disabled={index === entries.length - 1}
-                              onClick={() => moveEntry(index, 'down')}
-                            >
-                              <ArrowDown className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:text-primary"
-                              onClick={() => startEdit(entry)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:text-destructive"
-                              onClick={() => setEntryToDelete(entry)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+          <div className="space-y-4 pb-12">
+            <AnimatePresence mode="popLayout">
+              {entries.map((entry, index) => (
+                <motion.div
+                  key={entry.id}
+                  layout
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                >
+                  <Card className="hover:shadow-md transition-shadow group">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-sm font-semibold">{entry.date}</CardTitle>
+                          <Badge variant="outline" className="mt-1 bg-primary/5 border-primary/20">{entry.feeling}</Badge>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </ScrollArea>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled={index === 0}
+                            onClick={() => moveEntry(index, 'up')}
+                            title="Move Up"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled={index === entries.length - 1}
+                            onClick={() => moveEntry(index, 'down')}
+                            title="Move Down"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:text-primary"
+                            onClick={() => startEdit(entry)}
+                            title="Edit"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:text-destructive"
+                            onClick={() => setEntryToDelete(entry)}
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 

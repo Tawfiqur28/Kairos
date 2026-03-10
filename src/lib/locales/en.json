@@ -1,3 +1,4 @@
+
 {
   "header": {
     "logo": "KAIROS"
@@ -212,24 +213,27 @@
   },
   "journal": {
     "title": "Daily Journal",
-    "description": "Reflect on your journey. Your thoughts help reveal hidden career passions.",
-    "newEntryTitle": "New Reflection",
-    "newEntryDescription": "Log your thoughts and feelings about your career discovery today.",
+    "description": "Reflect on your growth and professional journey.",
+    "newEntryTitle": "Log your thoughts and feelings about your today",
+    "newEntryDescription": "Record your insights, challenges, and wins.",
     "feelingLabel": "How are you feeling?",
-    "feelingPlaceholder": "e.g., Curious, challenged, confident...",
-    "thoughtsLabel": "Reflection",
-    "thoughtsPlaceholder": "What did you learn about yourself or your goals today?",
-    "saveButton": "Save Reflection",
-    "updateButton": "Update Reflection",
-    "editEntryTitle": "Edit Reflection",
-    "editDescription": "Update your previous journal entry below.",
-    "pastEntriesTitle": "Your Reflections",
-    "entries": "Entries",
-    "noEntries": "No reflections logged yet. Start by writing your first one!",
-    "entryDeleted": "Reflection deleted successfully.",
-    "entryUpdated": "Reflection updated successfully.",
+    "feelingPlaceholder": "e.g., Energized, curious, slightly tired...",
+    "thoughtsLabel": "Journal Reflection",
+    "thoughtsPlaceholder": "Describe your tasks, what you enjoyed, and what you learned today.",
+    "saveButton": "Save Entry",
+    "updateButton": "Update Entry",
+    "editEntryTitle": "Edit Journal Entry",
+    "pastEntriesTitle": "Past Entries",
+    "entries": "entries",
+    "noEntries": "No journal entries yet.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Are you sure?",
+    "deleteConfirmDescription": "This will permanently delete your journal entry. This action cannot be undone.",
     "cancel": "Cancel",
-    "confirm": "Delete"
+    "confirm": "Confirm",
+    "entryDeleted": "Entry deleted.",
+    "entryUpdated": "Entry updated."
   },
   "careers": {
     "title": "Career Explorer",
@@ -381,7 +385,7 @@
     "voiceErrorGeneral": "An error occurred during voice recognition.",
     "incompleteEntryTitle": "Incomplete Entry",
     "incompleteEntryDescription": "Please fill out both your thoughts and feelings.",
-    "entrySavedTitle": "Reflection Saved",
+    "entrySavedTitle": "Entry Saved",
     "entrySavedDescription": "Your journal has been updated.",
     "notEnoughDataTitle": "Not Enough Data",
     "notEnoughDataDescription": "Please write at least one journal entry first.",
