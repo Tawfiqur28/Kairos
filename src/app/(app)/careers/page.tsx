@@ -526,6 +526,11 @@ export default function CareersPage() {
                   </div>
                 </div>
 
+                {/* Add this temporarily to debug */}
+                <pre className="text-xs bg-muted p-2 rounded mt-4 overflow-auto max-h-40">
+                  {JSON.stringify(selectedCareer, null, 2)}
+                </pre>
+
                 {/* Action Buttons */}
                 <div className="space-y-3 pt-4">
                   {matchResult.fitScore > 50 ? (
