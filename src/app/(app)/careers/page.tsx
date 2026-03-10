@@ -77,7 +77,9 @@ export default function CareersPage() {
   const { toast } = useToast();
   const [, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
   const [hasMounted, setHasMounted] = useState(false);
-  const [userThemes, setUserThemes] = useState<string[]>([]);
+  
+  // Cache user themes in local storage to prevent slow AI calls on every page visit
+  const [userThemes, setUserThemes] = useLocalStorage<string[]>('user-themes', []);
   const [selectedCluster, setSelectedCluster] = useState<string>('All');
   const [isRefreshingThemes, setIsRefreshingThemes] = useState(false);
 
@@ -135,12 +137,15 @@ export default function CareersPage() {
     } finally {
       setIsRefreshingThemes(false);
     }
-  }, [isProfileComplete, userProfileString]);
+  }, [isProfileComplete, userProfileString, setUserThemes]);
 
   useEffect(() => {
     setHasMounted(true);
-    refreshThemes();
-  }, [refreshThemes]);
+    // Only auto-refresh if themes are currently empty but profile is done
+    if (isProfileComplete && userThemes.length === 0) {
+      refreshThemes();
+    }
+  }, [isProfileComplete, userThemes.length, refreshThemes]);
 
   const displayedCareers = useMemo(() => {
     let filtered = sortedCareers;
