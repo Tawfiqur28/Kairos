@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -223,12 +224,12 @@ export default function LearnMorePage() {
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-red-600 dark:text-red-400 line-through">Problem:</span>
+                        <span className="font-medium text-red-500 line-through shrink-0">{t('learnMore.problemLabel')}</span>
                         <span className="font-semibold">{item.problem}</span>
                       </div>
                       <span className="hidden md:block text-muted-foreground">→</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-green-600 dark:text-green-400">Solution:</span>
+                        <span className="font-medium text-green-600 dark:text-green-400 shrink-0">{t('learnMore.solutionLabel')}</span>
                         <span className="font-semibold text-primary">{item.solution}</span>
                       </div>
                     </div>

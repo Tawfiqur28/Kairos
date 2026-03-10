@@ -331,6 +331,8 @@
     "heroCta": "Start Your Journey",
     "problemSolutionTitle": "Solving Career Guidance Challenges",
     "problemSolutionDesc": "How KAIROS addresses common issues with career matching tools",
+    "problemLabel": "Problem:",
+    "solutionLabel": "Solution:",
     "problem1": "Generic 50% Scores",
     "solution1": "Dynamic Theme-Based Matching",
     "problem1_desc": "Instead of showing 50% for every career, KAIROS analyzes your unique profile themes to provide accurate scores.",

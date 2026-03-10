@@ -1,3 +1,4 @@
+
 {
   "header": {
     "logo": "KAIROS"
@@ -174,7 +175,7 @@
     "careerGoalsDesc": "提及您好奇的任何特定职业道路或行业",
     "bannerCompleteTitle": "个人资料已完成！",
     "bannerIncompleteTitle": "完成您的个人资料以获得更好的结果",
-    "bannerCompleteDesc": "您详细的个人资料可确保准确的职业匹配。分数将基于您的独特个人资料。",
+    "bannerCompleteDesc": "您详细的个人资料可确保准确的职业匹配. 分数将基于您的独特个人资料。",
     "bannerIncompleteDesc": "完整的个人资料可防止通用的 50% 分数，并确保个性化的职业匹配。",
     "bannerProgressDesc": "请填写所有部分并提供详细信息，以解锁准确的职业匹配。",
     "readyForCareers": "准备好探索职业",
@@ -330,6 +331,8 @@
     "heroCta": "开始您的旅程",
     "problemSolutionTitle": "解决职业指导挑战",
     "problemSolutionDesc": "KAIROS 如何解决职业匹配工具的常见问题",
+    "problemLabel": "问题：",
+    "solutionLabel": "解决方案：",
     "problem1": "通用的 50% 分数",
     "solution1": "动态的基于主题的匹配",
     "problem1_desc": "KAIROS 不会为每个职业都显示 50%，而是分析您独特的个人资料主题以提供准确的分数。",
@@ -512,7 +515,7 @@
         "market_text": "职位增长：软件职位增长15%；UX职位增长18%。\n热门技能：JavaScript框架（React, Node.js）、Figma、敏捷/Scrum、用户研究。\n招聘中心：硅谷、奥斯汀、柏林、东京、深圳。"
       },
       "marketing_creative": {
-        "title": "领域情报：市场营销与创意",
+        "title": "领域情报：软件与设计",
         "innovation_title": "创新聚光灯",
         "innovation_text": "市场经理：转向AI驱动的分析、超个性化和影响者营销自动化。\n音乐制作人：AI音乐工具、空间音频和基于NFT的发行方式的兴起。",
         "market_title": "市场脉搏",
