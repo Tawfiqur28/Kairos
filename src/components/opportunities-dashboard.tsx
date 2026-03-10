@@ -17,24 +17,153 @@ interface OpportunitiesDashboardProps {
   educationLevel: EducationLevel;
 }
 
+// COMPLETE MAPPING FOR ALL 22 CAREERS
 const getIntelligenceKey = (careerTitle: string): 'cloud_cyber' | 'data_ai' | 'education_health' | 'software_design' | 'marketing_creative' => {
   const lowerCaseTitle = careerTitle.toLowerCase();
-  if (lowerCaseTitle.includes('cloud') || lowerCaseTitle.includes('cyber')) {
-    return 'cloud_cyber';
-  }
-  if (lowerCaseTitle.includes('data') || lowerCaseTitle.includes('research scientist')) {
-    return 'data_ai';
-  }
-  if (lowerCaseTitle.includes('teacher') || lowerCaseTitle.includes('nurse')) {
-    return 'education_health';
-  }
-  if (lowerCaseTitle.includes('software') || lowerCaseTitle.includes('ux designer') || lowerCaseTitle.includes('software engineer')) {
+  
+  // ===== TECH CAREERS (7 jobs) =====
+  
+  // 1. Software Engineer → software_design
+  if (lowerCaseTitle.includes('software') || 
+      (lowerCaseTitle.includes('engineer') && !lowerCaseTitle.includes('chemical') && !lowerCaseTitle.includes('architect'))) {
     return 'software_design';
   }
-  if (lowerCaseTitle.includes('marketing') || lowerCaseTitle.includes('music')) {
+  
+  // 2. Cloud Architect → cloud_cyber
+  if (lowerCaseTitle.includes('cloud') || (lowerCaseTitle.includes('architect') && lowerCaseTitle.includes('cloud'))) {
+    return 'cloud_cyber';
+  }
+  
+  // 3. Data Scientist → data_ai
+  // 5. AI Researcher → data_ai
+  if (lowerCaseTitle.includes('data') || 
+      lowerCaseTitle.includes('scientist') ||
+      lowerCaseTitle.includes('ai') ||
+      lowerCaseTitle.includes('artificial intelligence') ||
+      lowerCaseTitle.includes('machine learning') ||
+      lowerCaseTitle.includes('researcher')) {
+    return 'data_ai';
+  }
+  
+  // 4. Cybersecurity Analyst → cloud_cyber
+  // 14. Ethical Hacker → cloud_cyber
+  if (lowerCaseTitle.includes('cyber') || 
+      lowerCaseTitle.includes('security') ||
+      lowerCaseTitle.includes('ethical') ||
+      lowerCaseTitle.includes('hacker') ||
+      (lowerCaseTitle.includes('analyst') && lowerCaseTitle.includes('security'))) {
+    return 'cloud_cyber';
+  }
+  
+  // 13. Metaverse Developer → software_design
+  // 19. Blockchain Developer → software_design
+  if (lowerCaseTitle.includes('metaverse') || 
+      lowerCaseTitle.includes('blockchain') ||
+      lowerCaseTitle.includes('web3') ||
+      lowerCaseTitle.includes('crypto') ||
+      (lowerCaseTitle.includes('developer') && !lowerCaseTitle.includes('software'))) {
+    return 'software_design';
+  }
+  
+  // ===== SCIENCE CAREERS (2 jobs) =====
+  
+  // 6. Physicist → data_ai
+  // 7. Chemist → data_ai
+  if (lowerCaseTitle.includes('physicist') || 
+      lowerCaseTitle.includes('chemist') ||
+      lowerCaseTitle.includes('physics') ||
+      lowerCaseTitle.includes('chemistry') ||
+      (lowerCaseTitle.includes('science') && !lowerCaseTitle.includes('computer'))) {
+    return 'data_ai';
+  }
+  
+  // ===== HEALTHCARE CAREERS (2 jobs) =====
+  
+  // 17. Doctor → education_health
+  // 22. Psychologist → education_health
+  if (lowerCaseTitle.includes('doctor') || 
+      lowerCaseTitle.includes('physician') ||
+      lowerCaseTitle.includes('medical') ||
+      lowerCaseTitle.includes('psychologist') ||
+      lowerCaseTitle.includes('therapist') ||
+      lowerCaseTitle.includes('clinical') ||
+      lowerCaseTitle.includes('health')) {
+    return 'education_health';
+  }
+  
+  // ===== EDUCATION CAREERS (1 job) =====
+  
+  // 18. Professor → education_health
+  if (lowerCaseTitle.includes('professor') || 
+      lowerCaseTitle.includes('teacher') ||
+      lowerCaseTitle.includes('education') ||
+      lowerCaseTitle.includes('faculty') ||
+      lowerCaseTitle.includes('academic')) {
+    return 'education_health';
+  }
+  
+  // ===== ARCHITECTURE & ENGINEERING (1 job) =====
+  
+  // 20. Architect → software_design
+  if (lowerCaseTitle.includes('architect') && !lowerCaseTitle.includes('software') && !lowerCaseTitle.includes('cloud')) {
+    return 'software_design';
+  }
+  
+  // ===== ARTS & CREATIVE CAREERS (5 jobs) =====
+  
+  // 8. Music Producer → marketing_creative
+  // 10. Graphic Designer → marketing_creative
+  // 11. UI/UX Designer → marketing_creative
+  // 12. TikTok/Content Creator → marketing_creative
+  if (lowerCaseTitle.includes('music') || 
+      lowerCaseTitle.includes('producer') ||
+      lowerCaseTitle.includes('graphic') ||
+      lowerCaseTitle.includes('designer') ||
+      lowerCaseTitle.includes('ui') ||
+      lowerCaseTitle.includes('ux') ||
+      lowerCaseTitle.includes('content') ||
+      lowerCaseTitle.includes('tiktok') ||
+      lowerCaseTitle.includes('creative') ||
+      lowerCaseTitle.includes('artist')) {
     return 'marketing_creative';
   }
-  // A sensible default if no match.
+  
+  // ===== BUSINESS & MARKETING CAREERS (3 jobs) =====
+  
+  // 9. Marketing Manager → marketing_creative
+  // 21. Digital Marketing Specialist → marketing_creative
+  if (lowerCaseTitle.includes('marketing') || 
+      lowerCaseTitle.includes('digital') ||
+      lowerCaseTitle.includes('business') ||
+      lowerCaseTitle.includes('manager') ||
+      lowerCaseTitle.includes('finance') ||
+      (lowerCaseTitle.includes('analyst') && !lowerCaseTitle.includes('data') && !lowerCaseTitle.includes('security'))) {
+    return 'marketing_creative';
+  }
+  
+  // ===== LAW CAREERS (1 job) =====
+  
+  // 15. Lawyer → marketing_creative
+  if (lowerCaseTitle.includes('law') || 
+      lowerCaseTitle.includes('lawyer') ||
+      lowerCaseTitle.includes('attorney') ||
+      lowerCaseTitle.includes('legal') ||
+      lowerCaseTitle.includes('counsel')) {
+    return 'marketing_creative';
+  }
+  
+  // ===== SPORTS & ESPORTS CAREERS (1 job) =====
+  
+  // 16. E-sports Coach → marketing_creative
+  if (lowerCaseTitle.includes('sports') || 
+      lowerCaseTitle.includes('esports') ||
+      lowerCaseTitle.includes('coach') ||
+      lowerCaseTitle.includes('gaming') ||
+      lowerCaseTitle.includes('tournament')) {
+    return 'marketing_creative';
+  }
+  
+  // Default fallback
   return 'software_design';
 };
 
