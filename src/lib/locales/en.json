@@ -1,3 +1,4 @@
+
 {
   "header": {
     "logo": "KAIROS"
@@ -159,6 +160,7 @@
     "interestsLabel": "What you can be PAID FOR (Interests)",
     "interestsPlaceholder": "e.g., Building software, creating marketing campaigns, providing financial advice, scientific research...",
     "saveButton": "Save Profile",
+    "autoSaved": "All changes saved automatically",
     "profileIncompleteToast": "Profile Incomplete",
     "profileIncompleteToastDesc": "Please fill in more details for better career matching.",
     "profileCompleteToast": "Profile Complete! 🎉",
@@ -361,6 +363,7 @@
     "description": "Manage your account information and Ikigai.",
     "cardTitle": "@{name}",
     "cardDescription": "Update your personal details and Ikigai below.",
+    "autoSaved": "Changes are saved as you type",
     "nameLabel": "Name",
     "namePlaceholder": "Enter your name",
     "emailLabel": "Email",

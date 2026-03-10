@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -12,10 +13,9 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, EducationLevel } from '@/lib/types';
-import { Save, AlertCircle, Sparkles, Target, Zap, Heart, Brain } from 'lucide-react';
+import { AlertCircle, Sparkles, Target, Zap, Heart, Brain, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect, useState, useMemo } from 'react';
@@ -35,7 +35,6 @@ const initialIkigai: Ikigai = {
 
 export default function IkigaiPage() {
   const [ikigai, setIkigai] = useLocalStorage<Ikigai>('ikigai-profile', initialIkigai);
-  const { toast } = useToast();
   const { t } = useLanguage();
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -50,7 +49,8 @@ export default function IkigaiPage() {
     const fields = ['passions', 'skills', 'values', 'interests'];
     
     fields.forEach(field => {
-      if (ikigai[field as keyof Ikigai] && (ikigai[field as keyof Ikigai] as string).length > 10) completed++;
+      const val = ikigai[field as keyof Ikigai];
+      if (typeof val === 'string' && val.trim().length > 10) completed++;
     });
     
     if (ikigai.educationLevel) completed++;
@@ -60,41 +60,13 @@ export default function IkigaiPage() {
 
   const isProfileComplete = completionPercentage >= 80;
 
-  const handleSave = () => {
-    if (completionPercentage < 50) {
-      toast({
-        title: t('ikigai.profileIncompleteToast'),
-        description: t('ikigai.profileIncompleteToastDesc'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    toast({
-      title: t('toasts.profileSavedTitle'),
-      description: isProfileComplete 
-        ? t('ikigai.bannerCompleteDesc')
-        : t('toasts.profileSavedDescription'),
-    });
-
-    if (isProfileComplete) {
-      setTimeout(() => {
-        toast({
-          title: t('ikigai.profileCompleteToast'),
-          description: t('ikigai.profileCompleteToastDesc'),
-          variant: 'default',
-        });
-      }, 1000);
-    }
-  };
-
   const handleInputChange = (field: keyof Ikigai, value: string) => {
     setIkigai(prev => ({ ...prev, [field]: value }));
   };
 
   const getFieldStatus = (value?: string): 'good' | 'fair' | 'poor' => {
-    if (!value || value.length === 0) return 'poor';
-    if (value.length < 30) return 'fair';
+    if (!value || value.trim().length === 0) return 'poor';
+    if (value.trim().length < 30) return 'fair';
     return 'good';
   };
   
@@ -169,98 +141,12 @@ export default function IkigaiPage() {
           title={t('ikigai.title')}
           description={t('ikigai.description')}
         />
-        
-        <div className="mb-6 p-4 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <div className="flex items-start gap-3">
-            <Skeleton className="h-5 w-5 rounded-full mt-1" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="h-4 w-full" />
-              <div className="mt-3 space-y-2">
-                <div className="flex justify-between text-xs mb-1">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-10" />
-                </div>
-                <Skeleton className="h-2 w-full" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{t('ikigai.profileTitle')}</CardTitle>
-                    <CardDescription>
-                      {t('ikigai.profileDescription')}
-                    </CardDescription>
-                  </div>
-                  <Skeleton className="h-6 w-24" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  {[...Array(4)].map((_, i) => (
-                    <div className="space-y-2" key={i}>
-                      <div className="flex items-center justify-between">
-                        <Skeleton className="h-6 w-32" />
-                        <Skeleton className="h-4 w-24" />
-                      </div>
-                      <Skeleton className="min-h-40 w-full" />
-                      <Skeleton className="h-4 w-full" />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-4 pt-4 border-t">
-                  <Skeleton className="h-6 w-48" />
-                  <Skeleton className="h-4 w-full" />
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className="flex items-center space-x-2 p-3 rounded-lg border">
-                        <Skeleton className="h-4 w-4 rounded-full" />
-                        <Skeleton className="h-4 flex-1" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center">
-                <Skeleton className="h-5 w-48" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-10 w-32" />
-                  <Skeleton className="h-10 w-28" />
-                </div>
-              </CardFooter>
-            </Card>
+            <Skeleton className="h-[600px] w-full" />
           </div>
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
-                  {t('ikigai.tipsTitle')}
-                </CardTitle>
-                <CardDescription>
-                  {t('ikigai.tipsDesc')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[...Array(4)].map((_, index) => (
-                  <div key={index} className="p-3 bg-muted/30 rounded-lg space-y-2">
-                    <div className="flex items-start gap-2 mb-1">
-                      <Skeleton className="h-4 w-4 mt-0.5" />
-                      <Skeleton className="h-5 w-32" />
-                    </div>
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <Skeleton className="h-[400px] w-full" />
           </div>
         </div>
       </>
@@ -279,7 +165,7 @@ export default function IkigaiPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className={`mb-6 p-4 rounded-lg border ${
+          className={`mb-6 p-4 rounded-lg border mt-6 ${
             isProfileComplete 
               ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
               : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
@@ -322,11 +208,6 @@ export default function IkigaiPage() {
                   <span>{completionPercentage}%</span>
                 </div>
                 <Progress value={completionPercentage} className="h-2" />
-                {completionPercentage < 80 && (
-                  <p className="text-xs mt-2 text-muted-foreground">
-                    {t('ikigai.bannerProgressDesc')}
-                  </p>
-                )}
               </div>
             </div>
             
@@ -350,11 +231,15 @@ export default function IkigaiPage() {
                     {t('ikigai.profileDescription')}
                   </CardDescription>
                 </div>
-                {hasMounted && (
+                <div className="flex flex-col items-end gap-2">
                   <Badge variant={isProfileComplete ? "default" : "outline"}>
                     {t('ikigai.completion', { completionPercentage })}
                   </Badge>
-                )}
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    {t('ikigai.autoSaved')}
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -365,7 +250,7 @@ export default function IkigaiPage() {
                       <Heart className="h-4 w-4 text-red-500" />
                       {t('ikigai.passionsLabel')}
                     </Label>
-                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.passions))}`}>{getStatusText('passions')}</span>}
+                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.passions))}`}>{getStatusText('passions')}</span>
                   </div>
                   <Textarea
                     id="passions"
@@ -385,7 +270,7 @@ export default function IkigaiPage() {
                       <Zap className="h-4 w-4 text-yellow-500" />
                       {t('ikigai.skillsLabel')}
                     </Label>
-                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.skills))}`}>{getStatusText('skills')}</span>}
+                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.skills))}`}>{getStatusText('skills')}</span>
                   </div>
                   <Textarea
                     id="skills"
@@ -405,7 +290,7 @@ export default function IkigaiPage() {
                       <Target className="h-4 w-4 text-blue-500" />
                       {t('ikigai.valuesLabel')}
                     </Label>
-                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.values))}`}>{getStatusText('values')}</span>}
+                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.values))}`}>{getStatusText('values')}</span>
                   </div>
                   <Textarea
                     id="values"
@@ -425,7 +310,7 @@ export default function IkigaiPage() {
                       <Brain className="h-4 w-4 text-purple-500" />
                       {t('ikigai.interestsLabel')}
                     </Label>
-                    {hasMounted && <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.interests))}`}>{getStatusText('interests')}</span>}
+                    <span className={`text-xs ${getStatusColor(getFieldStatus(ikigai?.interests))}`}>{getStatusText('interests')}</span>
                   </div>
                   <Textarea
                     id="interests"
@@ -485,30 +370,23 @@ export default function IkigaiPage() {
                 </RadioGroup>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between items-center">
+            <CardFooter className="flex justify-between items-center border-t py-4">
               <div>
-                {hasMounted && (
-                  <>
-                    {completionPercentage < 50 ? (
-                      <p className="text-sm text-yellow-600">
-                        ⚠️ {t('ikigai.footerWarning')}
-                      </p>
-                    ) : completionPercentage < 80 ? (
-                      <p className="text-sm text-blue-600">
-                        📝 {t('ikigai.footerAlmostThere')}
-                      </p>
-                    ) : (
-                      <p className="text-sm text-green-600">
-                        ✅ {t('ikigai.footerReady')}
-                      </p>
-                    )}
-                  </>
+                {completionPercentage < 50 ? (
+                  <p className="text-sm text-yellow-600 font-medium">
+                    ⚠️ {t('ikigai.footerWarning')}
+                  </p>
+                ) : completionPercentage < 80 ? (
+                  <p className="text-sm text-blue-600 font-medium">
+                    📝 {t('ikigai.footerAlmostThere')}
+                  </p>
+                ) : (
+                  <p className="text-sm text-green-600 font-medium">
+                    ✅ {t('ikigai.footerReady')}
+                  </p>
                 )}
               </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSave} variant="secondary" disabled={!hasMounted || completionPercentage < 30}>
-                  <Save className="mr-2 h-4 w-4" /> {t('ikigai.saveButton')}
-                </Button>
+              <div className="flex gap-4 items-center">
                 {isProfileComplete && (
                   <Button asChild className="animate-button-glow">
                     <Link href="/careers">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -13,10 +14,9 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-import type { UserProfile } from '@/lib/types';
-import { Save, Camera, Mail, MapPin, X } from 'lucide-react';
+import type { UserProfile, Ikigai } from '@/lib/types';
+import { Camera, Mail, MapPin, X, CheckCircle2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/context/language-context';
 import { useState, useEffect, useRef } from 'react';
@@ -39,11 +39,18 @@ const initialProfile: UserProfile = {
   },
 };
 
+const initialIkigai: Ikigai = {
+  passions: '',
+  skills: '',
+  values: '',
+  interests: '',
+  educationLevel: undefined,
+};
+
 export default function ProfilePage() {
   const [profile, setProfile] = useLocalStorage<UserProfile>('user-profile', initialProfile);
-  const [ikigai, setIkigai] = useLocalStorage('ikigai-profile', initialProfile.ikigai);
+  const [ikigai, setIkigai] = useLocalStorage<Ikigai>('ikigai-profile', initialIkigai);
   const [hasMounted, setHasMounted] = useState(false);
-  const { toast } = useToast();
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,33 +58,12 @@ export default function ProfilePage() {
     setHasMounted(true);
   }, []);
 
-  const handleSave = () => {
-    setProfile({ ...profile, ikigai: ikigai });
-    toast({
-      title: t('toasts.profileSavedTitle'),
-      description: t('toasts.profileChangesSavedDescription'),
-    });
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 2MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfile({ ...profile, image: reader.result as string });
-        toast({
-          title: "Profile photo updated",
-          description: "Your profile picture has been changed.",
-        });
       };
       reader.readAsDataURL(file);
     }
@@ -85,10 +71,6 @@ export default function ProfilePage() {
 
   const handleRemoveImage = () => {
     setProfile({ ...profile, image: undefined });
-    toast({
-      title: "Photo removed",
-      description: "Your profile picture has been reset to default.",
-    });
   };
 
   const triggerFileInput = () => {
@@ -137,6 +119,7 @@ export default function ProfilePage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="mt-6"
       >
         <Card>
           <CardHeader>
@@ -194,8 +177,16 @@ export default function ProfilePage() {
               </div>
               
               <div className="flex-1">
-                <CardTitle className="text-2xl">{t('profile.cardTitle', { name: profile.name })}</CardTitle>
-                <CardDescription>{t('profile.cardDescription')}</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-2xl">{t('profile.cardTitle', { name: profile.name })}</CardTitle>
+                    <CardDescription>{t('profile.cardDescription')}</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold bg-muted/50 px-2 py-1 rounded">
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    {t('profile.autoSaved')}
+                  </div>
+                </div>
                 
                 {hasMounted && (profile.email || profile.location) && (
                   <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
@@ -281,7 +272,7 @@ export default function ProfilePage() {
                 <motion.div variants={itemVariants} className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="passions" className="flex items-center gap-2">
-                      <span className="text-lg">❤️</span>
+                      <Heart className="h-4 w-4 text-red-500" />
                       {t('profile.passionsLabel')}
                     </Label>
                     <Textarea
@@ -294,7 +285,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="skills" className="flex items-center gap-2">
-                      <span className="text-lg">⚡</span>
+                      <Zap className="h-4 w-4 text-yellow-500" />
                       {t('profile.skillsLabel')}
                     </Label>
                     <Textarea
@@ -307,7 +298,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="values" className="flex items-center gap-2">
-                      <span className="text-lg">🎯</span>
+                      <Target className="h-4 w-4 text-blue-500" />
                       {t('profile.valuesLabel')}
                     </Label>
                     <Textarea
@@ -320,7 +311,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="interests" className="flex items-center gap-2">
-                      <span className="text-lg">🧠</span>
+                      <Brain className="h-4 w-4 text-purple-500" />
                       {t('profile.interestsLabel')}
                     </Label>
                     <Textarea
@@ -376,15 +367,10 @@ export default function ProfilePage() {
                 </Badge>
               )}
             </div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button onClick={handleSave} size="lg">
-                <Save className="mr-2 h-4 w-4" />
-                {t('profile.saveButton')}
-              </Button>
-            </motion.div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              {t('profile.autoSaved')}
+            </div>
           </CardFooter>
         </Card>
       </motion.div>

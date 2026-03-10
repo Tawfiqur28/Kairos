@@ -1,3 +1,4 @@
+
 {
   "header": {
     "logo": "KAIROS"
@@ -159,6 +160,7 @@
     "interestsLabel": "您能获得报酬的 (兴趣/商业价值)",
     "interestsPlaceholder": "例如：开发企业级软件、策划营销增长方案、提供专业理财建议、从事生物科学研究...",
     "saveButton": "保存个人档案",
+    "autoSaved": "所有更改已自动保存",
     "profileIncompleteToast": "档案内容不足",
     "profileIncompleteToastDesc": "请提供更多细节，以便 AI 进行深度分析。",
     "profileCompleteToast": "档案构建成功！🎉",
@@ -352,6 +354,7 @@
     "description": "管理您的账户信息与核心特质档案。",
     "cardTitle": "@{name}",
     "cardDescription": "在此更新您的基本信息与 Ikigai 描述。",
+    "autoSaved": "更改在输入时自动保存",
     "nameLabel": "称呼",
     "namePlaceholder": "请输入您的姓名或昵称",
     "emailLabel": "电子邮箱",
