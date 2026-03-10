@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { UserProfile } from '@/lib/types';
-import { Save, Camera, Mail, MapPin } from 'lucide-react';
+import { Save, Camera, Mail, MapPin, X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/context/language-context';
 import { useState, useEffect, useRef } from 'react';
@@ -83,6 +83,14 @@ export default function ProfilePage() {
     }
   };
 
+  const handleRemoveImage = () => {
+    setProfile({ ...profile, image: undefined });
+    toast({
+      title: "Photo removed",
+      description: "Your profile picture has been reset to default.",
+    });
+  };
+
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
@@ -133,40 +141,57 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-                className="relative cursor-pointer group"
-                onClick={triggerFileInput}
-              >
-                <Avatar className="h-20 w-20 border-2 border-primary/20 overflow-hidden">
-                  <AvatarImage src={profile.image || `https://api.dicebear.com/7.x/initials/svg?seed=${profile.name}`} className="object-cover" />
-                  <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                    {hasMounted ? getInitials(profile.name) : 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                  <Camera className="h-6 w-6 text-white" />
-                </div>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background shadow-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    triggerFileInput();
-                  }}
+              <div className="relative">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                  className="relative cursor-pointer group"
+                  onClick={triggerFileInput}
                 >
-                  <Camera className="h-4 w-4" />
-                </Button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </motion.div>
+                  <Avatar className="h-20 w-20 border-2 border-primary/20 overflow-hidden">
+                    <AvatarImage src={profile.image || `https://api.dicebear.com/7.x/initials/svg?seed=${profile.name}`} className="object-cover" />
+                    <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                      {hasMounted ? getInitials(profile.name) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                    <Camera className="h-6 w-6 text-white" />
+                  </div>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerFileInput();
+                    }}
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </motion.div>
+                
+                {profile.image && (
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full shadow-sm z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                    title="Remove Photo"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
               
               <div className="flex-1">
                 <CardTitle className="text-2xl">{t('profile.cardTitle', { name: profile.name })}</CardTitle>
