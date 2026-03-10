@@ -47,7 +47,7 @@ const CareerCard: React.FC<CareerCardProps> = ({ career, matchesTheme, onCheckFi
             <li key={skill}>{skill}</li>
           ))}
           {career.requiredSkills.length > 3 && (
-            <li className="text-primary">+{career.requiredSkills.length - 3} more</li>
+            <li className="text-primary">{t('careers.moreSkills', { count: career.requiredSkills.length - 3 })}</li>
           )}
         </ul>
       </CardContent>

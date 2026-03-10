@@ -358,7 +358,7 @@ export default function CareersPage() {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-blue-600 dark:text-blue-400">No strong themes detected</span>
+                      <span className="text-sm text-blue-600 dark:text-blue-400">{t('careers.noThemes')}</span>
                     )}
                   </div>
                 </div>
@@ -371,17 +371,17 @@ export default function CareersPage() {
                   disabled={isRefreshingThemes}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingThemes ? 'animate-spin' : ''}`} />
-                  {isRefreshingThemes ? t('careers.refreshing') : t('careers.refreshThemes')}
+                  {isRefreshingThemes ? t('plan.regenerating') : t('plan.regenerate')}
                 </Button>
                 
                 <Select value={selectedCluster} onValueChange={setSelectedCluster}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={t('careers.filterByCluster')} />
+                    <SelectValue placeholder={t('dashboard.journeyStatus')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CAREER_CLUSTERS.map(cluster => (
                       <SelectItem key={cluster} value={cluster}>
-                        {cluster === 'All' ? t('careers.allClusters') : cluster}
+                        {cluster}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -389,7 +389,7 @@ export default function CareersPage() {
               </div>
             </div>
             <p className="text-xs text-blue-700 dark:text-blue-400 mt-3">
-              {t('careers.themesDescription')} • {displayedCareers.length} {t('careers.careersFound')}
+              {t('careers.themesDescription')}
             </p>
           </div>
         </motion.div>
@@ -419,9 +419,9 @@ export default function CareersPage() {
           {displayedCareers.length === 0 && (
             <motion.div variants={itemVariants} className="col-span-full">
               <Card className="p-8 text-center">
-                <p className="text-muted-foreground">{t('careers.noCareersFound')}</p>
+                <p className="text-muted-foreground">{t('journal.noEntries')}</p>
                 <Button variant="link" onClick={() => setSelectedCluster('All')}>
-                  {t('careers.clearFilter')}
+                  {t('plan.returnToDashboard')}
                 </Button>
               </Card>
             </motion.div>

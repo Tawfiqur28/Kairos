@@ -86,7 +86,8 @@
     "regenerateFailedToast": "Regeneration Failed",
     "regenerateFailedToastDesc": "Could not regenerate the plan. Please try again.",
     "exportedToast": "Plan Exported!",
-    "exportedToastDesc": "Your action plan has been downloaded as a text file."
+    "exportedToastDesc": "Your action plan has been downloaded as a text file.",
+    "percentComplete": "{percent}% Complete"
   },
   "dashboard": {
     "title": "Welcome to Your Journey",
@@ -135,6 +136,7 @@
     "careerExploration": "Career Exploration",
     "actionPlan": "Action Plan",
     "statusLocked": "Locked",
+    "active": "Active",
     "tipsTitle": "Tips for Better Career Matching",
     "tip1_title": "Dynamic Scoring",
     "tip1_text": "Each career gets a unique fit score based on your profile, not a fixed percentage.",
@@ -290,7 +292,8 @@
     "backToCareers": "Back to Careers List",
     "selectCareerPrompt": "Select a career to see your personalized fit score.",
     "matchesYourProfile": "Matches Your Profile",
-    "cluster": "Cluster: {cluster}"
+    "cluster": "Cluster: {cluster}",
+    "moreSkills": "+{count} more"
   },
   "learnMore": {
     "title": "How Kairos Compass Works",
@@ -422,6 +425,7 @@
     "sectionPlan": "Action Plan",
     "sectionLearnMore": "Learn More",
     "sectionJournal": "Daily Journal",
+    "sectionProfile": "Profile",
     "activePlan": "Active Plan",
     "profileCompletion": "Profile Completion",
     "activePlanFor": "{careerTitle}",
