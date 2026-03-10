@@ -45,7 +45,6 @@ type MatchResult = {
   confidence: 'high' | 'medium' | 'low';
 };
 
-// Career clusters for filtering
 const CAREER_CLUSTERS = [
   'All',
   'Tech',
@@ -61,7 +60,7 @@ const CAREER_CLUSTERS = [
 
 export default function CareersPage() {
   const allCareers: Career[] = careerData.careers;
-  const [ikigai, setIkigai] = useLocalStorage<Ikigai>('ikigai-profile', {
+  const [ikigai] = useLocalStorage<Ikigai>('ikigai-profile', {
     passions: '',
     skills: '',
     values: '',
@@ -71,18 +70,17 @@ export default function CareersPage() {
   
   const { t } = useLanguage();
   const router = useRouter();
-  const [sortedCareers, setSortedCareers] = useState<Career[]>(allCareers);
+  const [sortedCareers] = useState<Career[]>(allCareers);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [_, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
+  const [, setActionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
   const [hasMounted, setHasMounted] = useState(false);
   const [userThemes, setUserThemes] = useState<string[]>([]);
   const [selectedCluster, setSelectedCluster] = useState<string>('All');
   const [isRefreshingThemes, setIsRefreshingThemes] = useState(false);
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -125,7 +123,6 @@ export default function CareersPage() {
     return `Passions: ${ikigai.passions}. Skills: ${ikigai.skills}. Values: ${ikigai.values}. Interests: ${ikigai.interests}. Current Education Level: ${educationLevelText}.`;
   }, [ikigai]);
 
-  // Extract user themes and sort careers
   const refreshThemes = useCallback(async () => {
     if (!isProfileComplete) return;
     
@@ -145,16 +142,13 @@ export default function CareersPage() {
     refreshThemes();
   }, [refreshThemes]);
 
-  // Filter and sort careers based on themes and selected cluster
   const displayedCareers = useMemo(() => {
     let filtered = sortedCareers;
     
-    // Filter by cluster
     if (selectedCluster !== 'All') {
       filtered = filtered.filter(career => career.cluster === selectedCluster);
     }
     
-    // Sort by theme match if themes exist
     if (userThemes.length > 0) {
       return [...filtered].sort((a, b) => {
         const aMatchesTheme = userThemes.includes(a.cluster);
@@ -163,7 +157,6 @@ export default function CareersPage() {
         if (aMatchesTheme && !bMatchesTheme) return -1;
         if (!aMatchesTheme && bMatchesTheme) return 1;
         
-        // Then by title alphabetical
         return a.title.localeCompare(b.title);
       });
     }
@@ -225,7 +218,7 @@ export default function CareersPage() {
   const handleGeneratePlan = useCallback(async (career: Career) => {
     if (!career) return;
     
-    setSelectedCareer(null); // Close dialog
+    setSelectedCareer(null);
     toast({ 
       title: t('careers.generatingPlanToast'), 
       description: t('careers.generatingPlanToastDesc')
@@ -344,7 +337,6 @@ export default function CareersPage() {
           animate={{ opacity: 1, height: 'auto' }}
           className="mb-6 space-y-4"
         >
-          {/* Theme Banner */}
           <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-2">
@@ -377,7 +369,6 @@ export default function CareersPage() {
                   {isRefreshingThemes ? t('careers.refreshing') : t('careers.refreshThemes')}
                 </Button>
                 
-                {/* Cluster Filter */}
                 <Select value={selectedCluster} onValueChange={setSelectedCluster}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder={t('careers.filterByCluster')} />
@@ -460,7 +451,6 @@ export default function CareersPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                {/* Score Display */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="font-semibold text-lg">{t('careers.fitScore')}</h4>
@@ -479,7 +469,6 @@ export default function CareersPage() {
                   </div>
                   <Progress value={matchResult.fitScore} className="h-2" />
                   
-                  {/* Breakdown */}
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
                     <div className="p-2 bg-muted rounded">
                       <div className="font-medium">{t('careers.skillMatch')}</div>
@@ -496,7 +485,6 @@ export default function CareersPage() {
                   </div>
                 </div>
 
-                {/* Theme Mismatch Warning */}
                 {matchResult.themeMismatch && (
                   <motion.div 
                     initial={{ opacity: 0, x: -10 }}
@@ -515,7 +503,6 @@ export default function CareersPage() {
                   </motion.div>
                 )}
 
-                {/* Explanation */}
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <Bot className="h-4 w-4" />
@@ -526,12 +513,6 @@ export default function CareersPage() {
                   </div>
                 </div>
 
-                {/* Add this temporarily to debug */}
-                <pre className="text-xs bg-muted p-2 rounded mt-4 overflow-auto max-h-40">
-                  {JSON.stringify(selectedCareer, null, 2)}
-                </pre>
-
-                {/* Action Buttons */}
                 <div className="space-y-3 pt-4">
                   {matchResult.fitScore > 50 ? (
                     <motion.div 

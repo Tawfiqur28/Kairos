@@ -4,7 +4,7 @@ export interface Ikigai {
   passions: string;
   skills: string;
   values: string;
-  interests:string;
+  interests: string;
   educationLevel?: EducationLevel;
 }
 
