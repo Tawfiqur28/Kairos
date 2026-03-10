@@ -20,10 +20,16 @@ export interface Career {
   requiredSkills: string[];
   marketDemand: number;
   cluster: string;
+  salaryRange?: string;
+  growthOutlook?: string;
+  educationRequired?: string;
   embedding_keywords: string[];
   education_paths: {
-    high_school: string[];
-    undergrad: string[];
+    highSchool: string[];
+    undergraduate: string[];
+    masters?: string[];
+    phd?: string[];
+    professional?: string[];
   };
 }
 

@@ -166,7 +166,7 @@
       "education_paths": {
         "highSchool": ["Join business or DECA club", "Start a blog or social media account", "Learn digital marketing basics online", "Run small social campaigns", "Study psychology and consumer behavior"],
         "undergraduate": ["Major in Marketing or Business", "Get internships in marketing roles", "Build portfolio of campaigns", "Learn Google Analytics and SEO tools", "Join American Marketing Association"],
-        "masters": ["Pursue MBA with marketing focus", "Specialize in digital marketing", "Lead student marketing projects", "Network with industry professionals", "Get certified (HubSpot, Google)"],
+        "masters": ["Pursue Master's in Marketing or MBA", "Specialize in digital marketing", "Lead student marketing projects", "Network with industry professionals", "Get certified (HubSpot, Google)"],
         "phd": ["Research consumer behavior or marketing theory", "Publish in marketing journals", "Teach marketing courses", "Consult for businesses", "Develop new marketing frameworks"],
         "professional": ["Advance to Director of Marketing", "Lead cross-functional teams", "Manage larger budgets", "Develop global marketing strategies", "Mentor junior marketers"]
       }
@@ -259,7 +259,7 @@
       "educationRequired": "Bachelor's in Cybersecurity with certifications (CEH, OSCP)",
       "embedding_keywords": ["ethical hacking", "penetration testing", "cybersecurity", "security", "vulnerability", "exploit", "metasploit", "bug bounty", "oscp"],
       "education_paths": {
-        "highSchool": ["Learn Linux and networking", "Join cybersecurity clubs", "Participate in CTF competitions", "Learn Python for security", "Study basic cryptography"],
+        "highSchool": ["Learn Linux and networking", "Join cybersecurity clubs", "Participate in Capture The Flag (CTF) competitions", "Learn Python for security", "Study basic cryptography"],
         "undergraduate": ["Major in Cybersecurity or CS", "Earn CEH or Security+", "Practice on HackTheBox, TryHackMe", "Join security clubs and CTFs", "Intern in security roles"],
         "masters": ["Specialize in penetration testing", "Earn OSCP certification", "Conduct security research", "Participate in bug bounty programs", "Network at security conferences"],
         "phd": ["Research advanced exploitation techniques", "Discover new vulnerabilities", "Publish security research", "Teach security courses", "Develop security tools"],
@@ -272,7 +272,7 @@
       "description": "Provides legal advice, represents clients, and interprets laws and regulations. Specializes in areas like corporate, criminal, or family law.",
       "requiredSkills": ["Legal Research", "Negotiation", "Argumentation", "Client Counseling", "Case Management", "Writing", "Critical Thinking"],
       "marketDemand": 7,
-      "cluster": "Business",
+      "cluster": "Law",
       "salaryRange": "$60,000 - $200,000",
       "growthOutlook": "Moderate (8% growth)",
       "educationRequired": "Juris Doctor (JD) degree and bar passage",
@@ -367,7 +367,7 @@
       "description": "Designs buildings and spaces, balancing aesthetics, function, and safety. Creates architectural plans, oversees construction, and ensures code compliance.",
       "requiredSkills": ["AutoCAD/Revit", "Building Codes", "Structural Knowledge", "3D Modeling", "Project Management", "Sustainable Design", "Client Communication"],
       "marketDemand": 7,
-      "cluster": "Arts",
+      "cluster": "Engineering",
       "salaryRange": "$55,000 - $120,000",
       "growthOutlook": "Moderate (7% growth)",
       "educationRequired": "Bachelor's or Master's in Architecture + licensure",
@@ -384,4 +384,39 @@
       "id": "digital-marketing-specialist",
       "title": "Digital Marketing Specialist",
       "description": "Executes online marketing campaigns across SEO, social media, and email. Optimizes digital presence, analyzes metrics, and drives engagement.",
-      "requiredSkills": ["SEO/SEM", "
+      "requiredSkills": ["SEO/SEM", "Content Marketing", "Email Marketing", "Social Media Management", "Web Analytics", "PPC Advertising", "Copywriting"],
+      "marketDemand": 8,
+      "cluster": "Business",
+      "salaryRange": "$50,000 - $110,000",
+      "growthOutlook": "High (12% growth)",
+      "educationRequired": "Bachelor's in Marketing or related field",
+      "embedding_keywords": ["digital marketing", "seo", "social media", "analytics", "content", "advertising", "engagement", "online"],
+      "education_paths": {
+        "highSchool": ["Start a personal blog or YouTube channel", "Learn basic social media management", "Read about marketing trends", "Take classes in writing and psychology", "Practice with free design tools"],
+        "undergraduate": ["Major in Marketing or Communications", "Obtain Google Ads and Analytics certifications", "Intern with a marketing agency", "Manage social media for a local club", "Build a portfolio of marketing work"],
+        "masters": ["Pursue specialized Master's in Digital Marketing", "Network with digital marketing experts", "Research consumer data and trends", "Present case studies at conferences", "Explore advanced ad technology"],
+        "phd": ["Research digital consumer behavior", "Publish in marketing or technology journals", "Teach digital marketing courses", "Develop data-driven marketing models", "Consult for major brands"],
+        "professional": ["Move into digital strategy or management", "Lead multi-channel campaigns", "Specialize in automation or AI marketing", "Mentor junior specialists", "Become an industry thought leader"]
+      }
+    },
+    {
+      "id": "psychologist",
+      "title": "Psychologist",
+      "description": "Studies human behavior and mental processes to help individuals overcome challenges. Conducts therapy, assessments, and research.",
+      "requiredSkills": ["Therapeutic Techniques", "Active Listening", "Assessment Skills", "Research Methodology", "Ethics", "Communication", "Empathy"],
+      "marketDemand": 8,
+      "cluster": "Healthcare",
+      "salaryRange": "$60,000 - $130,000",
+      "growthOutlook": "High (10% growth)",
+      "educationRequired": "Doctoral degree (PhD/PsyD) + licensure",
+      "embedding_keywords": ["psychologist", "therapy", "mental health", "behavior", "counseling", "clinical", "psychology", "mind"],
+      "education_paths": {
+        "highSchool": ["Take AP Psychology", "Volunteer at crisis centers", "Join peer counseling groups", "Read psychological journals", "Participate in social science fairs"],
+        "undergraduate": ["Major in Psychology", "Get research experience in labs", "Volunteer at mental health facilities", "Maintain high GPA for graduate school", "Learn basic statistical analysis"],
+        "masters": ["Pursue Master's in Counseling or Clinical Psychology", "Complete initial practicum hours", "Publish research findings", "Network with licensed psychologists", "Prepare for doctoral applications"],
+        "phd": ["Complete original dissertation research", "Finish extensive clinical internship", "Publish in psychology journals", "Defend doctoral thesis", "Gain specialized training"],
+        "professional": ["Obtain state licensure", "Complete post-doctoral supervised hours", "Start private practice or join clinic", "Specialize in specific populations", "Continue professional development"]
+      }
+    }
+  ]
+}
