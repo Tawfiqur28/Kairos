@@ -23,7 +23,7 @@ import { useLanguage } from '@/context/language-context';
 export default function AppLayout({
   children,
 }: Readonly<{
-  children: React.HealthyReactNode;
+  children: React.ReactNode;
 }>) {
   const [hasMounted, setHasMounted] = useState(false);
   
@@ -49,7 +49,8 @@ export default function AppLayout({
     let completed = 0;
     const fields = ['passions', 'skills', 'values', 'interests'];
     fields.forEach(field => {
-      if (ikigai[field as keyof Ikigai] && ikigai[field as keyof Ikigai]!.length > 10) completed++;
+      const val = ikigai[field as keyof Ikigai];
+      if (val && typeof val === 'string' && val.trim().length > 10) completed++;
     });
     if (ikigai.educationLevel) completed++;
     return Math.round((completed / 5) * 100);

@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Generates a 3-year personalized action plan for career goals.
@@ -45,10 +44,10 @@ export type GeneratePersonalizedActionPlanOutput = z.infer<
   typeof GeneratePersonalizedActionPlanOutputSchema
 >;
 
-// FIX 1: Enhanced education level prompts with more detail
+// Enhanced education level prompts with more detail
 const getEducationLevelPrompt = (educationLevel?: string): string => {
   const prompts: Record<string, string> = {
-    high_school: `For HIGH SCHOOL student: Focus on foundational skills, college prep, and exploration. 
+    highSchool: `For HIGH SCHOOL student: Focus on foundational skills, college prep, and exploration. 
 - Suggest relevant AP courses and subject selection
 - Recommend extracurricular activities and clubs
 - Highlight summer programs and internships for high schoolers
@@ -87,7 +86,7 @@ const getEducationLevelPrompt = (educationLevel?: string): string => {
   return prompts[educationLevel as keyof typeof prompts] || 'Provide general career guidance tailored to their background.';
 };
 
-// FIX 2: Career-specific plan templates for ALL 21 careers
+// Career-specific plan templates for ALL 21 careers
 const getCareerSpecificTasks = (careerLower: string, careerGoal: string): { 
   phase1Tasks: any[], 
   phase2Tasks: any[], 
@@ -328,7 +327,7 @@ const getCareerSpecificTasks = (careerLower: string, careerGoal: string): {
       ],
       phase3Tasks: [
         { id: 'law-3-1', text: 'Excel in law school coursework', completed: false },
-        { id: 'law-3-2', text: 'Join law review or moot court', completed: false },
+        { id: 'law-3-2', text: 'Join law review or mock court', completed: false },
         { id: 'law-3-3', text: 'Secure summer associate positions', completed: false },
         { id: 'law-3-4', text: 'Prepare for bar exam', completed: false }
       ]
@@ -458,7 +457,7 @@ const getCareerSpecificTasks = (careerLower: string, careerGoal: string): {
 
 const extractEducationLevelFromDetails = (userDetails: string): string => {
   const details = userDetails.toLowerCase();
-  if (details.includes('high school') || details.includes('highschool')) return 'high_school';
+  if (details.includes('high school') || details.includes('highschool')) return 'highSchool';
   if (details.includes('undergraduate') || details.includes('bachelor') || details.includes('college')) return 'undergrad';
   if (details.includes('master') || details.includes('graduate')) return 'masters';
   if (details.includes('phd') || details.includes('doctorate')) return 'phd';
@@ -551,15 +550,15 @@ ${getEducationLevelPrompt(extractedLevel)}
 const extractEducationLevel = (userDetails: string): string => {
   const details = userDetails.toLowerCase();
   
-  if (details.includes('phd') || details.includes('doctorate')) return 'PhD';
-  if (details.includes('master') || details.includes('graduate')) return 'Master\'s';
-  if (details.includes('bachelor') || details.includes('undergrad') || details.includes('college')) return 'Undergraduate';
-  if (details.includes('associate') || details.includes('diploma')) return 'Associate Degree';
-  if (details.includes('high school') || details.includes('secondary')) return 'High School';
-  if (details.includes('professional') || details.includes('working') || details.includes('employed')) return 'Professional';
-  if (details.includes('student')) return 'Student';
+  if (details.includes('phd') || details.includes('doctorate')) return 'phd';
+  if (details.includes('master') || details.includes('graduate')) return 'masters';
+  if (details.includes('bachelor') || details.includes('undergrad') || details.includes('college')) return 'undergrad';
+  if (details.includes('associate') || details.includes('diploma')) return 'undergrad';
+  if (details.includes('high school') || details.includes('secondary')) return 'highSchool';
+  if (details.includes('professional') || details.includes('working') || details.includes('employed')) return 'professional';
+  if (details.includes('student')) return 'undergrad';
   
-  return 'Not Specified';
+  return 'not_specified';
 };
 
 // Helper function to extract skills/interests from user details
@@ -599,7 +598,7 @@ const generateLocalActionPlan = (
   let phaseDuration2 = 'Months 7-18';
   let phaseDuration3 = 'Months 19-36';
   
-  if (educationLevel === 'High School') {
+  if (educationLevel === 'highSchool') {
     timeline = '4-Year University & Career Preparation Plan';
     phaseTitle1 = 'Phase 1: 🎓 High School Foundation';
     phaseTitle2 = 'Phase 2: 📚 University Years 1-2';
@@ -607,7 +606,7 @@ const generateLocalActionPlan = (
     phaseDuration1 = 'Grade 11/12';
     phaseDuration2 = 'Freshman/Sophomore Years';
     phaseDuration3 = 'Junior/Senior Years';
-  } else if (educationLevel === 'Undergraduate') {
+  } else if (educationLevel === 'undergrad') {
     timeline = '3-Year Undergraduate to Career Transition';
     phaseTitle1 = 'Phase 1: 📖 Core Coursework & Exploration';
     phaseTitle2 = 'Phase 2: 💼 Internships & Skill Building';
@@ -615,7 +614,7 @@ const generateLocalActionPlan = (
     phaseDuration1 = 'Remaining Undergraduate';
     phaseDuration2 = 'Junior Year & Summer';
     phaseDuration3 = 'Senior Year & Post-Graduation';
-  } else if (educationLevel === 'Master\'s') {
+  } else if (educationLevel === 'masters') {
     timeline = '2-Year Master\'s to Specialization';
     phaseTitle1 = 'Phase 1: 🔬 Specialization & Research';
     phaseTitle2 = 'Phase 2: 🤝 Networking & Industry Connections';
@@ -623,7 +622,7 @@ const generateLocalActionPlan = (
     phaseDuration1 = 'Year 1';
     phaseDuration2 = 'Summer & Year 2';
     phaseDuration3 = 'Graduation & Beyond';
-  } else if (educationLevel === 'PhD') {
+  } else if (educationLevel === 'phd') {
     timeline = 'PhD to Research Career';
     phaseTitle1 = 'Phase 1: 📝 Dissertation Research';
     phaseTitle2 = 'Phase 2: 📄 Publication & Conferences';
@@ -631,7 +630,7 @@ const generateLocalActionPlan = (
     phaseDuration1 = 'Years 1-2';
     phaseDuration2 = 'Years 3-4';
     phaseDuration3 = 'Years 5+';
-  } else if (educationLevel === 'Professional') {
+  } else if (educationLevel === 'professional') {
     timeline = '2-Year Career Advancement Plan';
     phaseTitle1 = 'Phase 1: 📊 Skill Gap Analysis';
     phaseTitle2 = 'Phase 2: 📈 Upskilling & Certifications';
@@ -749,7 +748,7 @@ export async function generatePersonalizedActionPlan(
     // Emergency fallback - always returns a valid plan
     const emergencyPlan: GeneratePersonalizedActionPlanOutput = {
       careerTitle: input.careerGoal || 'Your Career Goal',
-      educationLevel: 'Not Specified',
+      educationLevel: 'not_specified',
       timeline: 'Career Development Journey',
       phases: [
         {

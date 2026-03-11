@@ -16,7 +16,7 @@ import { useLanguage } from '@/context/language-context';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { Ikigai, ActionPlan } from '@/lib/types';
 import { motion } from 'framer-motion';
 
@@ -27,7 +27,7 @@ export default function DashboardPage() {
     skills: '',
     values: '',
     interests: '',
-    educationLevel: ''
+    educationLevel: undefined
   });
   const [actionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
   const [hasMounted, setHasMounted] = useState(false);
@@ -59,24 +59,24 @@ export default function DashboardPage() {
     },
   };
 
-  // Check if profile is complete
-  const isProfileComplete = hasMounted && ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests;
-  
-  // Calculate completion percentage
-  const calculateProfileCompletion = () => {
+  // Calculate completion percentage consistently with other pages
+  const profileCompletion = useMemo(() => {
     if (!hasMounted) return 0;
     
     let completed = 0;
-    const fields = ['passions', 'skills', 'values', 'interests', 'educationLevel'];
+    const fields = ['passions', 'skills', 'values', 'interests'];
     
     fields.forEach(field => {
-      if (ikigai[field as keyof Ikigai]) completed++;
+      const val = ikigai[field as keyof Ikigai];
+      if (val && typeof val === 'string' && val.trim().length > 10) completed++;
     });
     
-    return Math.round((completed / fields.length) * 100);
-  };
+    if (ikigai.educationLevel) completed++;
+    
+    return Math.round((completed / 5) * 100);
+  }, [ikigai, hasMounted]);
 
-  const profileCompletion = calculateProfileCompletion();
+  const isProfileComplete = profileCompletion >= 80;
   const hasActionPlan = hasMounted && actionPlan && actionPlan.phases && actionPlan.phases.length > 0;
 
   return (
@@ -87,7 +87,7 @@ export default function DashboardPage() {
       />
 
       {/* Profile Status Banner */}
-      {hasMounted && !isProfileComplete && profileCompletion < 80 && (
+      {hasMounted && !isProfileComplete && (
         <motion.div
           className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
           initial={{ opacity: 0, y: -20 }}
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                     <div className="text-xs text-yellow-600 dark:text-yellow-400">
                       {profileCompletion === 0 ? 
                         t('dashboard.startHere') : 
-                        `${5 - Math.floor(profileCompletion/20)} ${t('dashboard.sectionsRemaining')}`}
+                        t('dashboard.completeProfileBannerDescription2', { completion: profileCompletion })}
                     </div>
                   )}
                 </div>
