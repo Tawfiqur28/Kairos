@@ -98,19 +98,19 @@ export function UserNav() {
         <DropdownMenuSeparator />
         
         <DropdownMenuGroup>
-          <Link href="/profile" passHref legacyBehavior>
-            <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/profile">
               <User className="mr-2 h-4 w-4" />
               <span>{t('userNav.profile')}</span>
-            </DropdownMenuItem>
-          </Link>
+            </Link>
+          </DropdownMenuItem>
           
-          <Link href="/settings" passHref legacyBehavior>
-            <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/settings">
               <Settings className="mr-2 h-4 w-4" />
               <span>{t('userNav.settings')}</span>
-            </DropdownMenuItem>
-          </Link>
+            </Link>
+          </DropdownMenuItem>
           
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="cursor-pointer">
