@@ -1,3 +1,4 @@
+
 'use client';
 
 import { generateCareerMatchExplanations } from '@/ai/flows/generate-career-match-explanations';
@@ -106,10 +107,18 @@ export default function CareersPage() {
     },
   };
 
-  const isProfileComplete = useMemo(() => 
-    ikigai.passions && ikigai.skills && ikigai.values && ikigai.interests,
-    [ikigai]
-  );
+  // Synchronized completion logic (at least 4 sections filled with > 10 chars)
+  const isProfileComplete = useMemo(() => {
+    if (!hasMounted) return false;
+    let completedCount = 0;
+    const fields = ['passions', 'skills', 'values', 'interests'];
+    fields.forEach(field => {
+      const val = ikigai[field as keyof Ikigai];
+      if (typeof val === 'string' && val.trim().length > 10) completedCount++;
+    });
+    if (ikigai.educationLevel) completedCount++;
+    return completedCount >= 4;
+  }, [ikigai, hasMounted]);
   
   const userProfileString = useMemo(() => {
     const educationLevelMap: Record<string, string> = {
@@ -141,11 +150,13 @@ export default function CareersPage() {
 
   useEffect(() => {
     setHasMounted(true);
-    // Only auto-refresh if themes are currently empty but profile is done
-    if (isProfileComplete && userThemes.length === 0) {
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && isProfileComplete && userThemes.length === 0) {
       refreshThemes();
     }
-  }, [isProfileComplete, userThemes.length, refreshThemes]);
+  }, [hasMounted, isProfileComplete, userThemes.length, refreshThemes]);
 
   const displayedCareers = useMemo(() => {
     let filtered = sortedCareers;

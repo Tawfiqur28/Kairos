@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { UserProfile, Ikigai } from '@/lib/types';
-import { Camera, Mail, MapPin, X, CheckCircle2 } from 'lucide-react';
+import { Camera, Mail, MapPin, X, CheckCircle2, Heart, Zap, Target, Brain } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/context/language-context';
 import { useState, useEffect, useRef } from 'react';
