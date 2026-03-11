@@ -55,7 +55,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" suppressHydrationWarning>
       <header className="container z-40 bg-background">
         <div className="flex h-20 items-center justify-between py-6">
           <AppLogo />

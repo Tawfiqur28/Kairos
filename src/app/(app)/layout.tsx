@@ -19,12 +19,11 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { Ikigai, ActionPlan } from '@/lib/types';
 import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/context/language-context';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AppLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.HealthyReactNode;
 }>) {
   const [hasMounted, setHasMounted] = useState(false);
   
@@ -74,21 +73,8 @@ export default function AppLayout({
     return '';
   };
 
-  const sidebarVariants = {
-    hidden: { x: -20, opacity: 0 },
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-  };
-
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex min-h-screen w-full" suppressHydrationWarning>
       {/* Fixed Sidebar */}
       <aside className="hidden md:flex flex-col sticky top-0 h-screen w-[220px] lg:w-[280px] border-r bg-gradient-to-b from-background to-muted/20 z-50 shrink-0">
         <div className="flex h-14 items-center justify-between border-b px-4 lg:h-[60px] lg:px-6 shrink-0">
@@ -140,7 +126,7 @@ export default function AppLayout({
       </aside>
       
       {/* Scrollable Main Content */}
-      <div className="flex flex-col flex-1 min-w-0">
+      <div className="flex flex-col flex-1 min-w-0" suppressHydrationWarning>
         <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 shrink-0">
           {hasMounted && (
             <Sheet>
