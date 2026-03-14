@@ -43,7 +43,6 @@ export default function AppLayout({
   const [actionPlan] = useLocalStorage<ActionPlan | null>('action-plan', null);
 
   const profileCompletion = useMemo(() => {
-    // Only calculate after hydration to avoid mismatch
     if (!hasMounted) return 0;
     
     let completed = 0;
@@ -129,7 +128,7 @@ export default function AppLayout({
       {/* Scrollable Main Content */}
       <div className="flex flex-col flex-1 min-w-0" suppressHydrationWarning>
         <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 shrink-0">
-          {hasMounted && (
+          {hasMounted ? (
             <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -174,6 +173,8 @@ export default function AppLayout({
                 </div>
               </SheetContent>
             </Sheet>
+          ) : (
+            <div className="w-10 h-10 md:hidden" />
           )}
 
           <div className="w-full flex-1 flex items-center gap-4 overflow-hidden">

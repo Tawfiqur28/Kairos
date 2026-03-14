@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -108,8 +107,10 @@ export default function ProfilePage() {
     },
   };
 
+  if (!hasMounted) return null;
+
   return (
-    <>
+    <div className="space-y-6">
       <PageHeader
         title={t('profile.title')}
         description={t('profile.description')}
@@ -119,7 +120,6 @@ export default function ProfilePage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="mt-6"
       >
         <Card>
           <CardHeader>
@@ -134,7 +134,7 @@ export default function ProfilePage() {
                   <Avatar className="h-20 w-20 border-2 border-primary/20 overflow-hidden">
                     <AvatarImage src={profile.image || `https://api.dicebear.com/7.x/initials/svg?seed=${profile.name}`} className="object-cover" />
                     <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                      {hasMounted ? getInitials(profile.name) : 'U'}
+                      {getInitials(profile.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
@@ -188,7 +188,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 
-                {hasMounted && (profile.email || profile.location) && (
+                {(profile.email || profile.location) && (
                   <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
                     {profile.email && (
                       <div className="flex items-center gap-1">
@@ -333,25 +333,25 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
                   <div className="text-2xl font-bold text-primary">
-                    {hasMounted ? (ikigai.passions ? '✓' : '—') : '—'}
+                    {ikigai.passions ? '✓' : '—'}
                   </div>
                   <div className="text-xs text-muted-foreground">{t('profile.passionsLabel')}</div>
                 </div>
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
                   <div className="text-2xl font-bold text-primary">
-                    {hasMounted ? (ikigai.skills ? '✓' : '—') : '—'}
+                    {ikigai.skills ? '✓' : '—'}
                   </div>
                   <div className="text-xs text-muted-foreground">{t('profile.skillsLabel')}</div>
                 </div>
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
                   <div className="text-2xl font-bold text-primary">
-                    {hasMounted ? (ikigai.values ? '✓' : '—') : '—'}
+                    {ikigai.values ? '✓' : '—'}
                   </div>
                   <div className="text-xs text-muted-foreground">{t('profile.valuesLabel')}</div>
                 </div>
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
                   <div className="text-2xl font-bold text-primary">
-                    {hasMounted ? (ikigai.interests ? '✓' : '—') : '—'}
+                    {ikigai.interests ? '✓' : '—'}
                   </div>
                   <div className="text-xs text-muted-foreground">{t('profile.interestsLabel')}</div>
                 </div>
@@ -361,7 +361,7 @@ export default function ProfilePage() {
           
           <CardFooter className="flex justify-between items-center border-t pt-6">
             <div className="text-sm text-muted-foreground">
-              {hasMounted && profile.email && (
+              {profile.email && (
                 <Badge variant="outline" className="mr-2">
                   {t('profile.verified')}
                 </Badge>
@@ -374,6 +374,6 @@ export default function ProfilePage() {
           </CardFooter>
         </Card>
       </motion.div>
-    </>
+    </div>
   );
 }

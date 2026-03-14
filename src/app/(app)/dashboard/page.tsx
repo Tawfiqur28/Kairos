@@ -68,7 +68,8 @@ export default function DashboardPage() {
     
     fields.forEach(field => {
       const val = ikigai[field as keyof Ikigai];
-      if (val && typeof val === 'string' && val.trim().length > 10) completed++;
+      // Use same 3-character threshold as Ikigai page
+      if (val && typeof val === 'string' && val.trim().length >= 3) completed++;
     });
     
     if (ikigai.educationLevel) completed++;
@@ -191,7 +192,7 @@ export default function DashboardPage() {
                     <div className="text-xs text-yellow-600 dark:text-yellow-400">
                       {profileCompletion === 0 ? 
                         t('dashboard.startHere') : 
-                        t('dashboard.completeProfileBannerDescription2', { completion: profileCompletion })}
+                        `${5 - Math.floor(profileCompletion/20)} ${t('dashboard.sectionsRemaining') || 'sections remaining'}`}
                     </div>
                   )}
                 </div>
@@ -351,20 +352,20 @@ export default function DashboardPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs">{t('dashboard.profileSetup')}</span>
-                        <Badge variant={isProfileComplete ? "default" : "outline"} size="sm">
+                        <Badge variant={isProfileComplete ? "default" : "outline"}>
                           {isProfileComplete ? '✓' : '—'}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs">{t('dashboard.careerExploration')}</span>
-                        <Badge variant={isProfileComplete ? "outline" : "secondary"} size="sm">
+                        <Badge variant={isProfileComplete ? "outline" : "secondary"}>
                           {isProfileComplete ? t('dashboard.statusReady') : t('dashboard.statusLocked')}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs">{t('dashboard.actionPlan')}</span>
-                        <Badge variant={hasActionPlan ? "default" : "outline"} size="sm">
-                          {hasActionPlan ? t('dashboard.active') : '—'}
+                        <Badge variant={hasActionPlan ? "default" : "outline"}>
+                          {hasActionPlan ? t('dashboard.active') || 'Active' : '—'}
                         </Badge>
                       </div>
                     </div>

@@ -1,4 +1,3 @@
-
 {
   "header": {
     "logo": "KAIROS"
@@ -178,7 +177,7 @@
     "careerGoalsDesc": "如果您对某些特定的职业路径或行业感兴趣，请务必提及。",
     "bannerCompleteTitle": "档案已完美构建！",
     "bannerIncompleteTitle": "完善档案以获得更优匹配结果",
-    "bannerCompleteDesc": "详尽的描述确保了职业匹配的深度。评分将完全基于您的独特性。",
+    "bannerCompleteDesc": "详尽的描述确保了职业匹配的深度. 评分将完全基于您的独特性。",
     "bannerIncompleteDesc": "完整的档案可以避免获得通用的匹配分值，确保建议的个性化。",
     "bannerProgressDesc": "请填满所有版块并提供具体描述，解锁高精准度的职业推荐。",
     "readyForCareers": "准备好探索职业",
@@ -244,13 +243,13 @@
     "explanation": "深度个性化解读",
     "generatePlan": "生成专属行动计划",
     "keepExploring": "继续探索其他可能",
-    "notStrongMatch": "目前来看，这个职业可能不是您的最佳选择。建议对比其他高分选项。",
+    "notStrongMatch": "目前来看，这个职业可能不是您的最佳选择. 建议对比其他高分选项。",
     "errorText": "分析过程出现异常，请稍后重试。",
     "plan_loading_title": "正在为您构筑进阶之路...",
     "plan_back_button": "返回职业列表",
     "plan_loading_text": "AI 正在为您精心打磨通往 {careerTitle} 的职业征途！",
     "plan_error_title": "计划生成异常",
-    "plan_error_text": "生成过程中遇到一点阻碍。请点击重试。",
+    "plan_error_text": "生成过程中遇到一点阻碍. 请点击重试。",
     "plan_regenerate_button": "重新规划路径",
     "plan_title": "通往 {careerTitle} 的进阶蓝图",
     "plan_insider_tips": "行业专家建议",
@@ -294,13 +293,13 @@
     "flowTitle": "简约而不简单的操作流程",
     "flowDescription": "我们通过三个直观步骤，引导您从模糊的自我感知走向清晰的职业落地。",
     "step1_title": "深度自我发现",
-    "step1_text": "从互动式的 <strong>Ikigai 画布</strong> 开启。在这个空间里，您可以清晰表达您的热爱、擅长、社会价值及商业回报。这将生成一个驱动 AI 核心逻辑的独特数字档案。",
+    "step1_text": "从互动式的 <strong>Ikigai 画布</strong> 开启. 在这个空间里，您可以清晰表达您的热爱、擅长、社会价值及商业回报. 这将生成一个驱动 AI 核心逻辑的独特数字档案。",
     "step2_title": "AI 驱动的职业匹配",
-    "step2_text": "我们的 AI 引擎会深度扫描您的 Ikigai 档案，并基于数据库建议真正与您共鸣的职业。您将看到个性化的“匹配分数”以及每项匹配的深度原理解析。",
+    "step2_text": "我们的 AI 引擎会深度扫描您的 Ikigai 档案，并基于数据库建议真正与您共鸣的职业. 您将看到个性化的“匹配分数”以及每项匹配的深度原理解析。",
     "step3_title": "获取动态行动计划",
-    "step3_text": "一旦确定职业目标，AI 将立即生成一份具体的、分为三阶段的 3 年进阶计划。告别盲目摸索，开启清晰的进阶之路。",
+    "step3_text": "一旦确定职业目标，AI 将立即生成一份具体的、分为三阶段的 3 年进阶计划. 告别盲目摸索，开启清晰的进阶之路。",
     "step4_title": "服务全球用户",
-    "step4_text": "本应用全面支持<strong>中文与英文</strong>。您可以根据使用习惯随时切换语言环境。",
+    "step4_text": "本应用全面支持<strong>中文与英文</strong>. 您可以根据使用习惯随时切换语言环境。",
     "step4_keyPoint": "中英双语完美支持",
     "featuresTitle": "核心技术与自动化优势",
     "featuresDescription": "我们利用智能化技术，让您的职业规划旅程毫无阻碍。",
@@ -318,7 +317,7 @@
     "feature6_text": "针对选定职业，提供包含任务清单、学习资源与关键时间线的路线图。",
     "feature6_highlight": "结构化的三阶段职业进阶路线",
     "heroTitle": "KAIROS 如何解决传统职业咨询的痛点",
-    "heroSubtitle": "传统的职业测评往往给出模棱两可的结果。KAIROS 利用 AI 提供基于深度个人特质的、极具操作性的职业引领。",
+    "heroSubtitle": "传统的职业测评往往给出模棱两可的结果. KAIROS 利用 AI 提供基于深度个人特质的、极具操作性的职业引领。",
     "heroBadge1": "拒绝通用的“及格分”",
     "heroBadge2": "落地性极强的行动计划",
     "heroBadge3": "多维核心主题匹配",
@@ -458,7 +457,7 @@
         },
         {
           "title": "Hult Prize (霍特奖) 中国区",
-          "description": "全球最大的社会公益商赛。参赛团队需提出具有商业可持续性的方案来解决全球紧迫问题。"
+          "description": "全球最大的社会公益商赛. 参赛团队需提出具有商业可持续性的方案来解决全球紧迫问题。"
         },
         {
           "title": "全国大学生数学建模竞赛",
@@ -472,7 +471,7 @@
       "highSchool": {
         "title": "致高中生：夯实根基",
         "fundamentals_title": "硬核基础建设",
-        "fundamentals_text": "在数理逻辑与编程（Python/C++）上投入精力。参与 <strong>NOI (青少年信息学奥赛)</strong> 或青少年科技创新大赛。",
+        "fundamentals_text": "在数理逻辑与编程（Python/C++）上投入精力. 参与 <strong>NOI (青少年信息学奥赛)</strong> 或青少年科技创新大赛。",
         "exploration_title": "前瞻性调研",
         "exploration_text": "关注顶尖高校（如清北、中科大）的 <strong>强基计划</strong> 或在线学术夏令营。",
         "handsOn_title": "实践先行",
@@ -487,7 +486,7 @@
         "internship_title": "实战驱动",
         "internship_text": "寒暑假优先锁定 <strong>一线互联网大厂或行业头部公司</strong> 的实习机会。",
         "studies_title": "多元化出路",
-        "studies_text": "考虑 <strong>推免保研、考研 (985/211)</strong> 或申请 <strong>海外名校 (新二港三等)</strong>。关注名企的春/秋招提前批。"
+        "studies_text": "考虑 <strong>推免保研、考研 (985/211)</strong> 或申请 <strong>海外名校 (新二港三等)</strong>. 关注名企的春/秋招提前批。"
       },
       "masters_phd": {
         "title": "致硕博生：产研结合",

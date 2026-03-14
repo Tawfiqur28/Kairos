@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PageHeader } from '@/components/page-header';
@@ -50,7 +49,7 @@ export default function IkigaiPage() {
     
     fields.forEach(field => {
       const val = ikigai[field as keyof Ikigai];
-      if (typeof val === 'string' && val.trim().length > 10) completed++;
+      if (val && typeof val === 'string' && val.trim().length > 10) completed++;
     });
     
     if (ikigai.educationLevel) completed++;
@@ -136,12 +135,12 @@ export default function IkigaiPage() {
 
   if (!hasMounted) {
     return (
-      <>
+      <div className="space-y-6 mt-6">
         <PageHeader
           title={t('ikigai.title')}
           description={t('ikigai.description')}
         />
-        <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Skeleton className="h-[600px] w-full" />
           </div>
@@ -149,76 +148,74 @@ export default function IkigaiPage() {
             <Skeleton className="h-[400px] w-full" />
           </div>
         </div>
-      </>
+      </div>
     );
   }
   
   return (
-    <>
+    <div className="space-y-6">
       <PageHeader
         title={t('ikigai.title')}
         description={t('ikigai.description')}
       />
 
-      {hasMounted && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          className={`mb-6 p-4 rounded-lg border mt-6 ${
-            isProfileComplete 
-              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            {isProfileComplete ? (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.5 }}
-                className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center mt-1"
-              >
-                <span className="text-white text-xs">✓</span>
-              </motion.div>
-            ) : (
-              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-1" />
-            )}
-            <div className="flex-1">
-              <h3 className={`font-semibold ${
-                isProfileComplete 
-                  ? 'text-green-900 dark:text-green-300' 
-                  : 'text-blue-900 dark:text-blue-300'
-              }`}>
-                {isProfileComplete ? t('ikigai.bannerCompleteTitle') : t('ikigai.bannerIncompleteTitle')}
-              </h3>
-              <p className={`text-sm mt-1 ${
-                isProfileComplete 
-                  ? 'text-green-800 dark:text-green-400' 
-                  : 'text-blue-800 dark:text-blue-400'
-              }`}>
-                {isProfileComplete 
-                  ? t('ikigai.bannerCompleteDesc')
-                  : t('ikigai.bannerIncompleteDesc')}
-              </p>
-              
-              <div className="mt-3">
-                <div className="flex justify-between text-xs mb-1">
-                  <span>{t('dashboard.profileCompletion')}</span>
-                  <span>{completionPercentage}%</span>
-                </div>
-                <Progress value={completionPercentage} className="h-2" />
-              </div>
-            </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className={`p-4 rounded-lg border ${
+          isProfileComplete 
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          {isProfileComplete ? (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.5 }}
+              className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center mt-1"
+            >
+              <span className="text-white text-xs">✓</span>
+            </motion.div>
+          ) : (
+            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-1" />
+          )}
+          <div className="flex-1">
+            <h3 className={`font-semibold ${
+              isProfileComplete 
+                ? 'text-green-900 dark:text-green-300' 
+                : 'text-blue-900 dark:text-blue-300'
+            }`}>
+              {isProfileComplete ? t('ikigai.bannerCompleteTitle') : t('ikigai.bannerIncompleteTitle')}
+            </h3>
+            <p className={`text-sm mt-1 ${
+              isProfileComplete 
+                ? 'text-green-800 dark:text-green-400' 
+                : 'text-blue-800 dark:text-blue-400'
+            }`}>
+              {isProfileComplete 
+                ? t('ikigai.bannerCompleteDesc')
+                : t('ikigai.bannerIncompleteDesc')}
+            </p>
             
-            {isProfileComplete && (
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                {t('ikigai.readyForCareers')}
-              </Badge>
-            )}
+            <div className="mt-3">
+              <div className="flex justify-between text-xs mb-1">
+                <span>{t('dashboard.profileCompletion')}</span>
+                <span>{completionPercentage}%</span>
+              </div>
+              <Progress value={completionPercentage} className="h-2" />
+            </div>
           </div>
-        </motion.div>
-      )}
+          
+          {isProfileComplete && (
+            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+              {t('ikigai.readyForCareers')}
+            </Badge>
+          )}
+        </div>
+      </motion.div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -436,6 +433,6 @@ export default function IkigaiPage() {
           </Card>
         </div>
       </div>
-    </>
+    </div>
   );
 }
