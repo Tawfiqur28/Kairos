@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { JournalEntry } from '@/lib/types';
-import { ArrowUp, ArrowDown, Edit, Trash2, Save, X, BookText, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ArrowUp, ArrowDown, Edit, Trash2, Save, X, BookText, AlertCircle, Mic, MicOff, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/context/language-context';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 
 export default function JournalPage() {
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [hasMounted, setHasMounted] = useState(false);
 
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>('journal-entries', []);
@@ -27,6 +27,10 @@ export default function JournalPage() {
   const [currentFeeling, setCurrentFeeling] = useState('');
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
   const [entryToEdit, setEntryToEdit] = useState<JournalEntry | null>(null);
+
+  // Voice Recognition State
+  const [isListening, setIsListening] = useState(false);
+  const [activeVoiceField, setActiveVoiceField] = useState<'feeling' | 'content' | null>(null);
 
   useEffect(() => {
     setHasMounted(true);
@@ -61,6 +65,58 @@ export default function JournalPage() {
     setCurrentContent('');
     setCurrentFeeling('');
   };
+
+  const startVoiceRecognition = useCallback((field: 'feeling' | 'content') => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      toast({
+        title: t('toasts.voiceNotSupportedTitle'),
+        description: t('toasts.voiceNotSupportedDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === 'ch' ? 'zh-CN' : 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setActiveVoiceField(field);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      if (field === 'feeling') {
+        setCurrentFeeling(prev => prev ? `${prev} ${transcript}` : transcript);
+      } else {
+        setCurrentContent(prev => prev ? `${prev} ${transcript}` : transcript);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsListening(false);
+      setActiveVoiceField(null);
+      toast({
+        title: t('toasts.voiceErrorTitle'),
+        description: event.error === 'not-allowed' 
+          ? t('toasts.voiceErrorPermission') 
+          : t('toasts.voiceErrorGeneral'),
+        variant: 'destructive',
+      });
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      setActiveVoiceField(null);
+    };
+
+    recognition.start();
+  }, [language, t, toast]);
 
   const startEdit = (entry: JournalEntry) => {
     setEntryToEdit(entry);
@@ -119,7 +175,19 @@ export default function JournalPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="feeling">{t('journal.feelingLabel')}</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 w-8 p-0 rounded-full ${isListening && activeVoiceField === 'feeling' ? 'text-primary animate-pulse' : 'text-muted-foreground'}`}
+                    onClick={() => startVoiceRecognition('feeling')}
+                    disabled={isListening}
+                    title={t('journal.voiceListen')}
+                  >
+                    {isListening && activeVoiceField === 'feeling' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                </div>
                 <Input 
                   id="feeling"
                   value={currentFeeling} 
@@ -128,14 +196,37 @@ export default function JournalPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="thoughts">{t('journal.thoughtsLabel')}</Label>
-                <Textarea 
-                  id="thoughts"
-                  value={currentContent} 
-                  onChange={(e) => setCurrentContent(e.target.value)} 
-                  placeholder={t('journal.thoughtsPlaceholder')} 
-                  className="min-h-[250px] resize-none" 
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="thoughts">{t('journal.thoughtsLabel')}</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 w-8 p-0 rounded-full ${isListening && activeVoiceField === 'content' ? 'text-primary animate-pulse' : 'text-muted-foreground'}`}
+                    onClick={() => startVoiceRecognition('content')}
+                    disabled={isListening}
+                    title={t('journal.voiceListen')}
+                  >
+                    {isListening && activeVoiceField === 'content' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <div className="relative">
+                  <Textarea 
+                    id="thoughts"
+                    value={currentContent} 
+                    onChange={(e) => setCurrentContent(e.target.value)} 
+                    placeholder={t('journal.thoughtsPlaceholder')} 
+                    className="min-h-[250px] resize-none" 
+                  />
+                  {isListening && activeVoiceField === 'content' && (
+                    <div className="absolute bottom-2 right-2 flex items-center gap-2 px-2 py-1 bg-primary/10 rounded text-[10px] text-primary font-medium uppercase tracking-wider">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                      </span>
+                      {t('journal.voiceListening')}
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
             <CardFooter className="gap-2">

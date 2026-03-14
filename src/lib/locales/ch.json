@@ -1,3 +1,4 @@
+
 {
   "header": {
     "logo": "KAIROS"
@@ -200,7 +201,7 @@
     "tipsTitle": "提升匹配准确度的技巧",
     "tipsDesc": "如何获得更优质的职业建议",
     "whyItMatters": "为什么深度档案如此重要",
-    "whyItMattersDesc": "详尽的档案可以有效避免 AI 给出模棱两可的中间分数。AI 会深度挖掘您热情、技能、价值观与兴趣的独特交集，为您提供真正有价值的洞察。",
+    "whyItMattersDesc": "详尽的档案可以有效避免 AI 给出模棱两且的中间分数。AI 会深度挖掘您热情、技能、价值观与兴趣的独特交集，为您提供真正有价值的洞察。",
     "exploreCareersNow": "立即探索职业",
     "completeProfileFirst": "请先完成档案填写"
   },
@@ -226,7 +227,9 @@
     "cancel": "取消",
     "confirm": "确定删除",
     "entryDeleted": "日志已成功删除。",
-    "entryUpdated": "日志内容已更新。"
+    "entryUpdated": "日志内容已更新。",
+    "voiceListen": "开启语音录入",
+    "voiceListening": "正在聆听..."
   },
   "careers": {
     "title": "职业探索器",
@@ -288,7 +291,7 @@
     "moreSkills": "+{count} 项更多"
   },
   "learnMore": {
-    "title": "了解 KAIROS 运行机制",
+    "title": "运行机制",
     "description": "为您量身定制的职业生涯自动化向导。",
     "flowTitle": "简约而不简单的操作流程",
     "flowDescription": "我们通过三个直观步骤，引导您从模糊的自我感知走向清晰的职业落地。",

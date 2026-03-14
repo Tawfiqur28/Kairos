@@ -236,7 +236,9 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "entryDeleted": "Entry deleted.",
-    "entryUpdated": "Entry updated."
+    "entryUpdated": "Entry updated.",
+    "voiceListen": "Start Voice Recognition",
+    "voiceListening": "Listening..."
   },
   "careers": {
     "title": "Career Explorer",
@@ -539,12 +541,42 @@
         "market_title": "Market Pulse",
         "market_text": "Job Growth: Software roles up 15%; UX roles up 18%.\nHot Skills: JavaScript frameworks (React, Node.js), Figma, Agile/Scrum, user research.\nHiring Hubs: Silicon Valley, Austin, Berlin, Tokyo, Shenzhen."
       },
-      "marketing_creative": {
-        "title": "Field Intelligence: Marketing & Creative",
-        "innovation_title": "Innovation Spotlight",
-        "innovation_text": "Marketing Manager: Shift toward AI-driven analytics, hyper-personalization, and influencer marketing automation.\nMusic Producer: Rise of AI music tools, spatial audio, and NFT-based distribution.",
-        "market_title": "Market Pulse",
-        "market_text": "Job Growth: Digital marketing roles up 14%; creative tech roles steady.\nHot Skills: SEO/SEM, content strategy, DAWs, mixing/mastering, social media analytics.\nHiring Hubs: LA, NYC, London, Seoul, Amsterdam."
+      "intelligence": {
+        "cloud_cyber": {
+          "title": "Field Intelligence: Cloud & Cybersecurity",
+          "innovation_title": "Innovation Spotlight",
+          "innovation_text": "Cloud Architect: Rise of multi-cloud and hybrid strategies; growing demand for FinOps and cloud cost optimization skills.\nCyber Security Analyst: Increased focus on AI-driven threat detection, zero-trust frameworks, and cloud security posture management.",
+          "market_title": "Market Pulse",
+          "market_text": "Job Growth: Cloud roles up 18%; cybersecurity roles up 15%.\nHot Skills: AWS/Azure/GCP certs, DevSecOps, incident response, compliance (GDPR, CCPA).\nHiring Hubs: Remote-friendly, but strong in Dallas, D.C., Bangalore, and Singapore."
+        },
+        "data_ai": {
+          "title": "Field Intelligence: Data Science & AI",
+          "innovation_title": "Innovation Spotlight",
+          "innovation_text": "The field is shifting toward MLOps, automated ML (AutoML), and explainable AI (XAI), with significant growth in generative AI, biomedical informatics, and climate modeling.",
+          "market_title": "Market Pulse",
+          "market_text": "Job Growth: AI/ML roles up 20%.\nHot Skills: Python, SQL, TensorFlow/PyTorch, big data tools (Spark, Hadoop).\nHiring Hubs: SF Bay Area, NYC, London, Beijing, Bengaluru."
+        },
+        "education_health": {
+          "title": "Field Intelligence: Education & Healthcare",
+          "innovation_title": "Innovation Spotlight",
+          "innovation_text": "High School Teacher: Rise of edtech tools, personalized learning platforms, and virtual classrooms.\nRegistered Nurse: Growth in telehealth, health informatics, and AI-assisted diagnostics.",
+          "market_title": "Market Pulse",
+          "market_text": "Job Growth: Nursing roles up 12%; teaching roles steady with edtech integration.\nHot Skills: Patient care, classroom tech tools, empathy, communication.\nHiring Hubs: NYC, Texas, California, urban and rural healthcare networks."
+        },
+        "software_design": {
+          "title": "Field Intelligence: Software & Design",
+          "innovation_title": "Innovation Spotlight",
+          "innovation_text": "Software Engineer: Emphasis on cloud-native development, microservices, and low-code platforms.\nUX Designer: Growth in voice/AR/VR interfaces, accessibility design, and design systems.",
+          "market_title": "Market Pulse",
+          "market_text": "Job Growth: Software roles up 15%; UX roles up 18%.\nHot Skills: JavaScript frameworks (React, Node.js), Figma, Agile/Scrum, user research.\nHiring Hubs: Silicon Valley, Austin, Berlin, Tokyo, Shenzhen."
+        },
+        "marketing_creative": {
+          "title": "Field Intelligence: Marketing & Creative",
+          "innovation_title": "Innovation Spotlight",
+          "innovation_text": "Marketing Manager: Shift toward AI-driven analytics, hyper-personalization, and influencer marketing automation.\nMusic Producer: Rise of AI music tools, spatial audio, and NFT-based distribution.",
+          "market_title": "Market Pulse",
+          "market_text": "Job Growth: Digital marketing roles up 14%; creative tech roles steady.\nHot Skills: SEO/SEM, content strategy, DAWs, mixing/mastering, social media analytics.\nHiring Hubs: LA, NYC, London, Seoul, Amsterdam."
+        }
       }
     }
   }
