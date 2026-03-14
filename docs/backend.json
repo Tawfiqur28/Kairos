@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -186,6 +187,44 @@
         "isFavorite",
         "isSaved"
       ]
+    },
+    "TechnicalTerm": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TechnicalTerm",
+      "type": "object",
+      "description": "A dictionary entry for a technical term, linking it to an external educational resource like Wikipedia.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the technical term."
+        },
+        "term": {
+          "type": "string",
+          "description": "The technical term or keyword to match in text (e.g., 'NumPy', 'TensorFlow')."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL to the Wikipedia page or other resource.",
+          "format": "uri"
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of the term (e.g., 'library', 'concept', 'tool')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the term for tooltip display."
+        },
+        "popularity": {
+          "type": "number",
+          "description": "A score used to prioritize matches if needed."
+        }
+      },
+      "required": [
+        "id",
+        "term",
+        "url"
+      ]
     }
   },
   "auth": {
@@ -203,56 +242,32 @@
           "schema": {
             "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "Stores user-specific settings, preferences, and authentication-related metadata. Authorization is based on 'request.auth.uid' matching '{userId}'. The 'id' field within the document implicitly functions as a denormalized 'ownerId' for authorization independence.",
+          "description": "Stores user-specific settings, preferences, and authentication-related metadata.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user, matching 'request.auth.uid'."
+              "description": "The unique identifier of the user."
             }
           ]
         }
       },
       {
-        "path": "/userProfiles/{userId}/mathProblemSolutions/{solutionId}",
+        "path": "/technicalTerms/{termId}",
         "definition": {
-          "entityName": "MathProblemSolution",
+          "entityName": "TechnicalTerm",
           "schema": {
-            "$ref": "#/backend/entities/MathProblemSolution"
+            "$ref": "#/backend/entities/TechnicalTerm"
           },
-          "description": "Contains detailed records of math problems solved by a specific user, including questions, solutions, and video metadata. Includes denormalized 'userId' for authorization independence, ensuring 'request.auth.uid' matches both the path's '{userId}' and the document's 'userId' field.",
+          "description": "A global dictionary of technical terms and their reference URLs.",
           "params": [
             {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns this solution, matching 'request.auth.uid'."
-            },
-            {
-              "name": "solutionId",
-              "description": "The unique identifier for a specific solved math problem."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/userProfiles/{userId}/conversationTurns/{turnId}",
-        "definition": {
-          "entityName": "ConversationTurn",
-          "schema": {
-            "$ref": "#/backend/entities/ConversationTurn"
-          },
-          "description": "Stores individual messages and system events within a user's chat history. Includes denormalized 'userId' for authorization independence, ensuring 'request.auth.uid' matches both the path's '{userId}' and the document's 'userId' field. Can optionally reference a 'MathProblemSolution'.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who participated in this conversation turn, matching 'request.auth.uid'."
-            },
-            {
-              "name": "turnId",
-              "description": "The unique identifier for a specific conversation message or event."
+              "name": "termId",
+              "description": "The unique identifier for the technical term."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore data structure for MathMaster AI prioritizes security, scalability, and debuggability by adhering to the core design principles and mandates. The design leverages path-based authorization and denormalization to achieve Authorization Independence (CRITICAL), ensuring robust and easily auditable security rules. The primary organizational unit is the user's profile, under which all user-specific data is nested.\n\n1.  **Authorization Independence (Denormalization Strategy):**\n    *   `UserProfile`: Each user's profile document is stored at `/userProfiles/{userId}`. The document's `id` field intrinsically matches the `{userId}` wildcard in the path, which in turn matches `request.auth.uid`. This design inherently ensures authorization independence as the necessary `uid` for verification is directly available from the path, eliminating the need for expensive and rule-complicating `get()` calls to verify ownership.\n    *   `MathProblemSolution`: These are stored in a subcollection at `/userProfiles/{userId}/mathProblemSolutions/{solutionId}`. Each `MathProblemSolution` document includes a `userId` field that explicitly stores the owner's ID. This `userId` field is denormalized, allowing security rules to directly compare `request.auth.uid` with the document's `userId` field and the path's `{userId}` wildcard. This again removes the need for `get()` calls to a parent `UserProfile` document.\n    *   `ConversationTurn`: Similar to `MathProblemSolution`, these are stored at `/userProfiles/{userId}/conversationTurns/{turnId}`. Each `ConversationTurn` document contains a `userId` field. This denormalized `userId` enables direct authorization checks against `request.auth.uid` and the path's `{userId}` wildcard, maintaining authorization independence.\n\n2.  **QAPs (Secure List Operations):**\n    *   **Structural Segregation:** All documents within a given subcollection (e.g., all `MathProblemSolution` documents under a specific user, or all `ConversationTurn` documents under a specific user) share the same security posture – they are owned by the `userId` specified in their path. This homogeneity simplifies rules significantly.\n    *   **Path-Based Ownership:** By nesting `mathProblemSolutions` and `conversationTurns` directly under `/userProfiles/{userId}`, listing operations become naturally secure. A user can only `list` documents within their own `/userProfiles/{uid}/mathProblemSolutions` or `/userProfiles/{uid}/conversationTurns` subcollections. Firestore security rules can easily enforce that `request.auth.uid` must match `{userId}` for any read or write operation on these subcollections. This design effectively makes rules act as Query Authorization Predicates (QAPs) by ensuring that any list query initiated by `db.collection('userProfiles').doc(request.auth.uid).collection('mathProblemSolutions').get()` will automatically be scoped and secured to only return data owned by the authenticated user, without requiring additional filtering logic in the rules.\n\nThis structure strongly adheres to Authorization Independence, enables efficient and secure `list` operations, and simplifies the security rule logic by moving access control from complex lookups to predictable path and denormalized field comparisons."
+    "reasoning": "The Firestore data structure is designed for efficiency and clarity. User-specific data is nested under userProfiles for secure access. A global technicalTerms collection provides a shared dictionary for all users to reference technical concepts found in their action plans."
   }
 }
