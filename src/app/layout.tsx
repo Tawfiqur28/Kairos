@@ -1,9 +1,12 @@
+
 import type { Metadata } from 'next';
 import { Inter, Source_Code_Pro } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/context/language-context';
+import { FirebaseClientProvider } from '@/firebase';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -35,10 +38,14 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        <LanguageProvider>
-          {children}
-          <Toaster />
-        </LanguageProvider>
+        <FirebaseClientProvider>
+          <TooltipProvider>
+            <LanguageProvider>
+              {children}
+              <Toaster />
+            </LanguageProvider>
+          </TooltipProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

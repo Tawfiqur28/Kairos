@@ -8,7 +8,6 @@ import { ExternalLink, Info } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
@@ -64,35 +63,33 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
 
       if (termData) {
         result.push(
-          <TooltipProvider key={`${termData.id}-${match.index}`}>
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <a
-                  href={termData.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-0.5 font-medium text-primary hover:text-primary/80 transition-colors border-b border-dotted border-primary/50 hover:border-primary"
-                >
-                  {matchedText}
-                  <ExternalLink className="h-3 w-3 inline opacity-50" />
-                </a>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs p-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 font-semibold text-sm">
-                    <Info className="h-3 w-3 text-primary" />
-                    {termData.term}
-                  </div>
-                  {termData.description && (
-                    <p className="text-xs text-muted-foreground">{termData.description}</p>
-                  )}
-                  <p className="text-[10px] text-primary/70 uppercase tracking-widest font-bold pt-1">
-                    Click to learn more on Wikipedia
-                  </p>
+          <Tooltip key={`${termData.id}-${match.index}`} delayDuration={300}>
+            <TooltipTrigger asChild>
+              <a
+                href={termData.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 font-medium text-primary hover:text-primary/80 transition-colors border-b border-dotted border-primary/50 hover:border-primary"
+              >
+                {matchedText}
+                <ExternalLink className="h-3 w-3 inline opacity-50" />
+              </a>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs p-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 font-semibold text-sm">
+                  <Info className="h-3 w-3 text-primary" />
+                  {termData.term}
                 </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+                {termData.description && (
+                  <p className="text-xs text-muted-foreground">{termData.description}</p>
+                )}
+                <p className="text-[10px] text-primary/70 uppercase tracking-widest font-bold pt-1">
+                  Click to learn more on Wikipedia
+                </p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
         );
       } else {
         result.push(matchedText);

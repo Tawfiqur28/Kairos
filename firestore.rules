@@ -28,9 +28,9 @@ service cloud.firestore {
     }
 
     match /technicalTerms/{termId} {
-      // Allow any signed-in user to read technical terms
-      allow read: if isSignedIn();
-      // Only admins should write, but for MVP we allow authenticated creation for seeding if needed
+      // Allow any user to read technical terms (dictionary is public)
+      allow read: if true;
+      // Allow any signed-in user to write (for MVP seeding/contribution)
       allow write: if isSignedIn();
     }
 
