@@ -1,13 +1,14 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, limit } from 'firebase/firestore';
 import { ExternalLink, Info } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
@@ -29,23 +30,30 @@ interface TechnicalTextProps {
  * Parses text and wraps detected technical terms with Wikipedia links.
  */
 export function TechnicalText({ text, className }: TechnicalTextProps) {
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const firestore = useFirestore();
 
   // Fetch all terms (limited to 500 for performance)
   const termsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !hasMounted) return null;
     return query(collection(firestore, 'technicalTerms'), limit(500));
-  }, [firestore]);
+  }, [firestore, hasMounted]);
 
   const { data: terms, isLoading } = useCollection<TechnicalTerm>(termsQuery);
 
   const parts = useMemo(() => {
-    if (!terms || terms.length === 0) return [text];
+    if (!terms || terms.length === 0 || !text) return [text];
 
-    // Create a regex from the terms list
-    // Sort terms by length descending to match longer phrases first (e.g., "Deep Learning" before "Learning")
+    // Sort terms by length descending to match longer phrases first
     const sortedTerms = [...terms].sort((a, b) => b.term.length - a.term.length);
     const escapedTerms = sortedTerms.map(t => t.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    
+    // Create regex with word boundaries
     const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
 
     const result: (string | React.ReactNode)[] = [];
@@ -53,7 +61,6 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
     let match;
 
     while ((match = regex.exec(text)) !== null) {
-      // Add preceding text
       if (match.index > lastIndex) {
         result.push(text.substring(lastIndex, match.index));
       }
@@ -69,10 +76,10 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
                 href={termData.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-0.5 font-medium text-primary hover:text-primary/80 transition-colors border-b border-dotted border-primary/50 hover:border-primary"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-0.5 font-medium text-primary hover:text-primary/80 transition-colors border-b border-dotted border-primary/50 hover:border-primary cursor-help"
               >
                 {matchedText}
-                <ExternalLink className="h-3 w-3 inline opacity-50" />
               </a>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs p-3">
@@ -84,9 +91,9 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
                 {termData.description && (
                   <p className="text-xs text-muted-foreground">{termData.description}</p>
                 )}
-                <p className="text-[10px] text-primary/70 uppercase tracking-widest font-bold pt-1">
-                  Click to learn more on Wikipedia
-                </p>
+                <div className="flex items-center gap-1 text-[10px] text-primary/70 uppercase tracking-widest font-bold pt-1">
+                  Learn on Wikipedia <ExternalLink className="h-2 w-2" />
+                </div>
               </div>
             </TooltipContent>
           </Tooltip>
@@ -98,7 +105,6 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
       lastIndex = regex.lastIndex;
     }
 
-    // Add remaining text
     if (lastIndex < text.length) {
       result.push(text.substring(lastIndex));
     }
@@ -106,7 +112,7 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
     return result;
   }, [text, terms]);
 
-  if (isLoading) {
+  if (!hasMounted || isLoading) {
     return <span className={className}>{text}</span>;
   }
 

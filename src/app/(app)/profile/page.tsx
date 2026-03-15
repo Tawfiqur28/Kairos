@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import type { UserProfile, Ikigai } from '@/lib/types';
-import { Camera, Mail, MapPin, X, CheckCircle2, Heart, Zap, Target, Brain } from 'lucide-react';
+import { Camera, Mail, MapPin, X, CheckCircle2, Heart, Zap, Target, Brain, Database, RefreshCw } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/context/language-context';
 import { useState, useEffect, useRef } from 'react';
@@ -23,6 +23,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { useFirestore } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 const initialProfile: UserProfile = {
   name: 'User',
@@ -46,16 +49,59 @@ const initialIkigai: Ikigai = {
   educationLevel: undefined,
 };
 
+const DEFAULT_TERMS = [
+  { term: "NumPy", url: "https://en.wikipedia.org/wiki/NumPy", category: "library", description: "Numerical Python library" },
+  { term: "Pandas", url: "https://en.wikipedia.org/wiki/Pandas_(software)", category: "library", description: "Data manipulation and analysis library" },
+  { term: "TensorFlow", url: "https://en.wikipedia.org/wiki/TensorFlow", category: "library", description: "Machine learning framework" },
+  { term: "PyTorch", url: "https://en.wikipedia.org/wiki/PyTorch", category: "library", description: "Open source machine learning library" },
+  { term: "Scikit-learn", url: "https://en.wikipedia.org/wiki/Scikit-learn", category: "library", description: "Machine learning library for Python" },
+  { term: "Matplotlib", url: "https://en.wikipedia.org/wiki/Matplotlib", category: "library", description: "Plotting library for Python" },
+  { term: "Linear Algebra", url: "https://en.wikipedia.org/wiki/Linear_algebra", category: "concept", description: "Branch of mathematics concerning linear equations" },
+  { term: "Calculus", url: "https://en.wikipedia.org/wiki/Calculus", category: "concept", description: "Mathematical study of continuous change" },
+  { term: "NLP", url: "https://en.wikipedia.org/wiki/Natural_language_processing", category: "technique", description: "Natural Language Processing" },
+  { term: "Computer Vision", url: "https://en.wikipedia.org/wiki/Computer_vision", category: "technique", description: "Field dealing with how computers can gain high-level understanding from digital images" },
+  { term: "Deep Learning", url: "https://en.wikipedia.org/wiki/Deep_learning", category: "technique", description: "Part of a broader family of machine learning methods based on artificial neural networks" },
+  { term: "Machine Learning", url: "https://en.wikipedia.org/wiki/Machine_learning", category: "technique", description: "Study of computer algorithms that improve automatically through experience" },
+  { term: "Neural Networks", url: "https://en.wikipedia.org/wiki/Artificial_neural_network", category: "technique", description: "Computing systems inspired by biological neural networks" },
+  { term: "Git", url: "https://en.wikipedia.org/wiki/Git", category: "tool", description: "Software for tracking changes in any set of files" },
+  { term: "GitHub", url: "https://en.wikipedia.org/wiki/GitHub", category: "tool", description: "Provider of Internet hosting for software development" },
+  { term: "Docker", url: "https://en.wikipedia.org/wiki/Docker_(software)", category: "tool", description: "Set of platform as a service products that use OS-level virtualization" }
+];
+
 export default function ProfilePage() {
   const [profile, setProfile] = useLocalStorage<UserProfile>('user-profile', initialProfile);
   const [ikigai, setIkigai] = useLocalStorage<Ikigai>('ikigai-profile', initialIkigai);
   const [hasMounted, setHasMounted] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const firestore = useFirestore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  const handleSeedTerms = async () => {
+    if (!firestore) return;
+    setIsSeeding(true);
+    try {
+      for (const term of DEFAULT_TERMS) {
+        const termId = term.term.toLowerCase().replace(/\s+/g, '-');
+        await setDoc(doc(firestore, 'technicalTerms', termId), {
+          ...term,
+          id: termId,
+          popularity: 90
+        });
+      }
+      toast({ title: "Dictionary Seeded", description: "Technical terms have been added to your database." });
+    } catch (error) {
+      console.error("Seeding error:", error);
+      toast({ title: "Seeding Failed", description: "Could not update the technical terms dictionary.", variant: "destructive" });
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,28 +131,6 @@ export default function ProfilePage() {
       .slice(0, 2);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-      },
-    },
-  };
-
   if (!hasMounted) return null;
 
   return (
@@ -117,17 +141,14 @@ export default function ProfilePage() {
       />
       
       <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
         <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="relative">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
+                <div
                   className="relative cursor-pointer group"
                   onClick={triggerFileInput}
                 >
@@ -158,7 +179,7 @@ export default function ProfilePage() {
                     accept="image/*"
                     onChange={handleImageChange}
                   />
-                </motion.div>
+                </div>
                 
                 {profile.image && (
                   <Button
@@ -169,7 +190,6 @@ export default function ProfilePage() {
                       e.stopPropagation();
                       handleRemoveImage();
                     }}
-                    title="Remove Photo"
                   >
                     <X className="h-3 w-3" />
                   </Button>
@@ -182,9 +202,21 @@ export default function ProfilePage() {
                     <CardTitle className="text-2xl">{t('profile.cardTitle', { name: profile.name })}</CardTitle>
                     <CardDescription>{t('profile.cardDescription')}</CardDescription>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold bg-muted/50 px-2 py-1 rounded">
-                    <CheckCircle2 className="h-3 w-3 text-green-500" />
-                    {t('profile.autoSaved')}
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold bg-muted/50 px-2 py-1 rounded">
+                      <CheckCircle2 className="h-3 w-3 text-green-500" />
+                      {t('profile.autoSaved')}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-[10px] h-7" 
+                      onClick={handleSeedTerms}
+                      disabled={isSeeding}
+                    >
+                      {isSeeding ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : <Database className="h-3 w-3 mr-1" />}
+                      Seed Wiki Dictionary
+                    </Button>
                   </div>
                 </div>
                 
@@ -216,7 +248,7 @@ export default function ProfilePage() {
               </TabsList>
               
               <TabsContent value="profile" className="space-y-6 pt-4">
-                <motion.div variants={itemVariants} className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">{t('profile.nameLabel')}</Label>
                     <Input
@@ -254,9 +286,9 @@ export default function ProfilePage() {
                       placeholder={t('profile.websitePlaceholder')}
                     />
                   </div>
-                </motion.div>
+                </div>
                 
-                <motion.div variants={itemVariants} className="space-y-2">
+                <div className="space-y-2">
                   <Label htmlFor="bio">{t('profile.bioLabel')}</Label>
                   <Textarea
                     id="bio"
@@ -265,11 +297,11 @@ export default function ProfilePage() {
                     placeholder={t('profile.bioPlaceholder')}
                     className="min-h-24"
                   />
-                </motion.div>
+                </div>
               </TabsContent>
               
               <TabsContent value="ikigai" className="space-y-6 pt-4">
-                <motion.div variants={itemVariants} className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="passions" className="flex items-center gap-2">
                       <Heart className="h-4 w-4 text-red-500" />
@@ -322,13 +354,13 @@ export default function ProfilePage() {
                       className="min-h-32"
                     />
                   </div>
-                </motion.div>
+                </div>
               </TabsContent>
             </Tabs>
             
             <Separator />
             
-            <motion.div variants={itemVariants} className="space-y-4">
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold">{t('profile.accountStats')}</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
@@ -356,7 +388,7 @@ export default function ProfilePage() {
                   <div className="text-xs text-muted-foreground">{t('profile.interestsLabel')}</div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </CardContent>
           
           <CardFooter className="flex justify-between items-center border-t pt-6">

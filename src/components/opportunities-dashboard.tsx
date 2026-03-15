@@ -225,14 +225,14 @@ export function OpportunitiesDashboard({ careerTitle, educationLevel }: Opportun
 
   const getVisibleEducationLevels = useMemo(() => {
     switch (educationLevel) {
-      case 'undergrad':
-        return ['undergrad', 'masters_phd'];
+      case 'undergraduate': // Fixed: changed from 'undergrad' to match EducationLevel type
+        return ['undergraduate', 'masters_phd'];
       case 'masters':
       case 'phd':
         return ['masters_phd'];
       case 'highSchool':
       default:
-        return ['highSchool', 'undergrad', 'masters_phd'];
+        return ['highSchool', 'undergraduate', 'masters_phd'];
     }
   }, [educationLevel]);
   
@@ -245,7 +245,7 @@ export function OpportunitiesDashboard({ careerTitle, educationLevel }: Opportun
           { title: t('opportunities.education.highSchool.handsOn_title'), text: t('opportunities.education.highSchool.handsOn_text') },
         ],
       },
-      undergrad: {
+      undergraduate: { // Fixed: changed from 'undergrad' to 'undergraduate'
         title: t('opportunities.education.undergrad.title'),
         points: [
           { title: t('opportunities.education.undergrad.specialize_title'), text: t('opportunities.education.undergrad.specialize_text') },
@@ -341,8 +341,8 @@ export function OpportunitiesDashboard({ careerTitle, educationLevel }: Opportun
             {getVisibleEducationLevels.includes('highSchool') && (
                 <EducationSection title={educationSections.highSchool.title} points={educationSections.highSchool.points} />
             )}
-            {getVisibleEducationLevels.includes('undergrad') && (
-                <EducationSection title={educationSections.undergrad.title} points={educationSections.undergrad.points} />
+            {getVisibleEducationLevels.includes('undergraduate') && (
+                <EducationSection title={educationSections.undergraduate.title} points={educationSections.undergraduate.points} />
             )}
             {getVisibleEducationLevels.includes('masters_phd') && (
                  <EducationSection title={educationSections.masters_phd.title} points={educationSections.masters_phd.points} />

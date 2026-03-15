@@ -1,4 +1,3 @@
-
 'use client';
 
 import { generateCareerMatchExplanations } from '@/ai/flows/generate-career-match-explanations';
@@ -107,14 +106,14 @@ export default function CareersPage() {
     },
   };
 
-  // Synchronized completion logic (at least 4 sections filled with > 10 chars)
+  // Synchronized completion logic (at least 4 sections filled with >= 3 chars)
   const isProfileComplete = useMemo(() => {
     if (!hasMounted) return false;
     let completedCount = 0;
     const fields = ['passions', 'skills', 'values', 'interests'];
     fields.forEach(field => {
       const val = ikigai[field as keyof Ikigai];
-      if (typeof val === 'string' && val.trim().length > 10) completedCount++;
+      if (typeof val === 'string' && val.trim().length >= 3) completedCount++;
     });
     if (ikigai.educationLevel) completedCount++;
     return completedCount >= 4;
