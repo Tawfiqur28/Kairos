@@ -25,6 +25,19 @@ interface TechnicalTextProps {
   className?: string;
 }
 
+const FALLBACK_TERMS: TechnicalTerm[] = [
+  { id: 'f1', term: 'NumPy', url: 'https://en.wikipedia.org/wiki/NumPy', description: 'Numerical Python library' },
+  { id: 'f2', term: 'Pandas', url: 'https://en.wikipedia.org/wiki/Pandas_(software)', description: 'Data analysis library' },
+  { id: 'f3', term: 'TensorFlow', url: 'https://en.wikipedia.org/wiki/TensorFlow', description: 'Machine learning framework' },
+  { id: 'f4', term: 'PyTorch', url: 'https://en.wikipedia.org/wiki/PyTorch', description: 'Deep learning framework' },
+  { id: 'f5', term: 'NLP', url: 'https://en.wikipedia.org/wiki/Natural_language_processing', description: 'Natural Language Processing' },
+  { id: 'f6', term: 'Scikit-learn', url: 'https://en.wikipedia.org/wiki/Scikit-learn', description: 'Machine learning library' },
+  { id: 'f7', term: 'Matplotlib', url: 'https://en.wikipedia.org/wiki/Matplotlib', description: 'Plotting library' },
+  { id: 'f8', term: 'Git', url: 'https://en.wikipedia.org/wiki/Git', description: 'Version control system' },
+  { id: 'f9', term: 'Docker', url: 'https://en.wikipedia.org/wiki/Docker_(software)', description: 'Containerization platform' },
+  { id: 'f10', term: 'Linear Algebra', url: 'https://en.wikipedia.org/wiki/Linear_algebra', description: 'Math concerning linear equations' }
+];
+
 /**
  * TechnicalText Component
  * Parses text and wraps detected technical terms with Wikipedia links.
@@ -38,22 +51,29 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
 
   const firestore = useFirestore();
 
-  // Fetch all terms (limited to 500 for performance)
   const termsQuery = useMemoFirebase(() => {
     if (!firestore || !hasMounted) return null;
     return query(collection(firestore, 'technicalTerms'), limit(500));
   }, [firestore, hasMounted]);
 
-  const { data: terms, isLoading } = useCollection<TechnicalTerm>(termsQuery);
+  const { data: dbTerms, isLoading } = useCollection<TechnicalTerm>(termsQuery);
+
+  const effectiveTerms = useMemo(() => {
+    // Merge database terms with fallbacks, database wins
+    const termMap = new Map<string, TechnicalTerm>();
+    FALLBACK_TERMS.forEach(t => termMap.set(t.term.toLowerCase(), t));
+    if (dbTerms && dbTerms.length > 0) {
+      dbTerms.forEach(t => termMap.set(t.term.toLowerCase(), t));
+    }
+    return Array.from(termMap.values());
+  }, [dbTerms]);
 
   const parts = useMemo(() => {
-    if (!terms || terms.length === 0 || !text) return [text];
+    if (!effectiveTerms || effectiveTerms.length === 0 || !text) return [text];
 
-    // Sort terms by length descending to match longer phrases first
-    const sortedTerms = [...terms].sort((a, b) => b.term.length - a.term.length);
+    const sortedTerms = [...effectiveTerms].sort((a, b) => b.term.length - a.term.length);
     const escapedTerms = sortedTerms.map(t => t.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     
-    // Create regex with word boundaries
     const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
 
     const result: (string | React.ReactNode)[] = [];
@@ -110,9 +130,9 @@ export function TechnicalText({ text, className }: TechnicalTextProps) {
     }
 
     return result;
-  }, [text, terms]);
+  }, [text, effectiveTerms]);
 
-  if (!hasMounted || isLoading) {
+  if (!hasMounted) {
     return <span className={className}>{text}</span>;
   }
 

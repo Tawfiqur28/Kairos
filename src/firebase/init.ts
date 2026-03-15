@@ -1,3 +1,4 @@
+
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
@@ -13,10 +14,11 @@ export function initializeFirebase() {
   let app: FirebaseApp;
   if (!getApps().length) {
     try {
-      // Attempt to initialize via Firebase App Hosting environment variables
-      app = initializeApp();
-    } catch (e) {
       app = initializeApp(firebaseConfig);
+    } catch (e) {
+      console.error('Firebase initialization error:', e);
+      // Fallback attempt
+      app = getApp();
     }
   } else {
     app = getApp();
