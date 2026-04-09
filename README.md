@@ -78,6 +78,8 @@ text
 观看我们的演示视频：
 📹 Google Drive 演示
 
+https://www.modelscope.cn/studios/Tawfiqur/Kairos_Compass
+
 
 
 
@@ -161,3 +163,6 @@ Monthly "field pulse" updates in chosen career paths
 📁 Additional Resources
 Watch Our Demo Video:
 📹 Google Drive Demo
+
+https://www.modelscope.cn/studios/Tawfiqur/Kairos_Compass
+
